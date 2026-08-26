@@ -1,0 +1,65 @@
+<script setup lang="ts">
+/**
+ * The way in — and the only page a stranger may see.
+ *
+ * One action, no form: accounts live at the identity provider, so there is
+ * nothing here to fill in. The three states of PAGES `/login` are driven by
+ * the `error` query the callback redirects with, which keeps the page a plain
+ * server-rendered document with no state of its own.
+ */
+const route = useRoute()
+
+definePageMeta({ layout: false })
+
+const PROBLEMS = {
+  'not-invited': { title: 'login.notInvitedTitle', body: 'login.notInvited' },
+  'provider': { title: 'login.providerErrorTitle', body: 'login.providerError' },
+} as const
+
+const problem = computed(() => {
+  const error = route.query.error
+  return typeof error === 'string' ? PROBLEMS[error as keyof typeof PROBLEMS] : undefined
+})
+</script>
+
+<template>
+  <div class="relative flex min-h-dvh flex-col overflow-x-hidden">
+    <!-- The same torchlight wash as the shell: decoration, never announced. -->
+    <div
+      class="torch-glow pointer-events-none absolute -top-40 -left-24 size-96 rounded-full"
+      aria-hidden="true"
+    />
+
+    <main class="relative mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-8 px-5 py-16 sm:px-8">
+      <!-- Barely lit, like the rest of the art direction — but `text-muted`,
+           which the contrast audit holds above 4.5:1 in both themes. -->
+      <h1 class="text-6xl leading-none font-bold tracking-tight text-text-muted sm:text-7xl">
+        {{ $t('app.name') }}
+      </h1>
+
+      <p class="max-w-measure text-lg leading-relaxed text-text-soft">
+        {{ $t('login.pitch') }}
+      </p>
+
+      <section
+        v-if="problem"
+        class="flex flex-col gap-2 rounded-2xl bg-alert/15 px-5 py-4"
+      >
+        <h2 class="font-mono text-label tracking-label text-alert-ink uppercase">
+          {{ $t(problem.title) }}
+        </h2>
+        <p class="text-base leading-relaxed text-text-soft">
+          {{ $t(problem.body) }}
+        </p>
+      </section>
+
+      <!-- A full page navigation, not a fetch: the next stop is the provider. -->
+      <a
+        href="/api/auth/login"
+        class="rounded-2xl bg-torch px-6 py-4 text-center text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      >
+        {{ problem ? $t('login.retry') : $t('login.signIn') }}
+      </a>
+    </main>
+  </div>
+</template>

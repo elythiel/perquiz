@@ -1,16 +1,14 @@
 import type { SessionUser } from '#shared/types/user'
 
 /**
- * The signed-in user.
+ * The signed-in user, or `null`.
  *
- * M0 PLACEHOLDER: the value is hard-coded while the shell is being built. M2
- * (OIDC authentication) will replace the body of this composable with the real
- * session; its callers (user chip, nav) will not have to move.
+ * Filled on the server by plugins/session.server.ts and carried to the client
+ * in the payload — there is no request to wait for, and no moment where the
+ * interface knows less than the server did.
  */
-const PLACEHOLDER: SessionUser = { displayName: 'Sofia', isAdmin: true }
-
 export function useSession() {
-  const user = useState<SessionUser | null>('session:user', () => PLACEHOLDER)
+  const user = useState<SessionUser | null>('session:user', () => null)
 
   return { user: readonly(user) }
 }

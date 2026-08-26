@@ -6989,6 +6989,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jose@npm:^6.2.8":
+  version: 6.2.10
+  resolution: "jose@npm:6.2.10"
+  checksum: 10c0/799fd8d3d92fe748ebe1f57dbd3dfd917d2e61d9fb39912c72cc674ae61d69414b7cc0ce773df8a0160e849926fc31853aec9caab88c481563d5a8ab6558e107
+  languageName: node
+  linkType: hard
+
 "js-tokens@npm:^10.0.0":
   version: 10.0.0
   resolution: "js-tokens@npm:10.0.0"
@@ -8089,6 +8096,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"oauth4webapi@npm:^3.8.7":
+  version: 3.8.7
+  resolution: "oauth4webapi@npm:3.8.7"
+  checksum: 10c0/7e581e24572a12c3b2abd4889d8f5271a7de0166a0971b8398468abe3baf9134012d312775f05b1a64b38b4413563bfb203801ba00909f831557823875b0699e
+  languageName: node
+  linkType: hard
+
 "object-deep-merge@npm:^2.0.1":
   version: 2.0.1
   resolution: "object-deep-merge@npm:2.0.1"
@@ -8171,6 +8185,16 @@ __metadata:
     powershell-utils: "npm:^0.2.0"
     wsl-utils: "npm:^1.0.0"
   checksum: 10c0/fd650ac10806a06bfe197af0ef143cd2a3127294721524972f04377fb1144da5e32a2d0507497e214385981ec5b6b4b43210e22d7ef22bc45c390771d80658a5
+  languageName: node
+  linkType: hard
+
+"openid-client@npm:^6.8.7":
+  version: 6.8.7
+  resolution: "openid-client@npm:6.8.7"
+  dependencies:
+    jose: "npm:^6.2.8"
+    oauth4webapi: "npm:^3.8.7"
+  checksum: 10c0/309a7924e034193d36634b7e2cfbb003c5018bfb800d9c1d6c5d3cb986682e9aef594038eb7a87153d36a96d1a9dba921491cb9145930116340a7af7e73928ee
   languageName: node
   linkType: hard
 
@@ -8530,6 +8554,7 @@ __metadata:
     drizzle-orm: "npm:^0.45.2"
     eslint: "npm:^10.9.1"
     nuxt: "npm:^4.5.2"
+    openid-client: "npm:^6.8.7"
     rolldown: "npm:~1.2.5"
     sharp: "npm:^0.35.3"
     tailwindcss: "npm:^4.3.3"

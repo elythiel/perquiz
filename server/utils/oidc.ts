@@ -106,3 +106,22 @@ export function extractDisplayName(claims: unknown): string {
     || text('email').split('@')[0]!.trim()
     || text('sub').slice(0, SUB_PREFIX_LENGTH)
 }
+
+/** The two role names the deployment configures (`NUXT_OIDC_ROLE_*`). */
+export interface RoleNames {
+  player: string
+  admin: string
+}
+
+/**
+ * Whether these roles get someone into the game, and with what powers.
+ *
+ * Admins are players too (SPEC §1), so holding only the admin role is enough
+ * to get in. Everything else — no roles, unknown roles, a token this file
+ * could not read — is refused, and refusing is a redirect to "you're not on
+ * the guest list", never an error page.
+ */
+export function resolveAccess(roles: readonly string[], names: RoleNames) {
+  const isAdmin = roles.includes(names.admin)
+  return { allowed: isAdmin || roles.includes(names.player), isAdmin }
+}

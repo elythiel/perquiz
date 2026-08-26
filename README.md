@@ -38,6 +38,11 @@ application. Everything about the provider is configuration — see
 [.env.example](.env.example). The manual setup steps live in the "Prerequisite"
 section of [docs/PLAN.md](docs/PLAN.md); the full guide lands with M9.
 
+Register the app with the redirect URI `<base>/api/auth/callback` and the
+post-logout URI `<base>/login`. **Nothing is public but `/login`**: with no
+working provider configured, that is the only page the app will serve — a
+contributor without access to the instance cannot browse the rest.
+
 **Tested with Zitadel**, whose claim and role names ship as the defaults. Other
 providers are wired from their documented claim shapes (an array of strings, an
 object keyed by role, a space-separated string — Keycloak, Authentik and
