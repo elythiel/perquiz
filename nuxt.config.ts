@@ -34,11 +34,22 @@ export default defineNuxtConfig({
   runtimeConfig: {
     dataDir: './data',
     sessionPassword: '',
-    zitadel: {
+
+    // A generic OIDC provider able to assert roles. The defaults below are the
+    // Zitadel reference configuration — the only instance this is tested
+    // against; another provider is a matter of env vars, not of code. The
+    // shapes those roles can take live in server/utils/oidc.ts.
+    oidc: {
       issuer: '',
       clientId: '',
       clientSecret: '',
+      providerId: 'zitadel',
+      rolesClaim: 'urn:zitadel:iam:org:project:roles',
+      rolePlayer: 'player',
+      roleAdmin: 'admin',
+      scopes: 'openid profile email',
     },
+
     public: {
       baseUrl: 'http://localhost:3000',
     },

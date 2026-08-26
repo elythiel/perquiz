@@ -11,9 +11,9 @@ French and mobile-first — participants upload and guess from their phones.
 ## Stack
 
 Nuxt 4 (SSR, TypeScript strict) · Tailwind v4 with the design-system tokens ·
-`@nuxtjs/i18n` for the copy · SQLite (better-sqlite3 + Drizzle) · Zitadel for
-identity (OIDC, code + PKCE) · sharp for photo processing. Self-hosted fonts,
-no CDN.
+`@nuxtjs/i18n` for the copy · SQLite (better-sqlite3 + Drizzle) · a generic
+OIDC provider for identity (code + PKCE) · sharp for photo processing.
+Self-hosted fonts, no CDN.
 
 ## Requirements
 
@@ -32,9 +32,26 @@ yarn dev
 
 The app boots on http://localhost:3000.
 
-Identity requires a Zitadel project (roles `player` / `admin`, a Web+PKCE app).
-The manual setup steps live in the "Prerequisite" section of
-[docs/PLAN.md](docs/PLAN.md); the full guide lands with M9.
+Identity requires an OIDC provider able to **assert roles** in the token, with
+two roles granted per user (`player` / `admin` by default) and a Web+PKCE
+application. Everything about the provider is configuration — see
+[.env.example](.env.example). The manual setup steps live in the "Prerequisite"
+section of [docs/PLAN.md](docs/PLAN.md); the full guide lands with M9.
+
+**Tested with Zitadel**, whose claim and role names ship as the defaults. Other
+providers are wired from their documented claim shapes (an array of strings, an
+object keyed by role, a space-separated string — Keycloak, Authentik and
+Authelia all fall into one of the three) and have not been run against a live
+instance. Providers that cannot assert roles at all — Google, GitHub, Apple —
+are out of scope on purpose: see §11 of [docs/SPEC.md](docs/SPEC.md).
+
+Entra ID is worth naming, because "unsupported" would be too broad. Its **app
+roles** arrive as an array of strings in a `roles` claim and fit the first
+shape, so an app-role deployment should work — untested, like the others. Its
+**groups** claim is the problem: it carries opaque GUIDs, and no claim *name*
+fixes that. Mapping GUIDs onto role names is a second kind of configuration,
+and past ~200 groups Entra stops sending the list altogether, pointing at Graph
+instead. Group-based Entra deployments are out of scope.
 
 ## Scripts
 
@@ -81,8 +98,9 @@ answer, or if a message is empty.
 ## Configuration
 
 Every setting arrives through the environment — see [.env.example](.env.example)
-for the full annotated list (session secret, public base URL, Zitadel issuer and
-client, data directory). Nothing sensitive is committed.
+for the full annotated list (session secret, public base URL, OIDC issuer and
+client, roles claim and role names, data directory). Nothing sensitive is
+committed.
 
 ## Persistent state
 

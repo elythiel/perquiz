@@ -17,14 +17,14 @@ Functional spec of every page, for UX/UI design. Features, states and edge cases
 Purpose: enter the game through the SSO.
 
 Features:
-- One action: sign in → redirect to the identity provider (Zitadel, OIDC). No registration, no password, no invite code — accounts are provisioned in Zitadel by the organizer.
+- One action: sign in → redirect to the identity provider (OIDC; Zitadel in the reference deployment). No registration, no password, no invite code — accounts are provisioned at the provider by the organizer.
 - App name + one-sentence pitch of the game (a newcomer must understand what they're joining).
 
 States & edge cases:
 - Already authenticated → redirected to `/`.
 - Back from the IdP without a `player`/`admin` role → "you're not on the guest list" screen: explain that access is granted by the organizer; no account is created.
 - IdP unreachable / OIDC error → readable error + retry action.
-- First login: account auto-created; display name defaults from the Zitadel profile. If that name is already taken, a suffix is appended and the user is nudged to pick a better one in « Ma pièce ».
+- First login: account auto-created; display name defaults from the token — `name`, else `preferred_username`, else the local part of `email`, else a prefix of `sub`. If that name is already taken, a suffix is appended and the user is nudged to pick a better one in « Ma pièce ».
 - Display name rules (unique case-insensitive, 2–30 chars) apply to renames in « Ma pièce », not here.
 
 ---
@@ -138,9 +138,9 @@ Purpose: run the game without ever seeing the answer key.
 Features:
 - **Phase control**: current phase + transitions (`open` → `locked` → `revealed`, and reversals). Each transition confirmed, with its consequences stated (lock = players can no longer change anything; reveal = everyone sees results).
 - **Participation dashboard** (per participant): photo count, guess progress (X/N), last activity. Never the content of their guesses.
-- **User management**: remove a participant's data (confirmation with consequences: their photos, room and guesses are removed; guesses others made about their room are discarded). A note makes clear this does not revoke their Zitadel access — accounts and roles are managed in Zitadel.
+- **User management**: remove a participant's data (confirmation with consequences: their photos, room and guesses are removed; guesses others made about their room are discarded). A note makes clear this does not revoke their access — accounts and roles are managed at the identity provider.
 - **Photo moderation**: browse all photos without owner names, delete any (confirmation).
 
 Constraints:
 - No admin screen shows the room → owner mapping. Admins play like everyone else; the only place answers appear is `/reveal`, live.
-- Who is admin is decided by the Zitadel `admin` role (synced at each login) — no promote/demote in the app.
+- Who is admin is decided by the provider's `admin` role (synced at each login) — no promote/demote in the app.

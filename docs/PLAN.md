@@ -10,14 +10,16 @@ Execution plan for building Perquiz from scratch, against [SPEC.md](./SPEC.md) a
 - **Images**: `sharp`. Magic-byte sniffing before processing; EXIF dropped by re-encoding; two stored variants (web ~1600px, thumb ~400px, WebP). Originals are not kept.
   - **HEIC caveat**: prebuilt sharp binaries decode HEIC only if built with libheif. Verify at M3; if unsupported, reject HEIC uploads with a clear message (iPhones can send JPEG) and note it in the README. Do not block the milestone on it.
 - **Styling**: Tailwind v4 with the design-system tokens (`night`, `panel`, `edge-subtle`, `text`, `torch`, `clue`, `alert`) as theme colors. The art direction names its colours in French; `app/assets/css/main.css` holds the only written mapping between those names and the English tokens. Space Grotesk + IBM Plex Mono self-hosted (no CDN). Animations follow `screens/animation-rules.png`, including the `prefers-reduced-motion` fallback.
-- **Tests**: Vitest on the pure logic (scoring/ranking, guess validation, role parsing) and on the security invariants (no owner data in participant payloads, phase/role guards). No E2E suite in v1; the reveal show is validated by hand with seed data.
+- **Tests**: Vitest on the pure logic (scoring/ranking, guess validation, OIDC claim reading) and on the security invariants (no owner data in participant payloads, phase/role guards). No E2E suite in v1; the reveal show is validated by hand with seed data.
 
-## Prerequisite: Zitadel setup (manual, on the homelab)
+## Prerequisite: identity provider (manual)
+
+Perquiz needs an OIDC provider **able to assert roles in the token**; everything about it is configuration (`.env.example`). The steps below are the **reference setup**, on the homelab's Zitadel — the only instance this is tested against. Another provider follows the same four steps under different names, and needs `NUXT_OIDC_ROLES_CLAIM` pointed at wherever it puts roles.
 
 1. Create a **project** "Perquiz"; add **roles** `player` and `admin`; enable **"Assert Roles on Authentication"**.
 2. Create an **application** in the project: type Web, **PKCE** (no secret), redirect URI `https://<host>/api/auth/callback`, post-logout URI `https://<host>/login`.
 3. Grant roles: `admin` to your personal user, `player` to everyone else (grantable in advance).
-4. Collect for `.env`: issuer URL, client ID.
+4. Collect for `.env`: issuer URL, client ID. Zitadel's claim name and role names are already the defaults.
 
 ## Milestones
 
@@ -29,9 +31,9 @@ Nuxt 4 + TypeScript strict + ESLint (Nuxt preset) + Yarn 4, Tailwind v4 wired wi
 Drizzle schema (`users`, `identities`, `photos`, `guesses`, `app_state`) + migrations running at boot; db util; **dev seed script** generating ~10 fake users, rooms with generated placeholder images, partial guess sheets — enough to exercise every later screen (including reveal) without real players.
 **Done when**: fresh clone → migrate + seed → inspectable playable state.
 
-### M2 — Auth (Zitadel)
-`/api/auth/login|callback|logout`, PKCE flow via `openid-client`, role-claim gate (`urn:zitadel:iam:org:project:roles`), JIT provisioning + display-name collision suffix, `is_admin` sync at every login, session cookie, global server-side guard (all routes except login/callback) + client route middleware, `/login` page with its three states (nominal, not-on-the-guest-list, IdP error).
-**Done when**: real round-trip against homelab Zitadel works for a `player`, an `admin`, and a role-less user.
+### M2 — Auth (OIDC)
+`/api/auth/login|callback|logout`, PKCE flow via `openid-client` on the discovery document, role gate through `extractRoles` and the configured claim, JIT provisioning + display-name collision suffix (seeded by `extractDisplayName`), `is_admin` sync at every login, session cookie, global server-side guard (all routes except login/callback) + client route middleware, `/login` page with its three states (nominal, not-on-the-guest-list, IdP error). Configuration and claim reading already landed — see `server/utils/oidc.ts`; no provider name belongs anywhere else.
+**Done when**: real round-trip against the homelab provider works for a `player`, an `admin`, and a role-less user.
 
 ### M3 — My room (`/my-room`)
 Upload API (multipart, size/type limits, magic bytes, sharp pipeline), authenticated photo-serving route (`/api/photos/…`, no identity leakage), list/reorder/delete, display-name edit, player-preview mode, per-phase read-only. UI per `screens/my-room.png` (upload progress, per-file errors, processing state).
@@ -45,7 +47,7 @@ Anonymized rooms endpoint (excludes own room, never includes owner), guess upser
 Aggregates endpoint (my room status, my progress, rooms/participants counts, new-rooms-since-last-visit), per-phase content and prioritized CTAs per `screens/home.png`.
 
 ### M6 — Régie (`/admin`)
-Phase-transition API with guards + confirmations UI, participation dashboard (photo count, X/N progress, last activity — never guess content), photo moderation without owner names, remove-participant-data with cascade confirmation. Per `screens/admin-panel.png` minus the invite block (obsolete — access lives in Zitadel).
+Phase-transition API with guards + confirmations UI, participation dashboard (photo count, X/N progress, last activity — never guess content), photo moderation without owner names, remove-participant-data with cascade confirmation. Per `screens/admin-panel.png` minus the invite block (obsolete — access lives at the identity provider).
 
 ### M7 — Reveal show (`/reveal`)
 Reveal API (admin + `locked` only): stable shuffled order (seed persisted in `app_state`), per-room vote distribution incl. « sans réponse », owner, podium data. Big-screen UI per `screens/room-reveal.png` and `podium-reveal.png`: three admin-advanced steps per room, keyboard navigation, URL-addressable position (refresh-proof), cascading bar animation, podium 3-2-1 then full ranking, `prefers-reduced-motion` variants.
@@ -55,7 +57,7 @@ Reveal API (admin + `locked` only): stable shuffled order (seed persisted in `ap
 Scoring util (correct-guess count, shared-rank competition ranking) with unit tests; page per `screens/results.png`: score, rank (ex æquo), leaderboard, per-room detail (my guess vs owner, unanswered); `revealed`-only guard with redirect.
 
 ### M9 — Hardening & ship
-Security pass on the invariants (§9 of SPEC.md) with endpoint tests; final Dockerfile (single volume `./data`); README (setup, Zitadel guide from the prerequisite section, backup note); French copy proofread; Lighthouse-style mobile pass on the three participant pages.
+Security pass on the invariants (§9 of SPEC.md) with endpoint tests; final Dockerfile (single volume `./data`); README (setup, the reference provider guide from the prerequisite section, backup note); French copy proofread; Lighthouse-style mobile pass on the three participant pages.
 
 ## Design deltas to fold back into the mockups
 
