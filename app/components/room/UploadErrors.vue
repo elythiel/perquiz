@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Upload } from '~/composables/useRoomUploads'
+import { MAX_PHOTOS_PER_ROOM, MAX_UPLOAD_BYTES } from '#shared/utils/photos'
 
 const props = defineProps<{ failures: Upload[], someSucceeded: boolean }>()
 defineEmits<{ dismiss: [] }>()
@@ -16,7 +17,7 @@ const lines = computed(() => props.failures.map(failure => ({
   text: t(`myRoom.errors.${failure.reason ?? 'failed'}`, {
     file: failure.fileName,
     size: megabytes(failure.size),
-    max: megabytes(15_000_000),
+    max: failure.reason === 'too-many' ? String(MAX_PHOTOS_PER_ROOM) : megabytes(MAX_UPLOAD_BYTES),
   }),
 })))
 </script>

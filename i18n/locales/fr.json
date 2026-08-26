@@ -64,6 +64,8 @@
     "summaryEmpty": "Votre pièce n'est pas encore en jeu : ajoutez au moins une photo pour qu'elle apparaisse sur la grille des autres.",
     "readOnly": "La partie est verrouillée : vos photos restent visibles, mais vous ne pouvez plus les modifier.",
     "add": "Ajouter",
+    "full": "Pièce complète",
+    "photoCount": "{count} / {max}",
     "addPhotos": "Ajouter des photos",
     "playerPreview": "Aperçu joueur",
     "closePreview": "Fermer l'aperçu",
@@ -95,7 +97,8 @@
       "failed": "{file} — l'envoi a échoué. Réessayez.",
       "name-taken": "Ce nom est déjà pris — essayez-en un autre.",
       "name-invalid": "Le nom doit faire entre 2 et 30 caractères.",
-      "locked": "La partie vient d'être verrouillée : vos modifications n'ont pas été enregistrées."
+      "locked": "La partie vient d'être verrouillée : vos modifications n'ont pas été enregistrées.",
+      "too-many": "{file} — votre pièce est déjà pleine ({max} photos maximum)."
     }
   },
   "photoZoom": {

@@ -121,7 +121,9 @@ the HEVC decoder is not in the prebuilt libheif, and building libvips
 ourselves is not worth a milestone. In practice iOS transcodes to JPEG when a
 photo is picked through a file input, so the common path is unaffected; the
 uploads that do arrive as HEIC get a message naming the setting to change.
-Accepted: JPEG, PNG, WebP, up to 15 Mo each.
+Accepted: JPEG, PNG, WebP, up to 15 Mo each, **10 photos per room**. Both limits live in [shared/utils/photos.ts](shared/utils/photos.ts), applied by the server and mirrored by the form.
+
+Uploads are processed **one at a time per person**. The count cap bounds the disk and nothing else — deleting and re-uploading in a loop is unbounded work, and decoding a 15 Mo JPEG twice is where the machine actually goes. Twenty-five phones uploading at once stay fast; one phone uploading twenty-five times queues.
 
 ## Configuration
 

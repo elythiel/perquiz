@@ -14,14 +14,6 @@ import sharp from 'sharp'
  * keeping the file.
  */
 
-/**
- * SPEC §3: a reasonable ceiling before processing.
- *
- * Decimal megabytes, not binary: the screen says "15 Mo max", and a limit that
- * quietly accepts 15.7 would make that sentence a lie.
- */
-export const MAX_UPLOAD_BYTES = 15_000_000
-
 /** Long edge of each stored variant (SPEC §3). */
 const WEB_EDGE = 1600
 const THUMB_EDGE = 400

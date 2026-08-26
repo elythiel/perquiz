@@ -42,10 +42,10 @@ Phase transitions are manual (admin panel), reversible (an admin can reopen if l
 
 ## 3. Rooms & photos
 
-- Each participant owns **exactly one room** and uploads **any number of photos** of it (unlimited).
+- Each participant owns **exactly one room** and uploads **up to 10 photos** of it. The cap is a product choice, not a storage one — a stored photo costs ~76 Ko across both variants — and it exists so the guess sheet and the reveal show can present a room one screen at a time. A room already holding more keeps them: the cap refuses additions, it never deletes.
 - A room is "in play" once it has at least one photo.
 - Owners can reorder and delete their own photos while the phase is `open`.
-- Upload constraints: JPEG/PNG/WebP input, 15 Mo max per file. HEIC was in this list until M3 measured that sharp's prebuilt binaries cannot decode it (no HEVC decoder); it is detected and refused with an explanatory message. iOS transcodes to JPEG on upload, so the common path is unaffected — see the README.
+- Upload constraints: JPEG/PNG/WebP input, 15 Mo max per file, 10 per room. HEIC was in this list until M3 measured that sharp's prebuilt binaries cannot decode it (no HEVC decoder); it is detected and refused with an explanatory message. iOS transcodes to JPEG on upload, so the common path is unaffected — see the README.
 - Server-side processing on upload:
   - **strip all EXIF metadata** (GPS coordinates especially — privacy),
   - re-encode and resize to a web variant (~1600px long edge) and a thumbnail (~400px),

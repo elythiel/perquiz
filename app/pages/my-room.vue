@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { MAX_PHOTOS_PER_ROOM } from '#shared/utils/photos'
+
 /**
  * My room: the photos other people will be guessing about, and my name.
  *
@@ -15,6 +17,7 @@ const { data: room, refresh } = await useFetch('/api/my-room')
 const readOnly = computed(() => phase.value !== 'open')
 const photos = computed(() => room.value?.photos ?? [])
 const inPlay = computed(() => photos.value.length > 0)
+const full = computed(() => photos.value.length >= MAX_PHOTOS_PER_ROOM)
 
 const uploads = useRoomUploads(refresh)
 
@@ -34,7 +37,7 @@ async function onPicked(event: Event) {
   const files = [...(input.files ?? [])]
   // Reset first: picking the same file twice in a row must fire again.
   input.value = ''
-  if (files.length) await uploads.add(files)
+  if (files.length) await uploads.add(files, { held: photos.value.length, max: MAX_PHOTOS_PER_ROOM })
 }
 
 function askToRemove(name: string) {
@@ -112,6 +115,7 @@ async function rename(displayName: string) {
       :photos="photos"
       :uploads="uploads.inFlight.value"
       :read-only="readOnly"
+      :full="full"
       @pick="pick"
       @remove="askToRemove"
       @move="move"
@@ -150,7 +154,8 @@ async function rename(displayName: string) {
       <button
         v-if="!readOnly"
         type="button"
-        class="flex-1 rounded-2xl bg-torch px-5 py-4 text-base font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex-1 rounded-2xl bg-torch px-5 py-4 text-base font-bold text-on-torch transition-opacity duration-100 ease-micro enabled:hover:opacity-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        :disabled="full"
         @click="pick"
       >
         {{ t('myRoom.addPhotos') }}

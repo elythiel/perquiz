@@ -77,8 +77,29 @@ export function useRoomUploads(onStored: () => Promise<unknown> | unknown) {
   const inFlight = computed(() => uploads.value.filter(upload => upload.status !== 'failed'))
   const anyStored = ref(false)
 
-  async function add(files: readonly File[]) {
-    const queue = files.map((file) => {
+  /**
+   * Sends what fits, and refuses the rest without asking the server.
+   *
+   * The picker is `multiple`: choosing fifty photographs for a room that can
+   * hold ten more must not fire fifty requests so the server can decline
+   * forty. The surplus is failed locally, with the same reason the server
+   * would have given, and lands in the same panel.
+   */
+  async function add(files: readonly File[], room: { held: number, max: number }) {
+    const fits = Math.max(0, room.max - room.held)
+
+    files.slice(fits).forEach((file) => {
+      uploads.value.push(reactive<Upload>({
+        id: nextId++,
+        fileName: file.name,
+        status: 'failed',
+        reason: 'too-many',
+        percent: 0,
+        size: file.size,
+      }))
+    })
+
+    const queue = files.slice(0, fits).map((file) => {
       const upload = reactive<Upload>({
         id: nextId++,
         fileName: file.name,
