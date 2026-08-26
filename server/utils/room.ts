@@ -71,17 +71,38 @@ export function roomState(userId: number): RoomState {
  * score counted against a room nobody can see any more.
  */
 export function deleteRoomPhoto(userId: number, name: string): { remaining: number, discardedGuesses: number } {
+  return deletePhoto(name, userId)
+}
+
+/**
+ * The same removal, done by a moderator, who owns none of it.
+ *
+ * `owner` is the scope: an owner may only reach into their own room, a
+ * moderator into any (SPEC §3). Nothing about the owner comes back out — the
+ * admin panel must never learn whose room it just touched (SPEC §7).
+ */
+export function deleteAnyPhoto(name: string): { remaining: number, discardedGuesses: number } {
+  return deletePhoto(name)
+}
+
+function deletePhoto(name: string, owner?: number): { remaining: number, discardedGuesses: number } {
   const db = useDatabase()
 
   return db.transaction((tx) => {
+    const scope = owner === undefined
+      ? eq(photos.filename, name)
+      : and(eq(photos.userId, owner), eq(photos.filename, name))
+
     const removed = tx.delete(photos)
-      .where(and(eq(photos.userId, userId), eq(photos.filename, name)))
-      .returning({ position: photos.position })
+      .where(scope)
+      .returning({ position: photos.position, userId: photos.userId })
       .all()
 
     if (removed.length === 0) {
-      throw createError({ statusCode: 404, statusMessage: 'No such photo in your room' })
+      throw createError({ statusCode: 404, statusMessage: 'No such photo' })
     }
+
+    const userId = removed[0]!.userId
 
     // Positions stay 0..n-1 and contiguous, so the grid never shows a gap.
     tx.run(sql`

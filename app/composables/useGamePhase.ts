@@ -1,10 +1,5 @@
 import type { GamePhase } from '#shared/types/game'
-
-const PHASES: GamePhase[] = ['open', 'locked', 'revealed']
-
-function isGamePhase(value: unknown): value is GamePhase {
-  return PHASES.includes(value as GamePhase)
-}
+import { isGamePhase } from '#shared/utils/game'
 
 /**
  * The game's current phase.
