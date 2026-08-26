@@ -45,7 +45,7 @@ Phase transitions are manual (admin panel), reversible (an admin can reopen if l
 - Each participant owns **exactly one room** and uploads **any number of photos** of it (unlimited).
 - A room is "in play" once it has at least one photo.
 - Owners can reorder and delete their own photos while the phase is `open`.
-- Upload constraints: JPEG/PNG/WebP/HEIC input, reasonable max size per file (e.g. 15 MB before processing).
+- Upload constraints: JPEG/PNG/WebP input, 15 Mo max per file. HEIC was in this list until M3 measured that sharp's prebuilt binaries cannot decode it (no HEVC decoder); it is detected and refused with an explanatory message. iOS transcodes to JPEG on upload, so the common path is unaffected — see the README.
 - Server-side processing on upload:
   - **strip all EXIF metadata** (GPS coordinates especially — privacy),
   - re-encode and resize to a web variant (~1600px long edge) and a thumbnail (~400px),

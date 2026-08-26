@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { tidyDisplayName, uniqueDisplayName } from '../../server/utils/display-name'
+import { tidyDisplayName } from '../../shared/utils/display-name'
+import { uniqueDisplayName } from '../../server/utils/display-name'
 import { resolveAccess } from '../../server/utils/oidc'
 
 /**

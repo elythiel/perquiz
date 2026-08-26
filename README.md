@@ -86,7 +86,9 @@ dropping `i18n/locales/en.json` next to `fr.json` and listing it in
 
 **Key convention.** One namespace per screen or shared UI element, named after
 its route or component; inside it, one camelCase key per string, named for the
-role the string plays rather than for its wording:
+role the string plays rather than for its wording. One further level of
+grouping is allowed only where the sub-keys are looked up dynamically —
+`myRoom.errors.<reason>`, keyed by the slug a refused upload answers with:
 
 ```
 app.name          nav.myRoom        phase.locked      myRoom.description
@@ -101,6 +103,25 @@ Two rules follow from that:
 
 `yarn test` fails if a component asks for a key the locale file does not
 answer, or if a message is empty.
+
+## Photos
+
+An upload is decoded, re-encoded into two WebP variants (~1600px and ~400px)
+and the original is dropped. Stripping metadata is not a step in that pipeline,
+it is a consequence of never keeping the file — which matters, because GPS
+coordinates in a photo of someone's living room give the game away. Files are
+served only through `/api/photos/<name>/<variant>`, behind the session, under a
+random name that says nothing about who took them.
+
+**HEIC is refused, deliberately.** Measured on 2026-08-26: sharp's prebuilt
+binaries parse a HEIC container — `metadata()` reports the dimensions and
+`compression: hevc` — but cannot decode its pixels, failing with `bad seek`.
+Same result on darwin-arm64 and inside `node:24-alpine`, which is what ships:
+the HEVC decoder is not in the prebuilt libheif, and building libvips
+ourselves is not worth a milestone. In practice iOS transcodes to JPEG when a
+photo is picked through a file input, so the common path is unaffected; the
+uploads that do arrive as HEIC get a message naming the setting to change.
+Accepted: JPEG, PNG, WebP, up to 15 Mo each.
 
 ## Configuration
 

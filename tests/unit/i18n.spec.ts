@@ -8,8 +8,12 @@ import { createI18n } from 'vue-i18n'
 // tests read it off disk — no Nuxt runtime, same trick as the contrast audit.
 const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 
-/** The file's shape: one namespace per screen or shared element, then strings. */
-type Messages = Record<string, Record<string, string>>
+/**
+ * One namespace per screen or shared element, then strings — with one level of
+ * grouping allowed where the sub-keys are looked up dynamically, as
+ * `myRoom.errors.<reason>` is from the slug a failed request answers with.
+ */
+interface Messages { [key: string]: string | Messages }
 
 const messages: Messages = JSON.parse(readFileSync(join(ROOT, 'i18n/locales/fr.json'), 'utf8'))
 
@@ -47,12 +51,14 @@ describe('the French locale', () => {
   })
 
   it('has no empty string', () => {
-    const empty = Object.entries(messages).flatMap(([namespace, strings]) =>
-      Object.entries(strings)
-        .filter(([, message]) => message.trim() === '')
-        .map(([key]) => `${namespace}.${key}`),
-    )
-    expect(empty).toEqual([])
+    const empty = (node: Messages, path = ''): string[] =>
+      Object.entries(node).flatMap(([key, value]) => {
+        const here = path ? `${path}.${key}` : key
+        if (typeof value !== 'string') return empty(value, here)
+        return value.trim() === '' ? [here] : []
+      })
+
+    expect(empty(messages)).toEqual([])
   })
 })
 

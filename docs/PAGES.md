@@ -55,7 +55,7 @@ Edge cases:
 Purpose: manage the photos of my room and my display name.
 
 Features (`open` phase):
-- Upload photos: multiple files, from camera or gallery. Accepted: JPEG/PNG/WebP/HEIC, ≤ 15 MB each, unlimited count.
+- Upload photos: multiple files, from camera or gallery. Accepted: JPEG/PNG/WebP, ≤ 15 Mo each, unlimited count. HEIC is detected and refused with an explanatory message — see §3 of SPEC.md and the README.
 - Upload feedback: per-file progress/processing state, per-file errors (too big, unsupported, failed) without blocking the other files.
 - List my photos; reorder them; delete any (with confirmation).
 - "In play" status: visible ("your room appears on others' sheets") vs 0 photos ("not in play").

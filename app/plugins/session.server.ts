@@ -1,3 +1,4 @@
+import type { GamePhase } from '#shared/types/game'
 import type { SessionUser } from '#shared/types/user'
 
 /**
@@ -8,8 +9,11 @@ import type { SessionUser } from '#shared/types/user'
  * travels: the internal user id stays on the server.
  */
 export default defineNuxtPlugin(() => {
-  const user = useRequestEvent()?.context.user
+  const context = useRequestEvent()?.context
+  const user = context?.user
 
   useState<SessionUser | null>('session:user', () =>
     user ? { displayName: user.displayName, isAdmin: user.isAdmin } : null)
+
+  useState<GamePhase>('game:phase', () => context?.phase ?? 'open')
 })

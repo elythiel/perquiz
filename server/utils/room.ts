@@ -1,0 +1,139 @@
+import type { GamePhase } from '#shared/types/game'
+import { and, asc, eq, sql } from 'drizzle-orm'
+import { guesses, photos, users } from '../database/schema'
+
+/**
+ * Everything the owner of a room may do to it, and the one condition on all of
+ * it: the game has to be `open`.
+ *
+ * The phase check lives here rather than in each route, because "everything is
+ * read-only once locked" (SPEC §2) is an invariant, and an invariant repeated
+ * in five handlers is one that will be missing from the sixth.
+ */
+
+export function assertPhaseIsOpen(): void {
+  const { phase } = useGameState()
+  if (phase !== 'open') {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'The game is no longer open',
+      data: { phase },
+    })
+  }
+}
+
+export interface RoomPhoto {
+  name: string
+  position: number
+}
+
+export function roomPhotos(userId: number): RoomPhoto[] {
+  return useDatabase()
+    .select({ name: photos.filename, position: photos.position })
+    .from(photos)
+    .where(eq(photos.userId, userId))
+    .orderBy(asc(photos.position))
+    .all()
+}
+
+export interface RoomState {
+  phase: GamePhase
+  displayName: string
+  photos: RoomPhoto[]
+  /** Players other than me — how wide the audience for this room is. */
+  otherPlayers: number
+  /** Guesses already made about my room; discarded if it leaves play. */
+  guessesOnMyRoom: number
+}
+
+export function roomState(userId: number): RoomState {
+  const db = useDatabase()
+  const count = (rows: { count: number } | undefined) => rows?.count ?? 0
+
+  return {
+    phase: useGameState().phase,
+    displayName: db.select({ name: users.displayName }).from(users)
+      .where(eq(users.id, userId)).get()?.name ?? '',
+    photos: roomPhotos(userId),
+    otherPlayers: count(db.select({ count: sql<number>`count(*)` }).from(users)
+      .where(sql`${users.id} <> ${userId}`).get()),
+    guessesOnMyRoom: count(db.select({ count: sql<number>`count(*)` }).from(guesses)
+      .where(eq(guesses.roomUserId, userId)).get()),
+  }
+}
+
+/**
+ * Removes one photo, and — if it was the last one — the guesses about a room
+ * that no longer exists.
+ *
+ * PAGES `/my-room`: a room with no photos leaves everyone's sheet, and the
+ * answers people had written about it go with it. Keeping them would mean a
+ * score counted against a room nobody can see any more.
+ */
+export function deleteRoomPhoto(userId: number, name: string): { remaining: number, discardedGuesses: number } {
+  const db = useDatabase()
+
+  return db.transaction((tx) => {
+    const removed = tx.delete(photos)
+      .where(and(eq(photos.userId, userId), eq(photos.filename, name)))
+      .returning({ position: photos.position })
+      .all()
+
+    if (removed.length === 0) {
+      throw createError({ statusCode: 404, statusMessage: 'No such photo in your room' })
+    }
+
+    // Positions stay 0..n-1 and contiguous, so the grid never shows a gap.
+    tx.run(sql`
+      update ${photos} set position = position - 1
+      where user_id = ${userId} and position > ${removed[0]!.position}
+    `)
+
+    const remaining = tx.select({ count: sql<number>`count(*)` }).from(photos)
+      .where(eq(photos.userId, userId)).get()?.count ?? 0
+
+    if (remaining > 0) return { remaining, discardedGuesses: 0 }
+
+    const discarded = tx.delete(guesses)
+      .where(eq(guesses.roomUserId, userId))
+      .returning({ guesser: guesses.guesserId })
+      .all()
+
+    return { remaining, discardedGuesses: discarded.length }
+  })
+}
+
+/** Rewrites the order from the names the owner listed, in the order they listed them. */
+export function reorderRoomPhotos(userId: number, order: readonly string[]): RoomPhoto[] {
+  const db = useDatabase()
+
+  return db.transaction((tx) => {
+    const current = tx.select({ name: photos.filename }).from(photos)
+      .where(eq(photos.userId, userId)).all().map(row => row.name)
+
+    const sameSet = current.length === order.length
+      && new Set(order).size === order.length
+      && order.every(name => current.includes(name))
+
+    if (!sameSet) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: 'The new order must list each of your photos exactly once',
+      })
+    }
+
+    // `(user_id, position)` is indexed but not unique, so a straight rewrite
+    // would work. It is still done in two passes, through an offset, because
+    // that keeps the operation independent of the order the rows are touched
+    // in — and it is what makes the index safe to tighten later, should a
+    // duplicate position ever turn out to be worth forbidding outright.
+    tx.run(sql`update ${photos} set position = position + ${order.length} where user_id = ${userId}`)
+    order.forEach((name, position) => {
+      tx.update(photos).set({ position })
+        .where(and(eq(photos.userId, userId), eq(photos.filename, name)))
+        .run()
+    })
+
+    return roomPhotos(userId)
+  })
+}

@@ -1,9 +1,12 @@
+import type { GamePhase } from '#shared/types/game'
 import type { SignedInUser } from '../utils/provisioning'
 
 declare module 'h3' {
   interface H3EventContext {
     /** The signed-in user, resolved once per request by this middleware. */
     user?: SignedInUser
+    /** The game's phase, read once here so no handler has to fetch it again. */
+    phase?: GamePhase
   }
 }
 
@@ -42,9 +45,13 @@ export default defineEventHandler(async (event) => {
   // A session can outlive the row it points at — an admin removing a
   // participant, a reseeded database. Treat it as signed out.
   const user = userId ? findUserById(userId) : undefined
-  if (user) event.context.user = user
-
-  if (user) return
+  if (user) {
+    event.context.user = user
+    // The phase decides what every screen may offer, so it travels with the
+    // request rather than being fetched again by whoever needs it.
+    event.context.phase = useGameState().phase
+    return
+  }
   if (PUBLIC_PATHS.has(path) || PUBLIC_PREFIXES.some(prefix => path.startsWith(prefix))) return
 
   if (path.startsWith('/api/')) {

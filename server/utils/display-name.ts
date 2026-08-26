@@ -1,20 +1,15 @@
+// Relative, not `#shared/...`: this file is also compiled by the node project
+// that covers tests/, where Nuxt's aliases do not exist.
+import { DISPLAY_NAME_MAX, DISPLAY_NAME_MIN, tidyDisplayName } from '../../shared/utils/display-name'
+
 /**
- * The name a player is known by, derived once at their first login.
+ * Giving a first-login account a name nobody else has.
  *
- * It is the name everyone else picks from when guessing, so it has to be
- * unique — and the provider knows nothing about that. Whatever the token
- * suggested gets tidied here, then given a suffix until it is free. It is a
- * *starting point*: the player renames themselves in « Ma pièce » (M3).
+ * The rules themselves live in shared/utils/display-name.ts, because the
+ * rename form applies the same tidying and a second copy of "collapse the
+ * spaces, clamp to thirty" would drift. What is here is the part that needs
+ * the database: asking whether a name is already taken.
  */
-
-/** PAGES `/login`: display names run from 2 to 30 characters. */
-export const DISPLAY_NAME_MIN = 2
-export const DISPLAY_NAME_MAX = 30
-
-/** Collapses the whitespace a provider may have left in, and clamps the length. */
-export function tidyDisplayName(candidate: string, limit = DISPLAY_NAME_MAX): string {
-  return candidate.replace(/\s+/gu, ' ').trim().slice(0, limit).trim()
-}
 
 /**
  * `desired`, or the first free `desired 2`, `desired 3`… variant.

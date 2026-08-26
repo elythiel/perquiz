@@ -26,6 +26,8 @@ if (process.env.NODE_ENV === 'production') {
 
 const WIDTH = 1600
 const HEIGHT = 1200
+/** Matches the pipeline in server/utils/photos.ts: web ~1600px, thumb ~400px. */
+const VARIANTS = [{ suffix: 'web', edge: 1600 }, { suffix: 'thumb', edge: 400 }]
 
 /** The design system's five accents: one per room, so rooms read apart. */
 const ACCENTS = ['#4fe3c1', '#8b7bff', '#ff6b8a', '#ffc45a', '#78b4ff']
@@ -58,9 +60,9 @@ function placeholderSvg(room: number, index: number): string {
   </svg>`
 }
 
-/** Deterministic, and shaped like the random ids M3 will mint for real. */
-function photoFilename(room: number, index: number): string {
-  return `${createHash('sha256').update(`perquiz-seed:${room}:${index}`).digest('hex').slice(0, 16)}.webp`
+/** Deterministic, and shaped exactly like the random names uploads get. */
+function photoName(room: number, index: number): string {
+  return createHash('sha256').update(`perquiz-seed:${room}:${index}`).digest('hex').slice(0, 32)
 }
 
 /**
@@ -116,13 +118,17 @@ const ids = plan.people.map((person) => {
 let written = 0
 for (const [room, person] of plan.people.entries()) {
   for (let index = 0; index < person.photos; index++) {
-    const filename = photoFilename(room, index)
-    await sharp(Buffer.from(placeholderSvg(room, index)))
-      .webp({ quality: 82 })
-      .toFile(join(photoDir, filename))
+    const name = photoName(room, index)
+    const source = sharp(Buffer.from(placeholderSvg(room, index)))
+    for (const { suffix, edge } of VARIANTS) {
+      await source.clone()
+        .resize({ width: edge, height: edge, fit: 'inside', withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toFile(join(photoDir, `${name}-${suffix}.webp`))
+    }
 
     db.insert(photos)
-      .values({ userId: ids[room]!, filename, position: index })
+      .values({ userId: ids[room]!, filename: name, position: index })
       .run()
     written++
   }
