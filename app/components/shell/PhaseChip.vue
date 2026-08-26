@@ -7,24 +7,26 @@ interface Props {
 
 const props = defineProps<Props>()
 
+const { t } = useI18n()
+
 /** The design system's phase chip: one colour per phase, a dot pulsing on `open`. */
 const PRESENTATION = {
   open: {
-    label: 'Partie en cours',
+    labelKey: 'phase.open',
     chip: 'bg-torch/10 text-torch-ink',
     pulse: true,
   },
   locked: {
-    label: 'Partie verrouillée',
+    labelKey: 'phase.locked',
     chip: 'border border-edge-strong bg-panel text-text-muted',
     pulse: false,
   },
   revealed: {
-    label: 'Résultats révélés',
+    labelKey: 'phase.revealed',
     chip: 'bg-clue/15 text-clue-ink',
     pulse: false,
   },
-} as const satisfies Record<GamePhase, { label: string, chip: string, pulse: boolean }>
+} as const satisfies Record<GamePhase, { labelKey: string, chip: string, pulse: boolean }>
 
 const current = computed(() => PRESENTATION[props.phase])
 </script>
@@ -39,6 +41,6 @@ const current = computed(() => PRESENTATION[props.phase])
       class="size-1.5 shrink-0 animate-standby rounded-full bg-current"
       aria-hidden="true"
     />
-    {{ current.label }}
+    {{ t(current.labelKey) }}
   </p>
 </template>

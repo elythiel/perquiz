@@ -20,7 +20,7 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
           to="/"
           class="text-lg font-bold tracking-tight sm:text-xl"
         >
-          Perquiz
+          {{ $t('app.name') }}
         </NuxtLink>
 
         <!-- Bottom bar on mobile, a row of tabs in the header above that. -->

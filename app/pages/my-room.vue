@@ -1,7 +1,7 @@
 <template>
   <PlaceholderScreen
-    title="Ma pièce"
-    milestone="M3 — Ma pièce"
-    description="Déposez les photos de votre pièce, réorganisez-les, et choisissez le nom sous lequel les autres vous chercheront."
+    :title="$t('myRoom.title')"
+    :milestone="$t('myRoom.milestone')"
+    :description="$t('myRoom.description')"
   />
 </template>

@@ -11,8 +11,9 @@ French and mobile-first — participants upload and guess from their phones.
 ## Stack
 
 Nuxt 4 (SSR, TypeScript strict) · Tailwind v4 with the design-system tokens ·
-SQLite (better-sqlite3 + Drizzle) · Zitadel for identity (OIDC, code + PKCE) ·
-sharp for photo processing. Self-hosted fonts, no CDN.
+`@nuxtjs/i18n` for the copy · SQLite (better-sqlite3 + Drizzle) · Zitadel for
+identity (OIDC, code + PKCE) · sharp for photo processing. Self-hosted fonts,
+no CDN.
 
 ## Requirements
 
@@ -50,6 +51,32 @@ The manual setup steps live in the "Prerequisite" section of
 of `app/assets/css/main.css` and computes WCAG ratios for both themes — it
 fails below 4.5:1 for text and 3:1 for meaningful borders. Adjust a colour
 token and the audit tells you whether it still passes.
+
+## Copy and translations
+
+Every string a player can read — button labels, headings, and the `aria-label`s
+a screen reader announces — lives in `i18n/locales/`, never in a component. The
+app ships **French only**; the point of the setup is that adding a language is
+dropping `i18n/locales/en.json` next to `fr.json` and listing it in
+`nuxt.config.ts`, with no component touched.
+
+**Key convention.** One namespace per screen or shared UI element, named after
+its route or component; inside it, one camelCase key per string, named for the
+role the string plays rather than for its wording:
+
+```
+app.name          nav.myRoom        phase.locked      myRoom.description
+```
+
+Two rules follow from that:
+
+- `strategy: 'no_prefix'` — URLs carry no language segment. `/my-room` stays
+  `/my-room`. Localised routes are a separate decision.
+- French keeps the singular at zero, so plural messages carry **three** forms
+  (`zero | one | many`), not the usual two — see `guess.progress`.
+
+`yarn test` fails if a component asks for a key the locale file does not
+answer, or if a message is empty.
 
 ## Configuration
 

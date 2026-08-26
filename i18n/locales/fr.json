@@ -1,0 +1,46 @@
+{
+  "app": {
+    "name": "Perquiz",
+    "description": "Une pièce, quelques photos, autant de suspects. Devinez qui vit ici."
+  },
+  "nav": {
+    "label": "Navigation principale",
+    "home": "Accueil",
+    "myRoom": "Ma pièce",
+    "guess": "Deviner",
+    "results": "Résultats",
+    "admin": "Admin"
+  },
+  "phase": {
+    "open": "Partie en cours",
+    "locked": "Partie verrouillée",
+    "revealed": "Résultats révélés"
+  },
+  "home": {
+    "title": "Une pièce, quelques photos, autant de suspects.",
+    "milestone": "M5 — Tableau de bord",
+    "description": "Vous trouverez ici l'état de votre pièce, votre progression de devinettes et la prochaine chose à faire."
+  },
+  "myRoom": {
+    "title": "Ma pièce",
+    "milestone": "M3 — Ma pièce",
+    "description": "Déposez les photos de votre pièce, réorganisez-les, et choisissez le nom sous lequel les autres vous chercheront."
+  },
+  "guess": {
+    "title": "Deviner",
+    "milestone": "M4 — Feuille de devinettes",
+    "description": "Une pièce à la fois : regardez les photos, désignez un suspect, changez d'avis autant que vous voulez jusqu'au verrouillage.",
+    "progress": "{done} / {total} pièce devinée | {done} / {total} pièce devinée | {done} / {total} pièces devinées"
+  },
+  "results": {
+    "title": "Résultats",
+    "milestone": "M8 — Résultats",
+    "description": "Votre score, votre rang et le détail pièce par pièce : votre réponse face au vrai propriétaire.",
+    "tie": "{count} joueur ex æquo | {count} joueur ex æquo | {count} joueurs ex æquo"
+  },
+  "admin": {
+    "title": "Régie",
+    "milestone": "M6 — Régie",
+    "description": "Piloter la phase de la partie, suivre la participation et modérer les photos — sans jamais voir les réponses."
+  }
+}

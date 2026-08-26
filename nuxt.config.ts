@@ -2,19 +2,17 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint'],
+  modules: ['@nuxt/eslint', '@nuxtjs/i18n'],
 
   devtools: { enabled: true },
 
   app: {
     head: {
-      htmlAttrs: { lang: 'fr' },
-      title: 'Perquiz',
-      // `theme-color` is driven by app/app.vue: it swaps with the theme.
-      // `color-scheme` is declared in CSS (main.css), for the same reason.
+      // `html lang`, the title and the description are driven by app/app.vue:
+      // they follow the locale. `theme-color` is set there too, following the
+      // theme; `color-scheme` is declared in CSS (main.css), for the same reason.
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-        { name: 'description', content: 'Une pièce, quelques photos, autant de suspects. Devinez qui vit ici.' },
       ],
     },
   },
@@ -62,5 +60,21 @@ export default defineNuxtConfig({
     config: {
       stylistic: true,
     },
+  },
+
+  // Every player-facing string lives in i18n/locales/ — see the README for the
+  // key convention. French is the only locale for now; adding one is meant to
+  // stay a data-only change.
+  i18n: {
+    defaultLocale: 'fr',
+    locales: [
+      { code: 'fr', name: 'Français', file: 'fr.json' },
+    ],
+    // The canonical URLs are the English ones, with no language prefix in
+    // front. Localising the routes is a separate decision, to reopen the day
+    // a second locale actually ships.
+    strategy: 'no_prefix',
+    // A single locale: nothing to detect, and no cookie worth setting.
+    detectBrowserLanguage: false,
   },
 })

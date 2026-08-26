@@ -13,18 +13,20 @@ interface NavItem {
 
 const props = defineProps<Props>()
 
+const { t } = useI18n()
+
 const items = computed<NavItem[]>(() => [
-  { to: '/', label: 'Accueil' },
-  { to: '/my-room', label: 'Ma pièce' },
-  { to: '/guess', label: 'Deviner' },
+  { to: '/', label: t('nav.home') },
+  { to: '/my-room', label: t('nav.myRoom') },
+  { to: '/guess', label: t('nav.guess') },
   // "Résultats" only exists once the answers are revealed (docs/PAGES.md).
-  ...(props.phase === 'revealed' ? [{ to: '/results', label: 'Résultats' }] : []),
-  ...(props.isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
+  ...(props.phase === 'revealed' ? [{ to: '/results', label: t('nav.results') }] : []),
+  ...(props.isAdmin ? [{ to: '/admin', label: t('nav.admin') }] : []),
 ])
 </script>
 
 <template>
-  <nav aria-label="Navigation principale">
+  <nav :aria-label="t('nav.label')">
     <ul class="flex flex-wrap items-center justify-between gap-x-1 gap-y-0.5 sm:gap-x-2">
       <li
         v-for="item in items"
