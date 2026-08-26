@@ -14,19 +14,18 @@ Functional spec of every page, for UX/UI design. Features, states and edge cases
 
 ## `/login` — public
 
-Purpose: sign in, or register with the invite code.
+Purpose: enter the game through the SSO.
 
 Features:
-- Sign-in form: display name + password.
-- Registration form: invite code + display name + password.
-- The invite code is pre-filled when arriving through an invite link (`/login?code=…`).
+- One action: sign in → redirect to the identity provider (Zitadel, OIDC). No registration, no password, no invite code — accounts are provisioned in Zitadel by the organizer.
 - App name + one-sentence pitch of the game (a newcomer must understand what they're joining).
 
 States & edge cases:
 - Already authenticated → redirected to `/`.
-- Errors: unknown name / wrong password (single undifferentiated message), invalid invite code, display name already taken, password too weak (minimum length only).
-- Display name rules surfaced at input: unique (case-insensitive), 2–30 chars — it's the name other players will pick when guessing, choose wisely.
-- First user ever to register silently becomes admin (no special UI).
+- Back from the IdP without a `player`/`admin` role → "you're not on the guest list" screen: explain that access is granted by the organizer; no account is created.
+- IdP unreachable / OIDC error → readable error + retry action.
+- First login: account auto-created; display name defaults from the Zitadel profile. If that name is already taken, a suffix is appended and the user is nudged to pick a better one in « Ma pièce ».
+- Display name rules (unique case-insensitive, 2–30 chars) apply to renames in « Ma pièce », not here.
 
 ---
 
@@ -138,11 +137,10 @@ Purpose: run the game without ever seeing the answer key.
 
 Features:
 - **Phase control**: current phase + transitions (`open` → `locked` → `revealed`, and reversals). Each transition confirmed, with its consequences stated (lock = players can no longer change anything; reveal = everyone sees results).
-- **Invite**: display the invite code and a copyable invite link.
 - **Participation dashboard** (per participant): photo count, guess progress (X/N), last activity. Never the content of their guesses.
-- **User management**: promote/demote admin, delete a user (confirmation with consequences: their photos, room and guesses are removed; guesses others made about their room are discarded).
+- **User management**: remove a participant's data (confirmation with consequences: their photos, room and guesses are removed; guesses others made about their room are discarded). A note makes clear this does not revoke their Zitadel access — accounts and roles are managed in Zitadel.
 - **Photo moderation**: browse all photos without owner names, delete any (confirmation).
 
 Constraints:
 - No admin screen shows the room → owner mapping. Admins play like everyone else; the only place answers appear is `/reveal`, live.
-- An admin cannot demote themselves if they are the last admin.
+- Who is admin is decided by the Zitadel `admin` role (synced at each login) — no promote/demote in the app.

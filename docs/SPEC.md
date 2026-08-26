@@ -8,21 +8,22 @@ The visible app name is **« Perquiz »** (perquisition + quiz — you're "searc
 
 ## 1. Roles & authentication
 
-- **Participant** — any authenticated user.
-- **Admin** — a participant with an admin flag. The **first registered user becomes admin**; admins can promote/demote others from the admin panel. Admins are also players.
+- **Participant** — a user authenticated through the instance's IdP and holding the `player` (or `admin`) role.
+- **Admin** — a participant holding the `admin` role. Admins are also players.
 
-### v1: local accounts, invite-gated
+### v1: OIDC via Zitadel, role-gated
 
-- Registration requires the instance's **invite code** (from runtime config), shared by the admin as a code or pre-filled link — the instance is never open to the world.
-- Registering takes a **display name** (unique, case-insensitive — it's the name others pick when guessing) and a **password**. No email required.
-- Sign-in: display name + password. Passwords hashed with a modern KDF (argon2id or scrypt).
-- No anonymous access: every page and API route requires a session, except the login/registration screen.
-- Sessions are encrypted, httpOnly cookies.
-- Participants can edit their display name afterwards.
+- Perquiz is an **OIDC client of a Zitadel instance** (authorization code flow + PKCE). No in-app registration or password handling: accounts are provisioned in Zitadel by the organizer.
+- Authorization uses a **Zitadel project** with two **project roles**: `player` and `admin`, granted per user in Zitadel. The app requires roles asserted in the token (`urn:zitadel:iam:org:project:roles`).
+- At login: a user with neither role is rejected (explanatory screen, no account created). Otherwise a local user record + identity are created on first login (JIT provisioning), and `is_admin` is **synced from the roles claim on every login** — Zitadel is the source of truth for who is admin.
+- **Display name**: defaults from the Zitadel profile, freely editable in-app (unique, case-insensitive — it's the name others pick when guessing). On collision at first login, a suffix is added and the user is invited to rename.
+- No anonymous access: every page and API route requires a session, except the login screen and the OIDC callback.
+- Sessions are the app's own encrypted, httpOnly cookies (established after the OIDC callback).
+- Logout ends the app session (no Zitadel single-logout in v1).
 
 ### Extensibility: pluggable identity providers
 
-Authentication is architecturally isolated from the game domain. A user's profile (`users`) is separate from how they authenticate (`identities`, 1-N per user: provider + subject + optional credential). v1 ships only the `local` provider; adding an OIDC/SSO provider later (Entra ID, Google, generic IdP…) means adding an identity row type and a login button — game code never touches identities. Password-reset flows, email-based provisioning, etc. slot in the same way.
+Authentication is architecturally isolated from the game domain. A user's profile (`users`) is separate from how they authenticate (`identities`, 1-N per user: provider + subject + optional credential). v1 ships only the `zitadel` provider; adding another OIDC provider — or local invite-code accounts — later means adding an identity row type and a login entry, and game code never touches identities.
 
 **Several providers can be active simultaneously.** Provider configuration is deployment-driven (a *list* of provider configs via env/config file, not a single set), and the login page renders one entry per enabled provider alongside the local form. Because identities are 1-N per user, one account can hold several login methods (account linking). Runtime-editable IdP config stored in DB (admin adds a provider without redeploy) is deliberately **not** pursued.
 
@@ -85,7 +86,7 @@ No realtime sync needed: the projected page is simply a page the admin controls 
 ## 7. Admin panel
 
 - Phase control (`open` / `locked` / `revealed`).
-- User management: promote/demote admins, remove a user (e.g. mistaken registration).
+- User management: remove a participant's data (photos, room, guesses — cascading). Access and admin role are managed in Zitadel, not in the app.
 - Participation dashboard: who has uploaded photos (count), who has started/completed their guess sheet — **without showing the guesses' content**.
 - Photo moderation: browse and delete photos, shown without owner names.
 - Design constraint: **admins play too**, so no admin screen may display the room → owner answer key. The only place answers appear is the reveal show (which the admin runs live, at which point the game is over anyway).
@@ -96,7 +97,7 @@ Detailed per-page functional specs (features, states, edge cases) live in [PAGES
 
 | Route | Access | Content |
 |---|---|---|
-| `/login` | public | Sign-in + registration (invite code, pre-fillable via link) |
+| `/login` | public | SSO sign-in (redirect to Zitadel) |
 | `/` | participant | Dashboard: current phase, my room status, guess progress, links |
 | `/ma-piece` | participant | Upload, reorder, delete my photos; edit my display name |
 | `/deviner` | participant | The guess sheet: grid of rooms (photo carousel + owner picker each) |
@@ -109,7 +110,7 @@ Detailed per-page functional specs (features, states, edge cases) live in [PAGES
 - **Nuxt 4** (Vue 3, `<script setup>`, TypeScript) with the Nitro server for the API.
 - **SQLite** via **Drizzle ORM**, migrations with **drizzle-kit**. DB file at `./data/app.db`.
 - **Tailwind CSS** (v4) — custom design, no component library.
-- Password hashing with **argon2id** (or Node's built-in scrypt — decided at planning). No auth framework needed for v1; the identity abstraction keeps the door open for OIDC modules later.
+- OIDC client for Zitadel (e.g. `openid-client` hand-wired in Nitro, or the `nuxt-oidc-auth` module — decided at planning).
 - **sharp** for image processing (resize, re-encode, EXIF stripping).
 - Package manager: **Yarn 4 via corepack**.
 - Lint: ESLint (Nuxt preset).
@@ -118,8 +119,8 @@ Detailed per-page functional specs (features, states, edge cases) live in [PAGES
 
 ```
 users       id, display_name (unique, ci), is_admin, created_at
-identities  id, user_id → users, provider ('local' in v1), subject,
-            secret_hash (nullable — local password hash; unused for future OIDC),
+identities  id, user_id → users, provider ('zitadel' in v1), subject,
+            secret_hash (nullable — reserved for a future local provider),
             created_at, UNIQUE (provider, subject)
 photos      id, user_id → users, filename, position, created_at
 guesses     guesser_id → users, room_user_id → users, guessed_user_id → users,
@@ -127,7 +128,7 @@ guesses     guesser_id → users, room_user_id → users, guessed_user_id → us
 app_state   singleton row: phase, locked_at
 ```
 
-For the `local` provider, `subject` is the normalized display name at registration time. The game domain only ever references `users.id` — it is provider-agnostic.
+For the `zitadel` provider, `subject` is the OIDC `sub` claim. `users.is_admin` is a cache of the Zitadel `admin` role, refreshed at every login. The game domain only ever references `users.id` — it is provider-agnostic.
 
 Scores are derived (computed from `guesses` at read time in `locked`/`revealed`), never stored.
 
@@ -142,12 +143,13 @@ Scores are derived (computed from `guesses` at read time in `locked`/`revealed`)
 
 - Node server build (`nuxt build`), single process.
 - All persistent state under `./data/` (SQLite file + photos) → one volume to back up.
-- Runtime config via env vars: session secret, invite code, public base URL.
+- Runtime config via env vars: session secret, public base URL, Zitadel issuer URL + client ID (+ client secret if the app is registered as a confidential client).
 - A simple `Dockerfile` is provided; HTTPS termination is assumed to be handled by the host's reverse proxy.
 
 ## 11. Out of scope (v1)
 
-- SSO / external IdP sign-in (Entra ID, Google, generic OIDC…) and email-based flows (password reset, magic links) — the `identities` model is designed to host them later.
+- Additional identity providers (local invite-code accounts, Google, generic OIDC…) and email-based flows — the `identities` model is designed to host them later.
+- Zitadel single-logout, and automatic reaction to users deleted/revoked in Zitadel (they simply can't log in anymore; their data stays until an admin removes it).
 - Live/synchronous game modes (Kahoot-style).
 - Notifications and email reminders.
 - Multiple rooms per participant, or multiple concurrent games/seasons.
