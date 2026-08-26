@@ -10,11 +10,11 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'fr' },
       title: 'Perquiz',
+      // `theme-color` est piloté par app/app.vue : il bascule avec le thème.
+      // `color-scheme` est déclaré en CSS (main.css), pour la même raison.
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'description', content: 'Une pièce, quelques photos, autant de suspects. Devinez qui vit ici.' },
-        { name: 'theme-color', content: '#0A0B12' },
-        { name: 'color-scheme', content: 'dark' },
       ],
     },
   },

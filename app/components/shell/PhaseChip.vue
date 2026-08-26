@@ -11,17 +11,17 @@ const props = defineProps<Props>()
 const PRESENTATION = {
   open: {
     label: 'Partie en cours',
-    chip: 'bg-torche/10 text-torche',
+    chip: 'bg-torche/10 text-torche-texte',
     pulse: true,
   },
   locked: {
     label: 'Partie verrouillée',
-    chip: 'border border-trait bg-panneau text-texte-estompe',
+    chip: 'border border-trait-fort bg-panneau text-texte-estompe',
     pulse: false,
   },
   revealed: {
     label: 'Résultats révélés',
-    chip: 'bg-indice/15 text-indice-clair',
+    chip: 'bg-indice/15 text-indice-texte',
     pulse: false,
   },
 } as const satisfies Record<GamePhase, { label: string, chip: string, pulse: boolean }>

@@ -43,7 +43,13 @@ The manual setup steps live in the "Prerequisite" section of
 | `yarn build` | Production build into `.output/` |
 | `yarn preview` | Serve the production build locally |
 | `yarn lint` / `yarn lint:fix` | ESLint (Nuxt preset, stylistic rules) |
-| `yarn typecheck` | `vue-tsc` over the whole project |
+| `yarn typecheck` | `vue-tsc` over the whole project, `tests/` included |
+| `yarn test` / `yarn test:watch` | Vitest unit tests |
+
+`yarn test` includes a contrast audit that reads the design tokens straight out
+of `app/assets/css/main.css` and computes WCAG ratios for both themes — it
+fails below 4.5:1 for text and 3:1 for meaningful borders. Adjust a colour
+token and the audit tells you whether it still passes.
 
 ## Configuration
 

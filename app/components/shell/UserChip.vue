@@ -7,11 +7,11 @@ const props = defineProps<Props>()
 
 /** Les cinq accents « identités » du design system. */
 const ACCENTS = [
-  'bg-torche/20 text-torche',
-  'bg-indice/20 text-indice-clair',
-  'bg-alerte/20 text-alerte-clair',
-  'bg-ambre/20 text-ambre',
-  'bg-azur/20 text-azur',
+  'bg-torche/20 text-torche-texte',
+  'bg-indice/20 text-indice-texte',
+  'bg-alerte/20 text-alerte-texte',
+  'bg-ambre/20 text-ambre-texte',
+  'bg-azur/20 text-azur-texte',
 ]
 
 const initials = computed(() => {

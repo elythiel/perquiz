@@ -4,6 +4,17 @@
  * Jetons du design system Perquiz — direction « Lampe torche ».
  * Référence : docs/design-system.png (couleurs, typo) et
  * docs/screens/animation-rules.png (mouvement).
+ *
+ * Deux thèmes, un seul vocabulaire : les valeurs ci-dessous sont celles du
+ * thème sombre (la référence de la DA) ; le thème clair redéfinit les mêmes
+ * noms plus bas. Aucun composant ne connaît le thème courant.
+ *
+ * Un accent ne peut pas être à la fois aplat et texte : sur blanc, torche
+ * #4fe3c1 en texte tombe à 1,6:1. D'où la scission — les cinq accents
+ * (torche, indice, alerte, ambre, azur) restent les APLATS, identiques dans
+ * les deux thèmes ; les cinq `*-texte` portent l'accent en texte ou en icône
+ * et basculent avec le thème. Les ratios sont mesurés par
+ * tests/unit/contraste.spec.ts, pas estimés.
  */
 @theme {
   /* Les sept couleurs nommées du design system */
@@ -21,19 +32,32 @@
   --color-texte-doux: #b7bcd1;
   --color-texte-estompe: #858ba6;
   --color-sur-torche: #06251f;
-  --color-indice-clair: #a99bff;
-  --color-alerte-clair: #ff95ab;
   --color-ambre: #ffc45a;
   --color-azur: #78b4ff;
+
+  /* Toute bordure porteuse de sens (puce « verrouillé », champ de saisie,
+     sélecteur de suspect) : ≥ 3:1 sur les trois fonds, exigé par WCAG 1.4.11.
+     `trait` et `trait-clair` plafonnent à 1,3–1,6:1 : ils restent réservés
+     aux séparateurs décoratifs, où aucun seuil ne s'applique. */
+  --color-trait-fort: #646b85;
+
+  /* Les accents en texte ou en icône. Ils remplacent les anciens
+     `indice-clair` / `alerte-clair` : une seule variante, pas deux. */
+  --color-torche-texte: #4fe3c1;
+  --color-indice-texte: #a99bff;
+  --color-alerte-texte: #ff95ab;
+  --color-ambre-texte: #ffc45a;
+  --color-azur-texte: #78b4ff;
 
   /* Typographie : Space Grotesk (titres, corps) + IBM Plex Mono (compteurs,
      états, phases). Les deux sont auto-hébergées via @fontsource. */
   --font-sans: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Étiquettes mono (compteurs, états, phases) : 10 px exprimés en rem, donc
-     dépendants de la taille de police racine. */
-  --text-etiquette: 0.625rem;
+  /* Étiquettes mono (compteurs, états, phases) : 11 px exprimés en rem, donc
+     dépendants de la taille de police racine. En capitales mono avec 0,12em
+     d'interlettrage, 10 px passait sous le plancher confortable. */
+  --text-etiquette: 0.6875rem;
   --text-etiquette--line-height: 1.4;
   --tracking-etiquette: 0.12em;
   --tracking-surtitre: 0.18em;
@@ -57,17 +81,82 @@
   }
 }
 
-/* Le halo de lampe torche qui éclaire le coin haut-gauche de la coquille. */
+/* Le halo de lampe torche qui éclaire le coin haut-gauche de la coquille.
+   13 % et pas 16 % : la nav de bureau vit dans ce halo, et à 16 % ses liens
+   (`texte-estompe`) tombaient à 4,27:1 en sombre. Le halo est décoratif, le
+   texte par-dessus ne l'est pas — c'est donc le décor qui cède. Mesuré par
+   tests/unit/contraste.spec.ts, qui lit l'alpha directement ici. */
 @utility halo-torche {
   background: radial-gradient(
     circle,
-    color-mix(in oklab, var(--color-torche) 16%, transparent),
+    color-mix(in oklab, var(--color-torche) 13%, transparent),
     transparent 70%
   );
 }
 
 @layer base {
+  /*
+   * Thème clair : mêmes jetons, autres valeurs. Deux sélecteurs pour une
+   * seule palette, parce que Perquiz est rendu côté serveur :
+   *
+   *  - `.light` — choix explicite « clair ». Le serveur pose la classe sur
+   *    <html> d'après le cookie, donc le premier octet porte déjà le bon
+   *    thème : aucun flash.
+   *  - la media query — réglage « auto » (le défaut). Là, le serveur ne peut
+   *    RIEN savoir : `prefers-color-scheme` ne voyage pas dans la requête.
+   *    C'est donc au navigateur de trancher, et une classe ne peut pas le
+   *    faire. `.dark` (choix explicite « sombre ») la neutralise.
+   *
+   * Les deux blocs doivent rester rigoureusement identiques :
+   * tests/unit/contraste.spec.ts échoue s'ils divergent.
+   *
+   * Les cinq aplats (torche, indice, alerte, ambre, azur) et `sur-torche`
+   * n'apparaissent pas ici : ils ne bougent pas d'un thème à l'autre.
+   */
+  .light {
+    color-scheme: light;
+
+    --color-nuit: #f1f3f8;
+    --color-panneau: #ffffff;
+    --color-trait: #d3d9e6;
+    --color-texte: #12141f;
+    --color-trait-clair: #b9c1d4;
+    --color-fond-creux: #e3e7f0;
+    --color-texte-doux: #3b4358;
+    --color-texte-estompe: #5a6379;
+    --color-trait-fort: #7a8293;
+    --color-torche-texte: #0a7159;
+    --color-indice-texte: #5335d2;
+    --color-alerte-texte: #c11b41;
+    --color-ambre-texte: #8a5a00;
+    --color-azur-texte: #0f5fb8;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not(.dark) {
+      color-scheme: light;
+
+      --color-nuit: #f1f3f8;
+      --color-panneau: #ffffff;
+      --color-trait: #d3d9e6;
+      --color-texte: #12141f;
+      --color-trait-clair: #b9c1d4;
+      --color-fond-creux: #e3e7f0;
+      --color-texte-doux: #3b4358;
+      --color-texte-estompe: #5a6379;
+      --color-trait-fort: #7a8293;
+      --color-torche-texte: #0a7159;
+      --color-indice-texte: #5335d2;
+      --color-alerte-texte: #c11b41;
+      --color-ambre-texte: #8a5a00;
+      --color-azur-texte: #0f5fb8;
+    }
+  }
+
   html {
+    /* La DA est née dans le noir : le sombre est le défaut, et il le reste
+       tant qu'un des deux sélecteurs ci-dessus ne prend pas le relais. */
+    color-scheme: dark;
     background-color: var(--color-nuit);
     -webkit-text-size-adjust: 100%;
   }
@@ -88,8 +177,10 @@
     text-wrap: balance;
   }
 
+  /* L'anneau de focus est une bordure porteuse de sens : il prend l'accent
+     EN TEXTE, pas l'aplat. `torche` sur panneau blanc ne fait que 1,4:1. */
   :focus-visible {
-    outline: 2px solid var(--color-torche);
+    outline: 2px solid var(--color-torche-texte);
     outline-offset: 2px;
   }
 

@@ -13,6 +13,9 @@ dist
 .nitro
 .cache
 
+# typescript (le projet tsconfig.test.json écrit son cache à la racine)
+*.tsbuildinfo
+
 # environment
 .env
 .env.*
