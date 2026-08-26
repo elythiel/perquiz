@@ -1,0 +1,89 @@
+<script setup lang="ts">
+import type { PodiumStep } from '~~/server/utils/scoring'
+import { accentOf, initialsOf } from '#shared/utils/identity'
+import { ordinal } from '#shared/utils/show'
+
+const props = defineProps<{
+  steps: readonly PodiumStep[]
+  /** How many steps have been climbed: the show reveals third, then second, then first. */
+  revealed: number
+  total: number
+}>()
+
+const { t } = useI18n()
+
+/**
+ * The three columns, in the order they stand on a podium — second, first,
+ * third — rather than the order they are revealed in.
+ *
+ * A step nobody stands on is simply absent: a tie for second leaves no third,
+ * and inventing one out of the fourth player would be a lie in front of the
+ * whole room.
+ */
+const COLUMNS = [2, 1, 3]
+
+const shown = computed(() => COLUMNS.map((rank) => {
+  const step = props.steps.find(candidate => candidate.rank === rank)
+  if (!step) return undefined
+  // Steps are climbed 3, 2, 1 — so a step is out once the show has passed it.
+  const order = props.steps.findIndex(candidate => candidate.rank === rank)
+  return order < props.revealed ? step : undefined
+}))
+
+/** First place stands tallest, third lowest; the middle column is the winner. */
+const HEIGHTS: Record<number, string> = { 1: 'h-56 sm:h-72', 2: 'h-40 sm:h-52', 3: 'h-32 sm:h-40' }
+</script>
+
+<template>
+  <div class="flex h-full items-end justify-center gap-4 sm:gap-8">
+    <div
+      v-for="(step, index) in shown"
+      :key="COLUMNS[index]"
+      class="flex w-full max-w-xs flex-col items-center justify-end gap-4"
+    >
+      <template v-if="step">
+        <!-- Overlapping avatars when a rank is shared, as the mockup shows. -->
+        <span class="flex animate-step-up items-center motion-reduce:animate-soft-fade">
+          <span
+            v-for="(player, seat) in step.players"
+            :key="player.id"
+            class="grid size-16 place-items-center rounded-full text-lg font-bold sm:size-20 sm:text-xl"
+            :class="[accentOf(player.displayName), seat > 0 && '-ml-5']"
+            aria-hidden="true"
+          >{{ initialsOf(player.displayName) }}</span>
+        </span>
+
+        <span class="flex animate-step-up flex-col items-center gap-1 motion-reduce:animate-soft-fade">
+          <span class="max-w-full truncate text-center text-2xl font-bold text-text/25 sm:text-4xl">
+            {{ step.players.map(player => player.displayName).join(' & ') }}
+          </span>
+          <span
+            v-if="step.players.length > 1"
+            class="font-mono text-label tracking-eyebrow text-text-muted uppercase"
+          >{{ t('reveal.exAequo') }}</span>
+        </span>
+
+        <div
+          class="flex w-full animate-step-up flex-col items-center justify-center gap-1 rounded-t-2xl motion-reduce:animate-soft-fade"
+          :class="[
+            HEIGHTS[COLUMNS[index]!],
+            step.rank === 1 ? 'bg-gradient-to-t from-torch/10 to-torch/40 ring-1 ring-torch' : 'bg-panel',
+          ]"
+        >
+          <span
+            class="font-mono text-label tracking-label uppercase"
+            :class="step.rank === 1 ? 'text-torch-ink' : 'text-text-muted'"
+          >{{ ordinal(step.rank) }}</span>
+          <span
+            class="text-4xl font-bold tabular-nums sm:text-6xl"
+            :class="step.rank === 1 ? 'text-text/25' : 'text-text'"
+          >{{ step.players[0]!.score }}</span>
+          <span
+            v-if="step.rank === 1"
+            class="text-base text-text-soft"
+          >{{ t('reveal.roomsOutOf', { score: step.players[0]!.score, total }) }}</span>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>

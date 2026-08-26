@@ -88,6 +88,19 @@ async function removePerson() {
       @change="changePhase"
     />
 
+    <!--
+      Nothing else in the app links to the show, and a screen nobody can reach
+      is not delivered. Offered only once the game is frozen, which is also the
+      only phase the reveal API will answer in.
+    -->
+    <NuxtLink
+      v-if="data.phase !== 'open'"
+      to="/reveal"
+      class="rounded-2xl bg-clue/15 px-5 py-4 text-center text-lg font-bold text-clue-ink transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+    >
+      {{ t('reveal.open') }}
+    </NuxtLink>
+
     <AdminParticipationList
       :participants="data.participants"
       :ready="data.ready"

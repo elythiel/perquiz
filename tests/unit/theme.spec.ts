@@ -52,26 +52,20 @@ describe('a page forcing its theme wins over the setting', () => {
   )
 })
 
-describe('the reveal show stays dark even without a declaration', () => {
-  // Safety net: if M7 forgets its `definePageMeta`, these paths stay dark.
-  it.each(['/reveal', '/reveal/3', '/reveal/12/podium'])(
-    '%s is dark despite a light cookie',
+describe('no path is pinned to a theme any more', () => {
+  // M0 pinned `/reveal`, on the assumption that a projected page must be dark.
+  // M7 built that show and decided otherwise: it follows the setting like
+  // everything else. The mechanism stays, the list is empty.
+  it.each(['/reveal', '/reveal/3', '/reveal/12/podium', '/', '/results'])(
+    '%s follows the setting',
     (path) => {
-      expect(resolveThemeClass({ cookie: 'light', meta: NO_META, path })).toBe('dark')
+      expect(themeOverride(undefined, path)).toBeUndefined()
+      expect(resolveThemeClass({ cookie: 'light', meta: undefined, path })).toBe('light')
     },
   )
 
-  // The net matches path segments, not string prefixes: a future page whose
-  // name merely starts with "reveal" must not turn dark by accident.
-  it.each(['/revelation', '/reveals', '/reveal-show', '/results', '/'])(
-    '%s is not affected',
-    (path) => {
-      expect(resolveThemeClass({ cookie: 'light', meta: NO_META, path })).toBe('light')
-    },
-  )
-
-  it('a page can also contradict the net and go light again', () => {
-    expect(themeOverride('light', '/reveal')).toBe('light')
-    expect(resolveThemeClass({ cookie: 'dark', meta: 'light', path: '/reveal' })).toBe('light')
+  it('still lets a page pin itself', () => {
+    expect(themeOverride('dark', '/reveal')).toBe('dark')
+    expect(resolveThemeClass({ cookie: 'light', meta: 'dark', path: '/reveal' })).toBe('dark')
   })
 })

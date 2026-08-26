@@ -1,0 +1,1 @@
+ALTER TABLE `app_state` ADD `reveal_seed` text;

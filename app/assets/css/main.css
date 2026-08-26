@@ -85,6 +85,37 @@
       opacity: 1;
     }
   }
+
+  /* Stage motion, /reveal only (screens/animation-rules.png): the podium
+     climbs step by step, and everything else on that screen is a transition
+     between two states rather than a keyframe — the show lives on one page,
+     so its blocks move instead of being mounted. `soft-fade` is the 120 ms
+     fade those rules pin as the reduced variant. */
+  --animate-step-up: step-up 600ms var(--ease-deck) both;
+  --animate-soft-fade: soft-fade 120ms var(--ease-micro) both;
+
+
+
+
+  @keyframes step-up {
+    from {
+      transform: translateY(2rem);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes soft-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 }
 
 /* The torchlight glow washing the top-left corner of the shell.

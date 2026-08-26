@@ -166,5 +166,30 @@
     "deletePhoto": "Supprimer cette photo",
     "confirmPhotoTitle": "Supprimer cette photo ?",
     "confirmPhotoBody": "Elle disparaît pour tout le monde. Si c'est la dernière de sa pièce, cette pièce quitte la grille et les réponses la concernant sont jetées."
+  },
+  "reveal": {
+    "roomCounter": "Pièce {position} / {total}",
+    "stepPhotos": "Les photos",
+    "stepVotes": "Les votes",
+    "stepOwner": "Révélation",
+    "majority": "La majorité pariait sur {name}…",
+    "nobodyVoted": "Personne n'a osé se prononcer…",
+    "tieVote": "Vous étiez partagés…",
+    "itsAt": "C'est chez",
+    "noAnswer": "Sans rép.",
+    "finalRanking": "Classement final",
+    "podiumStep": "{place} place",
+    "exAequo": "Ex æquo",
+    "roomsOutOf": "{score} pièces sur {total}",
+    "hintNext": "Espace pour continuer",
+    "hintPrevious": "Précédent",
+    "hintFullRanking": "Espace pour afficher le classement complet",
+    "hintEnd": "Le show est terminé — passez la partie en « révélé » depuis la régie.",
+    "notLockedTitle": "Verrouillez la partie avant le show",
+    "notLockedBody": "Tant que la partie est en cours, les réponses peuvent encore changer : le classement projeté ne serait pas le bon.",
+    "toAdmin": "Aller à la régie",
+    "emptyTitle": "Rien à révéler",
+    "emptyBody": "Aucune pièce n'est en jeu.",
+    "open": "Lancer le show"
   }
 }

@@ -4,15 +4,16 @@ const CHOICES: readonly ThemeChoice[] = ['auto', 'light', 'dark']
 const OVERRIDES: readonly ThemeOverride[] = ['light', 'dark']
 
 /**
- * Pages video-projected in a dark room: the reveal show and its podium (M7).
+ * Paths pinned to the dark theme whatever the person chose.
  *
- * This is a SAFETY NET, not the mechanism: a page declares its own theme with
- * `definePageMeta({ theme: 'dark' })`, which is safer — the declaration lives
- * in the page it concerns and follows its URL renames. But if M7 forgets,
- * these paths stay dark anyway. Matched on a path segment, since a position in
- * the show is meant to be addressable by URL.
+ * Empty, and deliberately still here. M0 put `/reveal` in this list on the
+ * assumption that a projected page must be dark; M7 built the show and the
+ * decision went the other way — the reveal follows the setting like every
+ * other screen, and is built from tokens so it holds up in both. Pinning a
+ * page is still one `definePageMeta({ theme })` away, and this net stays for
+ * the page that turns out to need it without remembering to declare it.
  */
-export const ALWAYS_DARK = ['/reveal'] as const
+export const ALWAYS_DARK: readonly string[] = []
 
 /** A hand-edited cookie must never end up in the `class` attribute as-is. */
 export function isThemeChoice(value: unknown): value is ThemeChoice {

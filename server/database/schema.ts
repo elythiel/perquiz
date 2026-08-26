@@ -102,6 +102,15 @@ export const appState = sqliteTable('app_state', {
   id: integer('id').primaryKey(),
   phase: text('phase', { enum: PHASES }).notNull().default('open'),
   lockedAt: integer('locked_at', { mode: 'timestamp' }),
+  /**
+   * The shuffle the reveal show walks the rooms in.
+   *
+   * Persisted rather than derived, because the show is driven live from one
+   * browser and has to survive a refresh, a reconnected laptop and a second
+   * screen — all of which would otherwise deal the rooms in a different order
+   * halfway through. Minted on the first request and never touched again.
+   */
+  revealSeed: text('reveal_seed'),
 }, table => [
   check('app_state_singleton', sql`${table.id} = 1`),
 ])
