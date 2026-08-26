@@ -45,7 +45,7 @@ const zoom = useTemplateRef<{ open: (index: number) => void }>('zoom')
       {{ t('guess.noPhotos') }}
     </p>
 
-    <GuessPhotoZoom
+    <PhotoZoom
       ref="zoom"
       :photos="photos"
     />

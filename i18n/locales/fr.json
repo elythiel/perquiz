@@ -91,6 +91,15 @@
       "locked": "La partie vient d'être verrouillée : vos modifications n'ont pas été enregistrées."
     }
   },
+  "photoZoom": {
+    "title": "Photos de cette pièce",
+    "close": "Fermer",
+    "previous": "Photo précédente",
+    "next": "Photo suivante",
+    "gallery": "Les photos de cette pièce",
+    "photoOf": "Photo {position} sur {total}",
+    "counter": "{done} / {total}"
+  },
   "guess": {
     "progress": "{done} / {total} pièce devinée | {done} / {total} pièce devinée | {done} / {total} pièces devinées",
     "counter": "{done} / {total}",
@@ -118,22 +127,26 @@
     "pickerCurrent": "Votre réponse pour cette pièce",
     "pickerClose": "Fermer",
     "photoOf": "Photo {position} sur {total}",
+    "gallery": "Les photos de cette pièce",
     "roomLabel": "Pièce {position} sur {total}",
     "roomAnswered": "Pièce {position}, répondue",
     "roomUnanswered": "Pièce {position}, sans réponse",
     "zoomOpen": "Agrandir la photo {position}",
-    "zoomClose": "Fermer",
-    "zoomTitle": "Photos de cette pièce",
-    "zoomPrevious": "Photo précédente",
-    "zoomNext": "Photo suivante",
-    "gallery": "Les photos de cette pièce",
     "noPhotos": "Cette pièce n'a plus de photo."
   },
   "results": {
     "title": "Résultats",
-    "milestone": "M8 — Résultats",
-    "description": "Votre score, votre rang et le détail pièce par pièce : votre réponse face au vrai propriétaire.",
-    "tie": "{count} joueur ex æquo | {count} joueur ex æquo | {count} joueurs ex æquo"
+    "tie": "{count} joueur ex æquo | {count} joueur ex æquo | {count} joueurs ex æquo",
+    "found": "/ {total} trouvée | / {total} trouvée | / {total} trouvées",
+    "place": "{place} place",
+    "tiedWith": "Ex æquo avec {names}",
+    "you": "(vous)",
+    "detail": "Mon détail",
+    "yourAnswer": "Votre réponse : {name}",
+    "correct": "Bien vu",
+    "wrong": "C'était {name}",
+    "unanswered": "Sans réponse — c'était {name}",
+    "noRooms": "Aucune pièce n'était en jeu : il n'y avait rien à deviner."
   },
   "admin": {
     "title": "Régie",
