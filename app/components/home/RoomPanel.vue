@@ -1,0 +1,58 @@
+<script setup lang="ts">
+defineProps<{ photos: readonly string[], readOnly: boolean }>()
+
+const { t } = useI18n()
+
+/** Enough to recognise the room at a glance; « Ma pièce » holds the rest. */
+const SHOWN = 4
+</script>
+
+<template>
+  <section class="flex flex-col gap-3 rounded-2xl bg-panel px-5 py-4">
+    <div class="flex items-center justify-between gap-4">
+      <h2 class="font-mono text-label tracking-eyebrow text-text-muted uppercase">
+        {{ t('home.roomLabel') }}
+      </h2>
+      <RoomStatusChip :in-play="photos.length > 0" />
+    </div>
+
+    <ul
+      v-if="photos.length"
+      class="grid grid-cols-4 gap-2"
+    >
+      <li
+        v-for="photo in photos.slice(0, SHOWN)"
+        :key="photo"
+      >
+        <NuxtLink
+          to="/my-room"
+          class="block overflow-hidden rounded-xl bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        >
+          <img
+            :src="`/api/photos/${photo}/thumb`"
+            alt=""
+            loading="lazy"
+            class="aspect-square w-full object-cover"
+          >
+        </NuxtLink>
+      </li>
+
+      <li v-if="!readOnly && photos.length <= SHOWN">
+        <NuxtLink
+          to="/my-room"
+          class="grid aspect-square w-full place-items-center rounded-xl border border-dashed border-edge-strong text-2xl text-torch-ink transition-colors duration-100 ease-micro hover:border-torch-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          :aria-label="t('home.addPhotos')"
+        >
+          +
+        </NuxtLink>
+      </li>
+    </ul>
+
+    <p
+      v-else
+      class="max-w-measure text-base leading-relaxed text-text-soft"
+    >
+      {{ t('home.roomEmpty') }}
+    </p>
+  </section>
+</template>

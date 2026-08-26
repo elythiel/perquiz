@@ -25,17 +25,34 @@
     "providerErrorTitle": "La connexion n'a pas abouti",
     "providerError": "Le fournisseur d'identité n'a pas répondu comme prévu. Réessayez dans un instant."
   },
+  "roomStatus": {
+    "inPlay": "En jeu",
+    "notInPlay": "Hors jeu"
+  },
   "home": {
-    "title": "Une pièce, quelques photos, autant de suspects.",
-    "milestone": "M5 — Tableau de bord",
-    "description": "Vous trouverez ici l'état de votre pièce, votre progression de devinettes et la prochaine chose à faire."
+    "awaiting": "{count} pièce attend votre verdict. | {count} pièce attend votre verdict. | {count} pièces attendent votre verdict.",
+    "allAnswered": "Vous avez répondu partout.",
+    "nothingYet": "Personne n'a encore déposé de photos.",
+    "answersLabel": "Mes réponses",
+    "newRooms": "{count} nouvelle pièce depuis votre dernière visite. | {count} nouvelle pièce depuis votre dernière visite. | {count} nouvelles pièces depuis votre dernière visite.",
+    "roomLabel": "Ma pièce",
+    "roomEmpty": "Votre pièce n'est pas encore en jeu : sans photo, elle n'apparaît sur la grille de personne.",
+    "addPhotos": "Ajouter des photos",
+    "startGuessing": "Commencer à deviner",
+    "keepGuessing": "Continuer à deviner",
+    "reviewAnswers": "Revoir mes réponses",
+    "tally": "{rooms} pièce en jeu, {players} participants | {rooms} pièce en jeu, {players} participants | {rooms} pièces en jeu, {players} participants",
+    "lockedTitle": "Les réponses sont verrouillées.",
+    "lockedBody": "Plus rien ne bouge jusqu'à la révélation. Voici où vous en êtes restés.",
+    "revealedTitle": "Les résultats sont là.",
+    "revealedBody": "Votre score, votre rang et le détail pièce par pièce vous attendent.",
+    "seeResults": "Voir les résultats",
+    "photosCount": "{count} photo | {count} photo | {count} photos"
   },
   "myRoom": {
     "title": "Ma pièce",
     "milestone": "M3 — Ma pièce",
     "description": "Déposez les photos de votre pièce, réorganisez-les, et choisissez le nom sous lequel les autres vous chercheront.",
-    "inPlay": "En jeu",
-    "notInPlay": "Hors jeu",
     "summary": "Votre photo apparaît sur la grille des {others} autres joueurs. Aucun nom n'est attaché. | Votre photo apparaît sur la grille des {others} autres joueurs. Aucun nom n'est attaché. | Vos {count} photos apparaissent sur la grille des {others} autres joueurs. Aucun nom n'est attaché.",
     "summaryEmpty": "Votre pièce n'est pas encore en jeu : ajoutez au moins une photo pour qu'elle apparaisse sur la grille des autres.",
     "readOnly": "La partie est verrouillée : vos photos restent visibles, mais vous ne pouvez plus les modifier.",
@@ -75,9 +92,6 @@
     }
   },
   "guess": {
-    "title": "Deviner",
-    "milestone": "M4 — Feuille de devinettes",
-    "description": "Une pièce à la fois : regardez les photos, désignez un suspect, changez d'avis autant que vous voulez jusqu'au verrouillage.",
     "progress": "{done} / {total} pièce devinée | {done} / {total} pièce devinée | {done} / {total} pièces devinées",
     "counter": "{done} / {total}",
     "question": "Chez qui sommes-nous ?",

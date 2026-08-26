@@ -24,6 +24,15 @@ export const users = sqliteTable('users', {
   displayName: text('display_name').notNull(),
   /** A cache of the provider's `admin` role, refreshed at every login. */
   isAdmin: integer('is_admin', { mode: 'boolean' }).notNull().default(false),
+  /**
+   * When the dashboard last told this person what had changed.
+   *
+   * Not a login timestamp and not an activity log: it exists so "3 new rooms
+   * since your last visit" can be true, and it is stamped by the dashboard
+   * itself. Null until the first visit, which reads as "nothing is new yet"
+   * rather than "everything is".
+   */
+  lastSeenAt: integer('last_seen_at', { mode: 'timestamp' }),
   createdAt: createdAt(),
 }, table => [
   // The name others pick when guessing, so it has to be unique — and unique

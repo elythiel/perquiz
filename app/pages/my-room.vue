@@ -92,12 +92,7 @@ async function rename(displayName: string) {
       <h1 class="text-3xl leading-tight sm:text-4xl">
         {{ t('myRoom.title') }}
       </h1>
-      <p
-        class="rounded-lg px-3 py-1.5 font-mono text-label tracking-label uppercase"
-        :class="inPlay ? 'bg-torch/10 text-torch-ink' : 'border border-edge-strong bg-panel text-text-muted'"
-      >
-        {{ inPlay ? t('myRoom.inPlay') : t('myRoom.notInPlay') }}
-      </p>
+      <RoomStatusChip :in-play="inPlay" />
     </header>
 
     <p class="max-w-measure text-base leading-relaxed text-text-soft">
