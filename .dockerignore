@@ -1,0 +1,13 @@
+node_modules
+.nuxt
+.output
+.git
+.yarn/cache
+.yarn/install-state.gz
+data
+docs
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store

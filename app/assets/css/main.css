@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+/*
+ * Jetons du design system Perquiz — direction « Lampe torche ».
+ * Référence : docs/design-system.png (couleurs, typo) et
+ * docs/screens/animation-rules.png (mouvement).
+ */
+@theme {
+  /* Les sept couleurs nommées du design system */
+  --color-nuit: #0a0b12;
+  --color-panneau: #12141f;
+  --color-trait: #232739;
+  --color-texte: #e8eaf4;
+  --color-torche: #4fe3c1;
+  --color-indice: #8b7bff;
+  --color-alerte: #ff6b8a;
+
+  /* Déclinaisons de support, telles qu'employées dans les maquettes */
+  --color-trait-clair: #2e3348;
+  --color-fond-creux: #1a1d2b;
+  --color-texte-doux: #b7bcd1;
+  --color-texte-estompe: #858ba6;
+  --color-sur-torche: #06251f;
+  --color-indice-clair: #a99bff;
+  --color-alerte-clair: #ff95ab;
+  --color-ambre: #ffc45a;
+  --color-azur: #78b4ff;
+
+  /* Typographie : Space Grotesk (titres, corps) + IBM Plex Mono (compteurs,
+     états, phases). Les deux sont auto-hébergées via @fontsource. */
+  --font-sans: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Étiquettes mono (compteurs, états, phases) : 10 px exprimés en rem, donc
+     dépendants de la taille de police racine. */
+  --text-etiquette: 0.625rem;
+  --text-etiquette--line-height: 1.4;
+  --tracking-etiquette: 0.12em;
+  --tracking-surtitre: 0.18em;
+
+  /* Largeur de mesure de lecture confortable (~46 caractères). */
+  --container-mesure: 46ch;
+
+  /* Mouvement : micro 120 ms ease-out, transitions de deck 240 ms */
+  --ease-micro: cubic-bezier(0, 0, 0.2, 1);
+  --ease-deck: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --animate-veille: veille 2s infinite;
+
+  @keyframes veille {
+    0%,
+    100% {
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+/* Le halo de lampe torche qui éclaire le coin haut-gauche de la coquille. */
+@utility halo-torche {
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--color-torche) 16%, transparent),
+    transparent 70%
+  );
+}
+
+@layer base {
+  html {
+    background-color: var(--color-nuit);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-nuit);
+    color: var(--color-texte);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Les titres du design system sont serrés (-0.02 à -0.03em) */
+  h1,
+  h2,
+  h3 {
+    font-weight: 700;
+    letter-spacing: var(--tracking-tight);
+    text-wrap: balance;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-torche);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-torche) 30%, transparent);
+  }
+}
+
+/* « prefers-reduced-motion : tout se réduit à des fondus de 120 ms ;
+   aucune translation, aucun halo animé. »
+   Les @keyframes sont coupées net (la pastille de phase reste donc allumée) ;
+   les transitions survivent, plafonnées à 120 ms. Les écrans qui introduisent
+   des translations (deck M4, scène M7) déclinent la règle chez eux. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition-duration: 120ms !important;
+  }
+}

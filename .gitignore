@@ -1,35 +1,31 @@
-# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
-
-# Node dependencies
+# dependencies
 node_modules
-
-# Yarn
 .yarn/*
 !.yarn/patches
 !.yarn/releases
-!.yarn/sdks
-!.yarn/versions
 .pnp.*
 
-# Local data (SQLite)
-data
+# nuxt
+.nuxt
+.output
+.data
+dist
+.nitro
+.cache
 
-# Logs
-logs
-*.log
-
-# Misc
-.DS_Store
-.fleet
-.idea
-
-# Local env files
+# environment
 .env
 .env.*
 !.env.example
+
+# persistent state (SQLite + photos) — never committed, mais l'arborescence
+# ./data/ + ./data/photos/ doit exister au clone.
+data/*
+!data/.gitkeep
+!data/photos/
+data/photos/*
+!data/photos/.gitkeep
+
+# system
+.DS_Store
+*.log
