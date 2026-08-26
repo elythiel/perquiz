@@ -16,6 +16,13 @@
     "locked": "Partie verrouillée",
     "revealed": "Résultats révélés"
   },
+  "theme": {
+    "label": "Thème",
+    "auto": "Auto",
+    "light": "Clair",
+    "dark": "Sombre",
+    "hint": "« Auto » suit le réglage de votre appareil."
+  },
   "login": {
     "pitch": "Chacun photographie une pièce de chez lui. À vous de deviner qui habite où. Réponses dévoilées le soir de la révélation.",
     "signIn": "Se connecter",

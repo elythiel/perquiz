@@ -1,5 +1,5 @@
-import type { ThemeOverride } from '#shared/types/theme'
-import { resolveThemeClass } from '#shared/utils/theme'
+import type { ThemeChoice, ThemeOverride } from '#shared/types/theme'
+import { isThemeChoice, resolveThemeClass } from '#shared/utils/theme'
 
 /**
  * The theme a page forces, whatever the person's setting. `/reveal` is
@@ -56,10 +56,10 @@ export interface ChromeColor {
  * `app/assets/css/main.css` under the same token names. No component needs to
  * know which theme is active.
  *
- * M0 PLACEHOLDER: no picker in v1, so the cookie is read-only and the setting
- * is always `auto` in practice. M3 will add the explicit choice next to the
- * display name in "Ma pièce" — it only has to write to the cookie, everything
- * else is already in place.
+ * The cookie is written by `ThemePicker`, which sits next to the display name
+ * in « Ma pièce ». Writing it is all a picker has to do: the class on `<html>`,
+ * the browser chrome colour and the server-rendered first byte all follow from
+ * the same computed values.
  */
 export function useTheme() {
   const route = useRoute()
@@ -68,6 +68,20 @@ export function useTheme() {
     sameSite: 'lax',
     path: '/',
     maxAge: MAX_AGE,
+  })
+
+  /**
+   * The setting, readable and writable.
+   *
+   * A cookie can be hand-edited, so reading it goes through the same guard as
+   * the class does and an unreadable value reads as `auto` rather than
+   * appearing in the control as a fourth, nameless option.
+   */
+  const choice = computed<ThemeChoice>({
+    get: () => isThemeChoice(cookie.value) ? cookie.value : 'auto',
+    set: (value) => {
+      cookie.value = value
+    },
   })
 
   const themeClass = computed(() => resolveThemeClass({
@@ -101,5 +115,5 @@ export function useTheme() {
     ]
   })
 
-  return { themeClass, chrome }
+  return { choice, themeClass, chrome }
 }

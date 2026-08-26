@@ -131,6 +131,13 @@ async function rename(displayName: string) {
       @save="rename"
     />
 
+    <!--
+      Next to the display name, as M0 intended. Deliberately NOT tied to
+      `readOnly`: the theme is how you see the app, not something the game
+      freezes when the admin locks it.
+    -->
+    <ThemePicker />
+
     <div class="flex flex-wrap gap-3">
       <button
         type="button"

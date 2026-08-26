@@ -41,6 +41,9 @@ const TEXT_TOKENS = [
  */
 const CHIPS = [
   { flat: 'torch', alpha: 0.10, ink: 'torch-ink' },
+  // 15%: the admin panel's phase control (M6). It went in unmeasured; adding
+  // it here either confirms it or finds a real defect.
+  { flat: 'torch', alpha: 0.15, ink: 'torch-ink' },
   { flat: 'clue', alpha: 0.15, ink: 'clue-ink' },
   { flat: 'torch', alpha: 0.20, ink: 'torch-ink' },
   { flat: 'clue', alpha: 0.20, ink: 'clue-ink' },
