@@ -50,7 +50,7 @@ Edge cases:
 
 ---
 
-## `/ma-piece` — my room (participant)
+## `/my-room` — my room (participant)
 
 Purpose: manage the photos of my room and my display name.
 
@@ -70,7 +70,7 @@ Edge cases:
 
 ---
 
-## `/deviner` — the guess sheet (participant)
+## `/guess` — the guess sheet (participant)
 
 Purpose: assign an owner to every room in play (except mine), revisable until lock.
 
@@ -95,7 +95,7 @@ Edge cases:
 
 ---
 
-## `/resultats` — results (participant, `revealed` only)
+## `/results` — results (participant, `revealed` only)
 
 Purpose: my personal debrief + the final leaderboard.
 

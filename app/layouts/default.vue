@@ -8,9 +8,9 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
 
 <template>
   <div class="relative flex min-h-dvh flex-col overflow-x-hidden">
-    <!-- Le halo de lampe torche : décor, jamais annoncé. -->
+    <!-- The torchlight glow: decoration, never announced. -->
     <div
-      class="halo-torche pointer-events-none absolute -top-40 -left-24 size-96 rounded-full"
+      class="torch-glow pointer-events-none absolute -top-40 -left-24 size-96 rounded-full"
       aria-hidden="true"
     />
 
@@ -23,11 +23,11 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
           Perquiz
         </NuxtLink>
 
-        <!-- Barre du bas sur mobile, rangée d'onglets dans l'en-tête au-delà. -->
+        <!-- Bottom bar on mobile, a row of tabs in the header above that. -->
         <ShellNav
           :phase="phase"
           :is-admin="isAdmin"
-          class="fixed inset-x-4 bottom-4 z-10 rounded-2xl bg-panneau p-3 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0"
+          class="fixed inset-x-4 bottom-4 z-10 rounded-2xl bg-panel p-3 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0"
         />
 
         <ShellUserChip :display-name="displayName" />

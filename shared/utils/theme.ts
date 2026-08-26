@@ -1,61 +1,60 @@
-import type { ThemeChoice, ThemeClass, ThemeImpose } from '../types/theme'
+import type { ThemeChoice, ThemeClass, ThemeOverride } from '../types/theme'
 
-const CHOIX: readonly ThemeChoice[] = ['auto', 'clair', 'sombre']
-const IMPOSES: readonly ThemeImpose[] = ['clair', 'sombre']
+const CHOICES: readonly ThemeChoice[] = ['auto', 'light', 'dark']
+const OVERRIDES: readonly ThemeOverride[] = ['light', 'dark']
 
 /**
- * Pages vidéoprojetées dans une pièce sombre : le show de révélation et son
- * podium (M7).
+ * Pages video-projected in a dark room: the reveal show and its podium (M7).
  *
- * C'est un FILET, pas le mécanisme : une page déclare son thème elle-même avec
- * `definePageMeta({ theme: 'sombre' })`, ce qui est plus sûr — la déclaration
- * vit dans la page concernée et suit ses renommages d'URL. Mais si M7 oublie,
- * ces chemins restent sombres quand même. Comparaison par préfixe de segment,
- * la position dans le show devant être adressable par l'URL.
+ * This is a SAFETY NET, not the mechanism: a page declares its own theme with
+ * `definePageMeta({ theme: 'dark' })`, which is safer — the declaration lives
+ * in the page it concerns and follows its URL renames. But if M7 forgets,
+ * these paths stay dark anyway. Matched on a path segment, since a position in
+ * the show is meant to be addressable by URL.
  */
-export const TOUJOURS_SOMBRE = ['/reveal'] as const
+export const ALWAYS_DARK = ['/reveal'] as const
 
-/** Un cookie trafiqué à la main ne doit pas finir dans l'attribut `class`. */
-export function estThemeChoice(valeur: unknown): valeur is ThemeChoice {
-  return CHOIX.includes(valeur as ThemeChoice)
+/** A hand-edited cookie must never end up in the `class` attribute as-is. */
+export function isThemeChoice(value: unknown): value is ThemeChoice {
+  return CHOICES.includes(value as ThemeChoice)
 }
 
-export function estThemeImpose(valeur: unknown): valeur is ThemeImpose {
-  return IMPOSES.includes(valeur as ThemeImpose)
+export function isThemeOverride(value: unknown): value is ThemeOverride {
+  return OVERRIDES.includes(value as ThemeOverride)
 }
 
-/** Le thème imposé par la page, `undefined` si elle laisse le réglage décider. */
-export function themeImpose(meta: unknown, chemin: string): ThemeImpose | undefined {
-  if (estThemeImpose(meta)) return meta
+/** The theme a page forces, or `undefined` if it defers to the setting. */
+export function themeOverride(meta: unknown, path: string): ThemeOverride | undefined {
+  if (isThemeOverride(meta)) return meta
 
-  const vitDansLeNoir = TOUJOURS_SOMBRE.some(
-    base => chemin === base || chemin.startsWith(`${base}/`),
+  const projected = ALWAYS_DARK.some(
+    base => path === base || path.startsWith(`${base}/`),
   )
 
-  return vitDansLeNoir ? 'sombre' : undefined
+  return projected ? 'dark' : undefined
 }
 
 /**
- * Classe à poser sur `<html>`.
+ * The class to set on `<html>`.
  *
- * Priorité : ce qu'impose la page, puis le choix de la personne. `auto` ne pose
- * rien — le serveur ne reçoit jamais `prefers-color-scheme`, donc c'est la
- * media query qui tranche, dans le navigateur et avant le premier paint.
+ * Precedence: what the page forces, then what the person chose. `auto` sets
+ * nothing — the server never receives `prefers-color-scheme`, so the media
+ * query decides, in the browser and before the first paint.
  *
- * Fonction pure exprès : c'est l'invariant « /reveal reste sombre quoi qu'il
- * arrive », et il se teste sans monter Nuxt (tests/unit/theme.spec.ts).
+ * Deliberately pure: this is the "/reveal stays dark no matter what" invariant,
+ * and it can be tested without booting Nuxt (tests/unit/theme.spec.ts).
  */
-export function classeDeTheme(entree: {
+export function resolveThemeClass(input: {
   cookie: unknown
   meta: unknown
-  chemin: string
+  path: string
 }): ThemeClass {
-  const impose = themeImpose(entree.meta, entree.chemin)
-  const choix = estThemeChoice(entree.cookie) ? entree.cookie : 'auto'
+  const override = themeOverride(input.meta, input.path)
+  const choice = isThemeChoice(input.cookie) ? input.cookie : 'auto'
 
-  switch (impose ?? choix) {
-    case 'clair': return 'light'
-    case 'sombre': return 'dark'
+  switch (override ?? choice) {
+    case 'light': return 'light'
+    case 'dark': return 'dark'
     default: return ''
   }
 }

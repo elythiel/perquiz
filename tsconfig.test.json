@@ -1,11 +1,11 @@
 {
-  // Les tests vivent hors de la portée des tsconfig générés par Nuxt (qui ne
-  // couvrent que app/, server/ et shared/) : sans ce projet-là, `yarn
-  // typecheck` ne lirait pas une ligne de tests/.
+  // The tests sit outside the reach of Nuxt's generated tsconfigs (which only
+  // cover app/, server/ and shared/): without this project, `yarn typecheck`
+  // would not read a single line of tests/.
   "extends": "./.nuxt/tsconfig.node.json",
   "compilerOptions": {
-    // Le test lit main.css sur le disque : il a besoin de node:fs, que la base
-    // Nuxt masque avec `"types": []`.
+    // The test reads main.css off disk, so it needs node:fs, which the Nuxt
+    // base config hides with `"types": []`.
     "types": ["node"]
   },
   "include": ["tests/**/*", "vitest.config.ts"]

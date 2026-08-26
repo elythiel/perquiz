@@ -1,65 +1,65 @@
-import type { ThemeImpose } from '#shared/types/theme'
-import { classeDeTheme } from '#shared/utils/theme'
+import type { ThemeOverride } from '#shared/types/theme'
+import { resolveThemeClass } from '#shared/utils/theme'
 
 /**
- * Thème imposé par la page, quel que soit le réglage de la personne.
- * `/reveal` est vidéoprojeté dans une pièce sombre : il déclarera
- * `definePageMeta({ theme: 'sombre' })`.
+ * The theme a page forces, whatever the person's setting. `/reveal` is
+ * video-projected in a dark room, so it will declare
+ * `definePageMeta({ theme: 'dark' })`.
  *
- * Les deux augmentations sont nécessaires, et pour des raisons différentes :
- * `PageMeta` contraint l'écriture (`definePageMeta`), qui accepterait sinon
- * n'importe quoi à cause de sa signature d'index `[key: string]: unknown` ;
- * `RouteMeta` type la lecture (`route.meta.theme`). Nuxt augmente lui-même
- * `PageMeta` depuis `nuxt/app`, cf. `.nuxt/types/middleware.d.ts`.
+ * Both augmentations are needed, for different reasons: `PageMeta` constrains
+ * the write side (`definePageMeta`), which would otherwise accept anything
+ * thanks to its `[key: string]: unknown` index signature; `RouteMeta` types the
+ * read side (`route.meta.theme`). Nuxt augments `PageMeta` from `nuxt/app`
+ * itself — see `.nuxt/types/middleware.d.ts`.
  */
 declare module 'nuxt/app' {
   interface PageMeta {
-    theme?: ThemeImpose
+    theme?: ThemeOverride
   }
 }
 
 declare module 'vue-router' {
   interface RouteMeta {
-    theme?: ThemeImpose
+    theme?: ThemeOverride
   }
 }
 
 /**
- * Cookie et non `localStorage` : Perquiz est rendu côté serveur, et le serveur
- * doit connaître le thème pour l'écrire dans le premier octet. Avec
- * `localStorage`, il faudrait un `<script>` inline bloquant dans le `<head>`
- * pour poser la classe avant le premier paint (ce que fait `@nuxtjs/color-mode`)
- * — un script de plus à autoriser dans la CSP que M9 mettra en place.
+ * A cookie and not `localStorage`: Perquiz renders on the server, and the
+ * server has to know the theme to write it into the first byte. With
+ * `localStorage` we would need a blocking inline `<script>` in the `<head>` to
+ * set the class before the first paint (what `@nuxtjs/color-mode` does) — one
+ * more script to allow in the CSP that M9 will put in place.
  */
 const COOKIE = 'perquiz-theme'
 
-/** Un an : le choix d'un thème n'a pas de raison d'expirer plus tôt. */
+/** One year: a theme choice has no reason to expire sooner. */
 const MAX_AGE = 60 * 60 * 24 * 365
 
-/** La couleur de chrome du navigateur : le fond `nuit` de chaque thème. */
+/** The browser chrome colour: each theme's `night` background. */
 const CHROME = {
-  clair: '#f1f3f8',
-  sombre: '#0a0b12',
+  light: '#f1f3f8',
+  dark: '#0a0b12',
 } as const
 
-/** Une valeur de `theme-color` et la media query sous laquelle elle s'applique. */
+/** One `theme-color` value and the media query it applies under. */
 export interface ChromeColor {
   media: string
   content: string
 }
 
 /**
- * Thème de l'interface.
+ * The interface theme.
  *
- * Ce composable n'est qu'un emballage réactif : toute la décision vit dans
- * `classeDeTheme` (pure, testée), et les valeurs vivent dans
- * `app/assets/css/main.css` sous les mêmes noms de jetons. Aucun composant n'a
- * besoin de savoir quel thème est actif.
+ * This composable is only a reactive wrapper: the whole decision lives in
+ * `resolveThemeClass` (pure, tested), and the values live in
+ * `app/assets/css/main.css` under the same token names. No component needs to
+ * know which theme is active.
  *
- * PLACEHOLDER M0 : pas de sélecteur en v1, donc le cookie est en lecture seule
- * et le réglage vaut toujours `auto` en pratique. M3 ajoutera le choix
- * explicite à côté du nom affiché dans « Ma pièce » — il n'aura qu'à écrire
- * dans le cookie, tout le reste est déjà en place.
+ * M0 PLACEHOLDER: no picker in v1, so the cookie is read-only and the setting
+ * is always `auto` in practice. M3 will add the explicit choice next to the
+ * display name in "Ma pièce" — it only has to write to the cookie, everything
+ * else is already in place.
  */
 export function useTheme() {
   const route = useRoute()
@@ -70,34 +70,34 @@ export function useTheme() {
     maxAge: MAX_AGE,
   })
 
-  const themeClass = computed(() => classeDeTheme({
+  const themeClass = computed(() => resolveThemeClass({
     cookie: cookie.value,
     meta: route.meta.theme,
-    chemin: route.path,
+    path: route.path,
   }))
 
   /**
-   * `theme-color` doit basculer sans JS ni flash. En `auto`, on émet les deux
-   * valeurs, chacune sous sa media query, et le navigateur choisit. Sur un
-   * thème résolu, la valeur retenue passe à `all` et l'autre à `not all`, qui
-   * ne matche jamais.
+   * `theme-color` has to swap with no JS and no flash. On `auto` we emit both
+   * values, each under its media query, and let the browser pick. Once the
+   * theme is resolved, the winning value moves to `all` and the other to
+   * `not all`, which never matches.
    */
   const chrome = computed<ChromeColor[]>(() => {
     if (themeClass.value === 'light') {
       return [
-        { media: 'all', content: CHROME.clair },
-        { media: 'not all', content: CHROME.sombre },
+        { media: 'all', content: CHROME.light },
+        { media: 'not all', content: CHROME.dark },
       ]
     }
     if (themeClass.value === 'dark') {
       return [
-        { media: 'not all', content: CHROME.clair },
-        { media: 'all', content: CHROME.sombre },
+        { media: 'not all', content: CHROME.light },
+        { media: 'all', content: CHROME.dark },
       ]
     }
     return [
-      { media: '(prefers-color-scheme: light)', content: CHROME.clair },
-      { media: '(prefers-color-scheme: dark)', content: CHROME.sombre },
+      { media: '(prefers-color-scheme: light)', content: CHROME.light },
+      { media: '(prefers-color-scheme: dark)', content: CHROME.dark },
     ]
   })
 

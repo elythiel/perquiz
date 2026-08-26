@@ -1,11 +1,11 @@
 import type { SessionUser } from '#shared/types/user'
 
 /**
- * Utilisateur connecté.
+ * The signed-in user.
  *
- * PLACEHOLDER M0 : la valeur est figée le temps de bâtir la coquille. M2
- * (authentification Zitadel) remplacera le contenu de ce composable par la
- * session réelle ; les appelants (chip utilisateur, nav) n'ont pas à bouger.
+ * M0 PLACEHOLDER: the value is hard-coded while the shell is being built. M2
+ * (Zitadel authentication) will replace the body of this composable with the
+ * real session; its callers (user chip, nav) will not have to move.
  */
 const PLACEHOLDER: SessionUser = { displayName: 'Sofia', isAdmin: true }
 

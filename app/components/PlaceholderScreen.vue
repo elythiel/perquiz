@@ -1,10 +1,10 @@
 <script setup lang="ts">
 interface Props {
-  /** Titre de l'écran, en clair. */
+  /** The screen's title, in plain words. */
   title: string
-  /** Jalon qui livrera cet écran, p. ex. « M4 — Feuille de devinettes ». */
+  /** The milestone that will ship this screen, e.g. "M4 — Feuille de devinettes". */
   milestone: string
-  /** Une phrase sur ce que l'écran fera. */
+  /** One sentence on what the screen will do. */
   description: string
 }
 
@@ -13,13 +13,13 @@ defineProps<Props>()
 
 <template>
   <section class="flex flex-col gap-4">
-    <p class="font-mono text-etiquette tracking-surtitre text-texte-estompe uppercase">
+    <p class="font-mono text-label tracking-eyebrow text-text-muted uppercase">
       {{ milestone }}
     </p>
     <h1 class="text-3xl leading-tight sm:text-4xl">
       {{ title }}
     </h1>
-    <p class="max-w-mesure text-base leading-relaxed text-texte-doux">
+    <p class="max-w-measure text-base leading-relaxed text-text-soft">
       {{ description }}
     </p>
   </section>

@@ -99,9 +99,9 @@ Detailed per-page functional specs (features, states, edge cases) live in [PAGES
 |---|---|---|
 | `/login` | public | SSO sign-in (redirect to Zitadel) |
 | `/` | participant | Dashboard: current phase, my room status, guess progress, links |
-| `/ma-piece` | participant | Upload, reorder, delete my photos; edit my display name |
-| `/deviner` | participant | The guess sheet: grid of rooms (photo carousel + owner picker each) |
-| `/resultats` | participant, `revealed` only | Personal results + final leaderboard |
+| `/my-room` | participant | Upload, reorder, delete my photos; edit my display name |
+| `/guess` | participant | The guess sheet: grid of rooms (photo carousel + owner picker each) |
+| `/results` | participant, `revealed` only | Personal results + final leaderboard |
 | `/reveal` | admin | The projected reveal show |
 | `/admin` | admin | Phase control, participation stats, moderation |
 

@@ -1,9 +1,8 @@
 import { defineConfig } from 'vitest/config'
 
-// Les jetons du design system vivent dans du CSS : le test les lit sur le
-// disque et calcule. Ni DOM ni runtime Nuxt à monter — quand un jalon
-// ultérieur aura besoin de monter des composants, `@nuxt/test-utils` viendra
-// s'ajouter ici, fichier par fichier.
+// The design-system tokens live in CSS: the test reads them off disk and does
+// the maths. No DOM and no Nuxt runtime to boot — when a later milestone needs
+// to mount components, `@nuxt/test-utils` will be added here, file by file.
 export default defineConfig({
   test: {
     include: ['tests/unit/**/*.spec.ts'],

@@ -5,25 +5,25 @@ interface Props {
 
 const props = defineProps<Props>()
 
-/** Les cinq accents « identités » du design system. */
+/** The design system's five "identity" accents. */
 const ACCENTS = [
-  'bg-torche/20 text-torche-texte',
-  'bg-indice/20 text-indice-texte',
-  'bg-alerte/20 text-alerte-texte',
-  'bg-ambre/20 text-ambre-texte',
-  'bg-azur/20 text-azur-texte',
+  'bg-torch/20 text-torch-ink',
+  'bg-clue/20 text-clue-ink',
+  'bg-alert/20 text-alert-ink',
+  'bg-amber/20 text-amber-ink',
+  'bg-azure/20 text-azure-ink',
 ]
 
 const initials = computed(() => {
   const parts = props.displayName.split(/[\s-]+/).filter(Boolean)
-  // Toujours deux lettres : « Claire Dupont » -> CD, « Sofia » -> SO.
+  // Always two letters: "Claire Dupont" -> CD, "Sofia" -> SO.
   const letters = parts.length > 1
     ? parts.slice(0, 2).map(part => part.slice(0, 1))
     : [(parts[0] ?? '').slice(0, 2)]
   return letters.join('').toLocaleUpperCase('fr-FR') || '?'
 })
 
-/** Accent stable pour un nom donné : la même personne garde sa couleur. */
+/** A stable accent per name: the same person keeps the same colour. */
 const accent = computed(() => {
   const sum = [...props.displayName].reduce((total, char) => total + char.charCodeAt(0), 0)
   return ACCENTS[sum % ACCENTS.length] ?? ''
@@ -32,7 +32,7 @@ const accent = computed(() => {
 
 <template>
   <span class="flex shrink-0 items-center gap-2.5">
-    <span class="sr-only text-sm font-medium text-texte-doux sm:not-sr-only">{{ displayName }}</span>
+    <span class="sr-only text-sm font-medium text-text-soft sm:not-sr-only">{{ displayName }}</span>
     <span
       class="grid size-8 place-items-center rounded-full text-xs font-bold"
       :class="accent"

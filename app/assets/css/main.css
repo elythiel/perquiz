@@ -1,76 +1,82 @@
 @import "tailwindcss";
 
 /*
- * Jetons du design system Perquiz — direction « Lampe torche ».
- * Référence : docs/design-system.png (couleurs, typo) et
- * docs/screens/animation-rules.png (mouvement).
+ * Perquiz design-system tokens — the "torchlight" art direction.
+ * Reference: docs/design-system.png (colours, type) and
+ * docs/screens/animation-rules.png (motion).
  *
- * Deux thèmes, un seul vocabulaire : les valeurs ci-dessous sont celles du
- * thème sombre (la référence de la DA) ; le thème clair redéfinit les mêmes
- * noms plus bas. Aucun composant ne connaît le thème courant.
+ * The art direction names its seven colours in French; the tokens are English.
+ * This table is the only place that mapping is written down, so keep it here:
  *
- * Un accent ne peut pas être à la fois aplat et texte : sur blanc, torche
- * #4fe3c1 en texte tombe à 1,6:1. D'où la scission — les cinq accents
- * (torche, indice, alerte, ambre, azur) restent les APLATS, identiques dans
- * les deux thèmes ; les cinq `*-texte` portent l'accent en texte ou en icône
- * et basculent avec le thème. Les ratios sont mesurés par
- * tests/unit/contraste.spec.ts, pas estimés.
+ *   nuit → night      panneau → panel    trait → edge-subtle
+ *   texte → text      torche → torch     indice → clue        alerte → alert
+ *
+ * Two themes, one vocabulary: the values below are the dark theme (the art
+ * direction's reference), and the light theme redefines the same names further
+ * down. No component ever knows which theme is active.
+ *
+ * An accent cannot be both a flat fill and a text colour: on white, torch
+ * #4fe3c1 as text drops to 1.6:1. Hence the split — the five accents (torch,
+ * clue, alert, amber, azure) stay the FLAT FILLS, identical in both themes,
+ * while the five `*-ink` tokens carry the accent as text or icon and swap with
+ * the theme. Every ratio is measured by tests/unit/contrast.spec.ts, not
+ * estimated.
  */
 @theme {
-  /* Les sept couleurs nommées du design system */
-  --color-nuit: #0a0b12;
-  --color-panneau: #12141f;
-  --color-trait: #232739;
-  --color-texte: #e8eaf4;
-  --color-torche: #4fe3c1;
-  --color-indice: #8b7bff;
-  --color-alerte: #ff6b8a;
+  /* The design system's seven named colours */
+  --color-night: #0a0b12;
+  --color-panel: #12141f;
+  --color-edge-subtle: #232739;
+  --color-text: #e8eaf4;
+  --color-torch: #4fe3c1;
+  --color-clue: #8b7bff;
+  --color-alert: #ff6b8a;
 
-  /* Déclinaisons de support, telles qu'employées dans les maquettes */
-  --color-trait-clair: #2e3348;
-  --color-fond-creux: #1a1d2b;
-  --color-texte-doux: #b7bcd1;
-  --color-texte-estompe: #858ba6;
-  --color-sur-torche: #06251f;
-  --color-ambre: #ffc45a;
-  --color-azur: #78b4ff;
+  /* Supporting shades, as used across the mockups */
+  --color-edge: #2e3348;
+  --color-sunken: #1a1d2b;
+  --color-text-soft: #b7bcd1;
+  --color-text-muted: #858ba6;
+  --color-on-torch: #06251f;
+  --color-amber: #ffc45a;
+  --color-azure: #78b4ff;
 
-  /* Toute bordure porteuse de sens (puce « verrouillé », champ de saisie,
-     sélecteur de suspect) : ≥ 3:1 sur les trois fonds, exigé par WCAG 1.4.11.
-     `trait` et `trait-clair` plafonnent à 1,3–1,6:1 : ils restent réservés
-     aux séparateurs décoratifs, où aucun seuil ne s'applique. */
-  --color-trait-fort: #646b85;
+  /* Any border that carries meaning (the "locked" chip, an input field, the
+     suspect picker): >= 3:1 on all three backgrounds, required by WCAG 1.4.11.
+     `edge-subtle` and `edge` top out at 1.3–1.6:1, so they stay reserved for
+     decorative separators, where no threshold applies. */
+  --color-edge-strong: #646b85;
 
-  /* Les accents en texte ou en icône. Ils remplacent les anciens
-     `indice-clair` / `alerte-clair` : une seule variante, pas deux. */
-  --color-torche-texte: #4fe3c1;
-  --color-indice-texte: #a99bff;
-  --color-alerte-texte: #ff95ab;
-  --color-ambre-texte: #ffc45a;
-  --color-azur-texte: #78b4ff;
+  /* The accents as text or icon. The name says "ink" because that is the role:
+     the colour you write with, as opposed to the flat you fill with. */
+  --color-torch-ink: #4fe3c1;
+  --color-clue-ink: #a99bff;
+  --color-alert-ink: #ff95ab;
+  --color-amber-ink: #ffc45a;
+  --color-azure-ink: #78b4ff;
 
-  /* Typographie : Space Grotesk (titres, corps) + IBM Plex Mono (compteurs,
-     états, phases). Les deux sont auto-hébergées via @fontsource. */
+  /* Type: Space Grotesk (headings, body) + IBM Plex Mono (counters, states,
+     phases). Both self-hosted through @fontsource. */
   --font-sans: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Étiquettes mono (compteurs, états, phases) : 11 px exprimés en rem, donc
-     dépendants de la taille de police racine. En capitales mono avec 0,12em
-     d'interlettrage, 10 px passait sous le plancher confortable. */
-  --text-etiquette: 0.6875rem;
-  --text-etiquette--line-height: 1.4;
-  --tracking-etiquette: 0.12em;
-  --tracking-surtitre: 0.18em;
+  /* Mono labels (counters, states, phases): 11px expressed in rem, so they
+     follow the root font size. In mono caps with 0.12em of tracking, 10px sat
+     below the comfortable floor. */
+  --text-label: 0.6875rem;
+  --text-label--line-height: 1.4;
+  --tracking-label: 0.12em;
+  --tracking-eyebrow: 0.18em;
 
-  /* Largeur de mesure de lecture confortable (~46 caractères). */
-  --container-mesure: 46ch;
+  /* A comfortable reading measure (~46 characters). */
+  --container-measure: 46ch;
 
-  /* Mouvement : micro 120 ms ease-out, transitions de deck 240 ms */
+  /* Motion: 120ms ease-out for micro-interactions, 240ms for deck transitions */
   --ease-micro: cubic-bezier(0, 0, 0.2, 1);
   --ease-deck: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --animate-veille: veille 2s infinite;
+  --animate-standby: standby 2s infinite;
 
-  @keyframes veille {
+  @keyframes standby {
     0%,
     100% {
       opacity: 0.35;
@@ -81,94 +87,94 @@
   }
 }
 
-/* Le halo de lampe torche qui éclaire le coin haut-gauche de la coquille.
-   13 % et pas 16 % : la nav de bureau vit dans ce halo, et à 16 % ses liens
-   (`texte-estompe`) tombaient à 4,27:1 en sombre. Le halo est décoratif, le
-   texte par-dessus ne l'est pas — c'est donc le décor qui cède. Mesuré par
-   tests/unit/contraste.spec.ts, qui lit l'alpha directement ici. */
-@utility halo-torche {
+/* The torchlight glow washing the top-left corner of the shell.
+   13% and not 16%: the desktop nav lives inside this glow, and at 16% its
+   links (`text-muted`) fell to 4.27:1 in dark. The glow is decorative, the
+   text on top of it is not — so the decoration is what gives way. Measured by
+   tests/unit/contrast.spec.ts, which reads the alpha straight from here. */
+@utility torch-glow {
   background: radial-gradient(
     circle,
-    color-mix(in oklab, var(--color-torche) 13%, transparent),
+    color-mix(in oklab, var(--color-torch) 13%, transparent),
     transparent 70%
   );
 }
 
 @layer base {
   /*
-   * Thème clair : mêmes jetons, autres valeurs. Deux sélecteurs pour une
-   * seule palette, parce que Perquiz est rendu côté serveur :
+   * Light theme: same tokens, different values. Two selectors for a single
+   * palette, because Perquiz renders on the server:
    *
-   *  - `.light` — choix explicite « clair ». Le serveur pose la classe sur
-   *    <html> d'après le cookie, donc le premier octet porte déjà le bon
-   *    thème : aucun flash.
-   *  - la media query — réglage « auto » (le défaut). Là, le serveur ne peut
-   *    RIEN savoir : `prefers-color-scheme` ne voyage pas dans la requête.
-   *    C'est donc au navigateur de trancher, et une classe ne peut pas le
-   *    faire. `.dark` (choix explicite « sombre ») la neutralise.
+   *  - `.light` — the explicit choice. The server sets the class on <html>
+   *    from the cookie, so the very first byte already carries the right
+   *    theme: no flash.
+   *  - the media query — the `auto` setting (the default). There, the server
+   *    can know NOTHING: `prefers-color-scheme` never travels in the request.
+   *    So the browser has to decide, and a class cannot do that. `.dark` (the
+   *    explicit "dark" choice) neutralises it.
    *
-   * Les deux blocs doivent rester rigoureusement identiques :
-   * tests/unit/contraste.spec.ts échoue s'ils divergent.
+   * The two blocks must stay rigorously identical:
+   * tests/unit/contrast.spec.ts fails if they drift apart.
    *
-   * Les cinq aplats (torche, indice, alerte, ambre, azur) et `sur-torche`
-   * n'apparaissent pas ici : ils ne bougent pas d'un thème à l'autre.
+   * The five flat accents (torch, clue, alert, amber, azure) and `on-torch`
+   * are absent here: they do not move between themes.
    */
   .light {
     color-scheme: light;
 
-    --color-nuit: #f1f3f8;
-    --color-panneau: #ffffff;
-    --color-trait: #d3d9e6;
-    --color-texte: #12141f;
-    --color-trait-clair: #b9c1d4;
-    --color-fond-creux: #e3e7f0;
-    --color-texte-doux: #3b4358;
-    --color-texte-estompe: #5a6379;
-    --color-trait-fort: #7a8293;
-    --color-torche-texte: #0a7159;
-    --color-indice-texte: #5335d2;
-    --color-alerte-texte: #c11b41;
-    --color-ambre-texte: #8a5a00;
-    --color-azur-texte: #0f5fb8;
+    --color-night: #f1f3f8;
+    --color-panel: #ffffff;
+    --color-edge-subtle: #d3d9e6;
+    --color-text: #12141f;
+    --color-edge: #b9c1d4;
+    --color-sunken: #e3e7f0;
+    --color-text-soft: #3b4358;
+    --color-text-muted: #5a6379;
+    --color-edge-strong: #7a8293;
+    --color-torch-ink: #0a7159;
+    --color-clue-ink: #5335d2;
+    --color-alert-ink: #c11b41;
+    --color-amber-ink: #8a5a00;
+    --color-azure-ink: #0f5fb8;
   }
 
   @media (prefers-color-scheme: light) {
     :root:not(.dark) {
       color-scheme: light;
 
-      --color-nuit: #f1f3f8;
-      --color-panneau: #ffffff;
-      --color-trait: #d3d9e6;
-      --color-texte: #12141f;
-      --color-trait-clair: #b9c1d4;
-      --color-fond-creux: #e3e7f0;
-      --color-texte-doux: #3b4358;
-      --color-texte-estompe: #5a6379;
-      --color-trait-fort: #7a8293;
-      --color-torche-texte: #0a7159;
-      --color-indice-texte: #5335d2;
-      --color-alerte-texte: #c11b41;
-      --color-ambre-texte: #8a5a00;
-      --color-azur-texte: #0f5fb8;
+      --color-night: #f1f3f8;
+      --color-panel: #ffffff;
+      --color-edge-subtle: #d3d9e6;
+      --color-text: #12141f;
+      --color-edge: #b9c1d4;
+      --color-sunken: #e3e7f0;
+      --color-text-soft: #3b4358;
+      --color-text-muted: #5a6379;
+      --color-edge-strong: #7a8293;
+      --color-torch-ink: #0a7159;
+      --color-clue-ink: #5335d2;
+      --color-alert-ink: #c11b41;
+      --color-amber-ink: #8a5a00;
+      --color-azure-ink: #0f5fb8;
     }
   }
 
   html {
-    /* La DA est née dans le noir : le sombre est le défaut, et il le reste
-       tant qu'un des deux sélecteurs ci-dessus ne prend pas le relais. */
+    /* The art direction was born in the dark: dark is the default, and it
+       stays so until one of the two selectors above takes over. */
     color-scheme: dark;
-    background-color: var(--color-nuit);
+    background-color: var(--color-night);
     -webkit-text-size-adjust: 100%;
   }
 
   body {
-    background-color: var(--color-nuit);
-    color: var(--color-texte);
+    background-color: var(--color-night);
+    color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Les titres du design system sont serrés (-0.02 à -0.03em) */
+  /* The design system's headings are tight (-0.02 to -0.03em) */
   h1,
   h2,
   h3 {
@@ -177,23 +183,23 @@
     text-wrap: balance;
   }
 
-  /* L'anneau de focus est une bordure porteuse de sens : il prend l'accent
-     EN TEXTE, pas l'aplat. `torche` sur panneau blanc ne fait que 1,4:1. */
+  /* The focus ring is a border that carries meaning, so it takes the accent as
+     INK, not as a flat fill: `torch` on a white panel is only 1.4:1. */
   :focus-visible {
-    outline: 2px solid var(--color-torche-texte);
+    outline: 2px solid var(--color-torch-ink);
     outline-offset: 2px;
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-torche) 30%, transparent);
+    background-color: color-mix(in oklab, var(--color-torch) 30%, transparent);
   }
 }
 
-/* « prefers-reduced-motion : tout se réduit à des fondus de 120 ms ;
-   aucune translation, aucun halo animé. »
-   Les @keyframes sont coupées net (la pastille de phase reste donc allumée) ;
-   les transitions survivent, plafonnées à 120 ms. Les écrans qui introduisent
-   des translations (deck M4, scène M7) déclinent la règle chez eux. */
+/* "prefers-reduced-motion: everything reduces to 120ms fades; no translation,
+   no animated glow."
+   Keyframes are cut dead (so the phase dot stays lit); transitions survive,
+   capped at 120ms. Screens that introduce translations (the M4 deck, the M7
+   stage) restate the rule locally. */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -9,7 +9,7 @@ Execution plan for building Perquiz from scratch, against [SPEC.md](./SPEC.md) a
 - **DB**: `better-sqlite3` + Drizzle; `drizzle-kit` migrations executed at server startup (Nitro plugin). DB file `./data/app.db`.
 - **Images**: `sharp`. Magic-byte sniffing before processing; EXIF dropped by re-encoding; two stored variants (web ~1600px, thumb ~400px, WebP). Originals are not kept.
   - **HEIC caveat**: prebuilt sharp binaries decode HEIC only if built with libheif. Verify at M3; if unsupported, reject HEIC uploads with a clear message (iPhones can send JPEG) and note it in the README. Do not block the milestone on it.
-- **Styling**: Tailwind v4 with the design-system tokens (`nuit`, `panneau`, `trait`, `texte`, `torche`, `indice`, `alerte`) as theme colors; Space Grotesk + IBM Plex Mono self-hosted (no CDN). Animations follow `screens/animation-rules.png`, including the `prefers-reduced-motion` fallback.
+- **Styling**: Tailwind v4 with the design-system tokens (`night`, `panel`, `edge-subtle`, `text`, `torch`, `clue`, `alert`) as theme colors. The art direction names its colours in French; `app/assets/css/main.css` holds the only written mapping between those names and the English tokens. Space Grotesk + IBM Plex Mono self-hosted (no CDN). Animations follow `screens/animation-rules.png`, including the `prefers-reduced-motion` fallback.
 - **Tests**: Vitest on the pure logic (scoring/ranking, guess validation, role parsing) and on the security invariants (no owner data in participant payloads, phase/role guards). No E2E suite in v1; the reveal show is validated by hand with seed data.
 
 ## Prerequisite: Zitadel setup (manual, on the homelab)
@@ -33,11 +33,11 @@ Drizzle schema (`users`, `identities`, `photos`, `guesses`, `app_state`) + migra
 `/api/auth/login|callback|logout`, PKCE flow via `openid-client`, role-claim gate (`urn:zitadel:iam:org:project:roles`), JIT provisioning + display-name collision suffix, `is_admin` sync at every login, session cookie, global server-side guard (all routes except login/callback) + client route middleware, `/login` page with its three states (nominal, not-on-the-guest-list, IdP error).
 **Done when**: real round-trip against homelab Zitadel works for a `player`, an `admin`, and a role-less user.
 
-### M3 — My room (`/ma-piece`)
+### M3 — My room (`/my-room`)
 Upload API (multipart, size/type limits, magic bytes, sharp pipeline), authenticated photo-serving route (`/api/photos/…`, no identity leakage), list/reorder/delete, display-name edit, player-preview mode, per-phase read-only. UI per `screens/my-room.png` (upload progress, per-file errors, processing state).
 **Done when**: happy path from a phone works; served files verified EXIF-free; last-photo deletion warns about discarding others' guesses.
 
-### M4 — Guess sheet (`/deviner`)
+### M4 — Guess sheet (`/guess`)
 Anonymized rooms endpoint (excludes own room, never includes owner), guess upsert endpoint (phase-guarded, target-validated), deck UI per `screens/room-guess.png`: one room at a time, swipe/next navigation, searchable participant picker (self excluded), save-state indicator, duplicate soft warning, unanswered filter, progress `X/N`.
 **Done when**: autosave with visible states works; payload audit shows no deducible answer; Vitest covers the guards.
 
@@ -51,7 +51,7 @@ Phase-transition API with guards + confirmations UI, participation dashboard (ph
 Reveal API (admin + `locked` only): stable shuffled order (seed persisted in `app_state`), per-room vote distribution incl. « sans réponse », owner, podium data. Big-screen UI per `screens/room-reveal.png` and `podium-reveal.png`: three admin-advanced steps per room, keyboard navigation, URL-addressable position (refresh-proof), cascading bar animation, podium 3-2-1 then full ranking, `prefers-reduced-motion` variants.
 **Done when**: full show runs on seed data start-to-finish with keyboard only, and survives a mid-show refresh.
 
-### M8 — Results (`/resultats`)
+### M8 — Results (`/results`)
 Scoring util (correct-guess count, shared-rank competition ranking) with unit tests; page per `screens/results.png`: score, rank (ex æquo), leaderboard, per-room detail (my guess vs owner, unanswered); `revealed`-only guard with redirect.
 
 ### M9 — Hardening & ship

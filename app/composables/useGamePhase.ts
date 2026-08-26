@@ -7,11 +7,11 @@ function isGamePhase(value: unknown): value is GamePhase {
 }
 
 /**
- * Phase courante de la partie.
+ * The game's current phase.
  *
- * PLACEHOLDER M0 : la phase vaut toujours `open`. En développement seulement,
- * `?phase=locked` (ou `revealed`) permet de voir les trois états de la
- * coquille. M6 (régie) branchera la vraie valeur d'`app_state`.
+ * M0 PLACEHOLDER: the phase is always `open`. In development only,
+ * `?phase=locked` (or `revealed`) shows the shell's three states. M6 (the admin
+ * panel) will wire the real value from `app_state`.
  */
 export function useGamePhase() {
   const route = useRoute()

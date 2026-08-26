@@ -7,21 +7,21 @@ interface Props {
 
 const props = defineProps<Props>()
 
-/** Puce de phase du design system : couleur par phase, pastille qui veille sur `open`. */
+/** The design system's phase chip: one colour per phase, a dot pulsing on `open`. */
 const PRESENTATION = {
   open: {
     label: 'Partie en cours',
-    chip: 'bg-torche/10 text-torche-texte',
+    chip: 'bg-torch/10 text-torch-ink',
     pulse: true,
   },
   locked: {
     label: 'Partie verrouillée',
-    chip: 'border border-trait-fort bg-panneau text-texte-estompe',
+    chip: 'border border-edge-strong bg-panel text-text-muted',
     pulse: false,
   },
   revealed: {
     label: 'Résultats révélés',
-    chip: 'bg-indice/15 text-indice-texte',
+    chip: 'bg-clue/15 text-clue-ink',
     pulse: false,
   },
 } as const satisfies Record<GamePhase, { label: string, chip: string, pulse: boolean }>
@@ -31,12 +31,12 @@ const current = computed(() => PRESENTATION[props.phase])
 
 <template>
   <p
-    class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 font-mono text-etiquette tracking-etiquette uppercase"
+    class="inline-flex items-center gap-2 rounded-lg px-3 py-1.5 font-mono text-label tracking-label uppercase"
     :class="current.chip"
   >
     <span
       v-if="current.pulse"
-      class="size-1.5 shrink-0 animate-veille rounded-full bg-current"
+      class="size-1.5 shrink-0 animate-standby rounded-full bg-current"
       aria-hidden="true"
     />
     {{ current.label }}

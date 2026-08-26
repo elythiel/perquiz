@@ -1,135 +1,135 @@
 import { readFileSync } from 'node:fs'
 
 /**
- * Lecture des jetons du design system et calcul des ratios de contraste.
+ * Reading the design-system tokens and computing contrast ratios.
  *
- * Le CSS est la seule source de vérité : ce module lit
- * `app/assets/css/main.css` sur le disque plutôt que de recopier les valeurs,
- * pour qu'un jeton modifié dans le CSS soit mesuré au test suivant sans que
- * personne ait à penser à synchroniser quoi que ce soit.
+ * The CSS is the single source of truth: this module reads
+ * `app/assets/css/main.css` off disk rather than copying the values, so that a
+ * token changed in the CSS is measured on the next test run without anyone
+ * having to remember to keep the two in sync.
  */
 
 const CSS_PATH = new URL('../../app/assets/css/main.css', import.meta.url)
 
-/** Table jeton → valeur, les noms dépouillés de leur préfixe `--color-`. */
+/** A token → value table, with the `--color-` prefix stripped from the names. */
 export type Palette = Record<string, string>
 
 /**
- * Corps d'un bloc CSS, accolades équilibrées. Un simple `/\{([^}]*)\}/` ne
- * suffit pas : `@theme` contient des `@keyframes` imbriquées.
+ * The body of a CSS block, with balanced braces. A plain `/\{([^}]*)\}/` will
+ * not do: `@theme` contains nested `@keyframes`.
  */
-function corpsDuBloc(css: string, ouverture: RegExp): string {
-  const entete = ouverture.exec(css)
-  if (!entete) throw new Error(`Bloc introuvable dans main.css : ${ouverture}`)
+function blockBody(css: string, opening: RegExp): string {
+  const header = opening.exec(css)
+  if (!header) throw new Error(`Block not found in main.css: ${opening}`)
 
-  const debut = css.indexOf('{', entete.index)
-  let profondeur = 0
+  const start = css.indexOf('{', header.index)
+  let depth = 0
 
-  for (let i = debut; i < css.length; i++) {
-    if (css[i] === '{') profondeur++
-    else if (css[i] === '}' && --profondeur === 0) return css.slice(debut + 1, i)
+  for (let i = start; i < css.length; i++) {
+    if (css[i] === '{') depth++
+    else if (css[i] === '}' && --depth === 0) return css.slice(start + 1, i)
   }
 
-  throw new Error(`Accolade non fermée dans main.css : ${ouverture}`)
+  throw new Error(`Unclosed brace in main.css: ${opening}`)
 }
 
-/** Les déclarations de propriétés personnalisées d'un bloc, dans l'ordre. */
-function declarations(corps: string): Palette {
+/** A block's custom-property declarations, in source order. */
+function customProperties(body: string): Palette {
   return Object.fromEntries(
-    [...corps.matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, nom, valeur]) => [nom!, valeur!.trim()]),
+    [...body.matchAll(/--([\w-]+):\s*([^;]+);/g)].map(([, name, value]) => [name!, value!.trim()]),
   )
 }
 
-/** Les seules déclarations de couleur, préfixe `color-` retiré. */
-function couleurs(brut: Palette): Palette {
+/** Only the colour declarations, with the `color-` prefix removed. */
+function colours(raw: Palette): Palette {
   return Object.fromEntries(
-    Object.entries(brut)
-      .filter(([nom]) => nom.startsWith('color-'))
-      .map(([nom, valeur]) => [nom.slice('color-'.length), valeur]),
+    Object.entries(raw)
+      .filter(([name]) => name.startsWith('color-'))
+      .map(([name, value]) => [name.slice('color-'.length), value]),
   )
 }
 
 export interface DesignSystem {
-  /** Palette du thème sombre : les valeurs déclarées dans `@theme`. */
-  sombre: Palette
-  /** Palette du thème clair : `@theme` recouvert par les surcharges. */
-  clair: Palette
-  /** Surcharges claires du sélecteur `.light` (choix explicite). */
-  surchargesClasse: Palette
-  /** Surcharges claires de la media query (réglage « auto »). */
-  surchargesMedia: Palette
-  /** Opacité du halo de lampe torche, en fraction. */
-  haloAlpha: number
-  /** Taille des étiquettes mono, telle qu'écrite (ex. `0.6875rem`). */
-  tailleEtiquette: string
+  /** The dark theme's palette: the values declared in `@theme`. */
+  dark: Palette
+  /** The light theme's palette: `@theme` with the light overrides applied. */
+  light: Palette
+  /** The light overrides from the `.light` selector (the explicit choice). */
+  classOverrides: Palette
+  /** The light overrides from the media query (the `auto` setting). */
+  mediaOverrides: Palette
+  /** The torchlight glow's opacity, as a fraction. */
+  glowAlpha: number
+  /** The mono label size, exactly as written (e.g. `0.6875rem`). */
+  labelSize: string
 }
 
-export function lireDesignSystem(): DesignSystem {
+export function readDesignSystem(): DesignSystem {
   const css = readFileSync(CSS_PATH, 'utf8')
 
-  const theme = declarations(corpsDuBloc(css, /@theme\s*\{/))
-  const surchargesClasse = couleurs(declarations(corpsDuBloc(css, /\.light\s*\{/)))
-  const surchargesMedia = couleurs(declarations(corpsDuBloc(css, /:root:not\(\.dark\)\s*\{/)))
+  const theme = customProperties(blockBody(css, /@theme\s*\{/))
+  const classOverrides = colours(customProperties(blockBody(css, /\.light\s*\{/)))
+  const mediaOverrides = colours(customProperties(blockBody(css, /:root:not\(\.dark\)\s*\{/)))
 
-  const sombre = couleurs(theme)
+  const dark = colours(theme)
 
-  const halo = /@utility halo-torche[\s\S]*?var\(--color-torche\)\s+(\d+(?:\.\d+)?)%/.exec(css)
-  if (!halo) throw new Error('Opacité du halo introuvable dans main.css')
+  const glow = /@utility torch-glow[\s\S]*?var\(--color-torch\)\s+(\d+(?:\.\d+)?)%/.exec(css)
+  if (!glow) throw new Error('Glow opacity not found in main.css')
 
-  const etiquette = theme['text-etiquette']
-  if (!etiquette) throw new Error('--text-etiquette introuvable dans main.css')
+  const labelSize = theme['text-label']
+  if (!labelSize) throw new Error('--text-label not found in main.css')
 
   return {
-    sombre,
-    clair: { ...sombre, ...surchargesClasse },
-    surchargesClasse,
-    surchargesMedia,
-    haloAlpha: Number(halo[1]) / 100,
-    tailleEtiquette: etiquette,
+    dark,
+    light: { ...dark, ...classOverrides },
+    classOverrides,
+    mediaOverrides,
+    glowAlpha: Number(glow[1]) / 100,
+    labelSize,
   }
 }
 
-/** Composante sRGB linéarisée, définition WCAG 2.x. */
-function lineaire(composante: number): number {
-  const c = composante / 255
+/** An sRGB channel, linearised per the WCAG 2.x definition. */
+function toLinear(channel: number): number {
+  const c = channel / 255
   return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
 }
 
-function canaux(hex: string): [number, number, number] {
-  const brut = hex.trim().replace('#', '')
-  if (!/^[0-9a-f]{6}$/i.test(brut)) throw new Error(`Couleur illisible : ${hex}`)
+function channels(hex: string): [number, number, number] {
+  const raw = hex.trim().replace('#', '')
+  if (!/^[0-9a-f]{6}$/i.test(raw)) throw new Error(`Unreadable colour: ${hex}`)
 
-  return [0, 2, 4].map(i => Number.parseInt(brut.slice(i, i + 2), 16)) as [number, number, number]
+  return [0, 2, 4].map(i => Number.parseInt(raw.slice(i, i + 2), 16)) as [number, number, number]
 }
 
-/** Luminance relative WCAG 2.x. */
+/** Relative luminance, WCAG 2.x. */
 function luminance(hex: string): number {
-  const [r, g, b] = canaux(hex)
-  return 0.2126 * lineaire(r) + 0.7152 * lineaire(g) + 0.0722 * lineaire(b)
+  const [r, g, b] = channels(hex)
+  return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b)
 }
 
-/** Ratio de contraste WCAG 2.x entre deux couleurs opaques, de 1 à 21. */
-export function contraste(a: string, b: string): number {
-  const [clair, sombre] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number]
-  return (clair + 0.05) / (sombre + 0.05)
+/** The WCAG 2.x contrast ratio between two opaque colours, from 1 to 21. */
+export function contrast(a: string, b: string): number {
+  const [lighter, darker] = [luminance(a), luminance(b)].sort((x, y) => y - x) as [number, number]
+  return (lighter + 0.05) / (darker + 0.05)
 }
 
 /**
- * Aplatit une couleur translucide sur son fond, en sRGB.
+ * Flattens a translucent colour onto its background, in sRGB.
  *
- * C'est bien ce que fait le navigateur pour un `bg-torche/20` : Tailwind v4
- * compile le modificateur d'opacité en
- * `color-mix(in oklab, var(--color-torche) 20%, transparent)`, et mélanger une
- * couleur avec `transparent` en interpolation prémultipliée rend exactement la
- * couleur d'origine à alpha 0,20 — la composition sur le fond, elle, a lieu à
- * la peinture, en sRGB.
+ * This is exactly what the browser does for a `bg-torch/20`: Tailwind v4
+ * compiles the opacity modifier to
+ * `color-mix(in oklab, var(--color-torch) 20%, transparent)`, and mixing a
+ * colour with `transparent` under premultiplied interpolation yields precisely
+ * the original colour at alpha 0.20 — the compositing onto the background then
+ * happens at paint time, in sRGB.
  */
-export function aplati(couleur: string, alpha: number, fond: string): string {
-  const dessus = canaux(couleur)
-  const dessous = canaux(fond)
+export function composite(colour: string, alpha: number, background: string): string {
+  const front = channels(colour)
+  const back = channels(background)
 
-  return `#${dessus
-    .map((valeur, i) => Math.round(alpha * valeur + (1 - alpha) * dessous[i]!)
+  return `#${front
+    .map((value, i) => Math.round(alpha * value + (1 - alpha) * back[i]!)
       .toString(16)
       .padStart(2, '0'))
     .join('')}`

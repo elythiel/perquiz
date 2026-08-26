@@ -13,7 +13,7 @@ dist
 .nitro
 .cache
 
-# typescript (le projet tsconfig.test.json écrit son cache à la racine)
+# typescript (the tsconfig.test.json project writes its cache at the root)
 *.tsbuildinfo
 
 # environment
@@ -21,8 +21,8 @@ dist
 .env.*
 !.env.example
 
-# persistent state (SQLite + photos) — never committed, mais l'arborescence
-# ./data/ + ./data/photos/ doit exister au clone.
+# persistent state (SQLite + photos) — never committed, but the ./data/ and
+# ./data/photos/ directories must exist on a fresh clone.
 data/*
 !data/.gitkeep
 !data/photos/

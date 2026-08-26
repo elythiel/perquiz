@@ -1,18 +1,20 @@
 /**
- * Réglage de thème choisi par la personne (docs/SPEC.md n'en parle pas : c'est
- * une préférence d'affichage, pas une règle de jeu). `auto` suit le système.
+ * The theme setting a person chose. `auto` follows the operating system.
+ * Not a game rule, so docs/SPEC.md says nothing about it — it is a display
+ * preference.
  */
-export type ThemeChoice = 'auto' | 'clair' | 'sombre'
+export type ThemeChoice = 'auto' | 'light' | 'dark'
 
 /**
- * Thème qu'une page impose, quel que soit le réglage : elle tranche, ou elle
- * se taît. Pas d'`auto` ici — une page qui laisse choisir ne déclare rien.
+ * A theme a page forces on itself, whatever the setting: it either decides or
+ * stays quiet. No `auto` here — a page that lets the person choose declares
+ * nothing at all.
  */
-export type ThemeImpose = Exclude<ThemeChoice, 'auto'>
+export type ThemeOverride = Exclude<ThemeChoice, 'auto'>
 
 /**
- * Classe posée sur `<html>`, seule chose que le reste de l'app voit du thème.
- * La chaîne vide vaut « auto » : aucune classe, et c'est la media query de
- * `main.css` qui tranche — elle seule connaît `prefers-color-scheme`.
+ * The class set on `<html>`, and the only thing the rest of the app ever sees
+ * of the theme. The empty string means `auto`: no class, and the media query
+ * in `main.css` decides — it alone knows `prefers-color-scheme`.
  */
 export type ThemeClass = '' | 'light' | 'dark'

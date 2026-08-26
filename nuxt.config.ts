@@ -10,8 +10,8 @@ export default defineNuxtConfig({
     head: {
       htmlAttrs: { lang: 'fr' },
       title: 'Perquiz',
-      // `theme-color` est piloté par app/app.vue : il bascule avec le thème.
-      // `color-scheme` est déclaré en CSS (main.css), pour la même raison.
+      // `theme-color` is driven by app/app.vue: it swaps with the theme.
+      // `color-scheme` is declared in CSS (main.css), for the same reason.
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
         { name: 'description', content: 'Une pièce, quelques photos, autant de suspects. Devinez qui vit ici.' },
@@ -20,8 +20,8 @@ export default defineNuxtConfig({
   },
 
   css: [
-    // Polices auto-hébergées (aucun CDN) : les woff2 sont servis par le build.
-    // On ne charge que les sous-ensembles utiles au français (latin, latin-ext).
+    // Self-hosted fonts (no CDN): the woff2 files are served by the build.
+    // Only the subsets French needs are loaded (latin, latin-ext).
     '@fontsource-variable/space-grotesk/index.css',
     '@fontsource/ibm-plex-mono/latin-400.css',
     '@fontsource/ibm-plex-mono/latin-ext-400.css',
@@ -32,7 +32,7 @@ export default defineNuxtConfig({
     '~/assets/css/main.css',
   ],
 
-  // Toutes les valeurs sensibles arrivent par l'environnement (voir .env.example).
+  // Every sensitive value arrives through the environment (see .env.example).
   runtimeConfig: {
     dataDir: './data',
     sessionPassword: '',
@@ -55,7 +55,7 @@ export default defineNuxtConfig({
 
   typescript: {
     strict: true,
-    typeCheck: false, // exécuté à la demande via `yarn typecheck`
+    typeCheck: false, // run on demand through `yarn typecheck`
   },
 
   eslint: {

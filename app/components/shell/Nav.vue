@@ -15,10 +15,10 @@ const props = defineProps<Props>()
 
 const items = computed<NavItem[]>(() => [
   { to: '/', label: 'Accueil' },
-  { to: '/ma-piece', label: 'Ma pièce' },
-  { to: '/deviner', label: 'Deviner' },
-  // « Résultats » n'existe qu'une fois les réponses révélées (docs/PAGES.md).
-  ...(props.phase === 'revealed' ? [{ to: '/resultats', label: 'Résultats' }] : []),
+  { to: '/my-room', label: 'Ma pièce' },
+  { to: '/guess', label: 'Deviner' },
+  // "Résultats" only exists once the answers are revealed (docs/PAGES.md).
+  ...(props.phase === 'revealed' ? [{ to: '/results', label: 'Résultats' }] : []),
   ...(props.isAdmin ? [{ to: '/admin', label: 'Admin' }] : []),
 ])
 </script>
@@ -32,8 +32,8 @@ const items = computed<NavItem[]>(() => [
       >
         <NuxtLink
           :to="item.to"
-          class="block rounded-lg py-1.5 font-mono text-etiquette tracking-widest whitespace-nowrap text-texte-estompe uppercase transition-colors duration-100 ease-micro hover:text-texte-doux sm:px-2"
-          exact-active-class="text-torche-texte"
+          class="block rounded-lg py-1.5 font-mono text-label tracking-widest whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text-soft sm:px-2"
+          exact-active-class="text-torch-ink"
         >
           {{ item.label }}
         </NuxtLink>

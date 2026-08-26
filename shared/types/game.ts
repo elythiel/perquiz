@@ -1,7 +1,7 @@
 /**
- * Phase globale de la partie, pilotée par l'admin (docs/SPEC.md §2).
- * - `open`     : on dépose ses photos et on remplit sa feuille de devinettes
- * - `locked`   : tout est figé, en attente du show de révélation
- * - `revealed` : scores et classement visibles par tout le monde
+ * The game's global phase, driven by the admin (docs/SPEC.md §2).
+ * - `open`     : people upload photos and fill in their guess sheet
+ * - `locked`   : everything is frozen, waiting for the reveal show
+ * - `revealed` : scores and leaderboard visible to everyone
  */
 export type GamePhase = 'open' | 'locked' | 'revealed'
