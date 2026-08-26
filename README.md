@@ -1,75 +1,76 @@
-# Nuxt Minimal Starter
+# Perquiz
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+A party game for a group who know each other: everyone photographs a room of their
+home, then tries to work out whose room is whose. Perquisition + quiz. The UI is in
+French and mobile-first — participants upload and guess from their phones.
+
+- **What it does, exactly**: [docs/SPEC.md](docs/SPEC.md) (rules, phases, security invariants)
+- **Screen by screen**: [docs/PAGES.md](docs/PAGES.md)
+- **How it gets built**: [docs/PLAN.md](docs/PLAN.md) (milestones, technical decisions)
+
+## Stack
+
+Nuxt 4 (SSR, TypeScript strict) · Tailwind v4 with the design-system tokens ·
+SQLite (better-sqlite3 + Drizzle) · Zitadel for identity (OIDC, code + PKCE) ·
+sharp for photo processing. Self-hosted fonts, no CDN.
+
+## Requirements
+
+- **Node 24**
+- **Yarn 4** — the only supported package manager, pinned via `packageManager`.
+  Enable it with `corepack enable`; there is no npm/pnpm/bun lockfile and none
+  is supported.
 
 ## Setup
 
-Make sure to install dependencies:
-
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
 yarn install
-
-# bun
-bun install
-```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
-```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
+cp .env.example .env   # then fill it in — see the comments in the file
 yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+The app boots on http://localhost:3000.
 
-Build the application for production:
+Identity requires a Zitadel project (roles `player` / `admin`, a Web+PKCE app).
+The manual setup steps live in the "Prerequisite" section of
+[docs/PLAN.md](docs/PLAN.md); the full guide lands with M9.
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `yarn dev` | Dev server with HMR |
+| `yarn build` | Production build into `.output/` |
+| `yarn preview` | Serve the production build locally |
+| `yarn lint` / `yarn lint:fix` | ESLint (Nuxt preset, stylistic rules) |
+| `yarn typecheck` | `vue-tsc` over the whole project |
+
+## Configuration
+
+Every setting arrives through the environment — see [.env.example](.env.example)
+for the full annotated list (session secret, public base URL, Zitadel issuer and
+client, data directory). Nothing sensitive is committed.
+
+## Persistent state
+
+All persistent state lives in a single directory, `./data`:
+
+```
+data/
+├── app.db      SQLite database
+└── photos/     processed photo variants (web + thumb)
+```
+
+That directory is the only thing to back up, and the only volume the container
+needs. It is git-ignored except for the `.gitkeep` files that keep the layout
+present on a fresh clone.
+
+## Docker
 
 ```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+docker build -t perquiz .
+docker run --rm -p 3000:3000 --env-file .env -v perquiz-data:/app/data perquiz
 ```
 
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+The image is a skeleton for now (M0); M9 finalizes it — non-root user,
+healthcheck, native dependencies on musl.
