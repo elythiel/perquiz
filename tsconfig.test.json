@@ -1,12 +1,16 @@
 {
-  // The tests sit outside the reach of Nuxt's generated tsconfigs (which only
-  // cover app/, server/ and shared/): without this project, `yarn typecheck`
-  // would not read a single line of tests/.
+  // Everything that lives outside Nuxt's reach — its generated tsconfigs only
+  // cover app/, server/ and shared/. Without this project, `yarn typecheck`
+  // would not read a single line of tests/ or scripts/.
   "extends": "./.nuxt/tsconfig.node.json",
   "compilerOptions": {
-    // The test reads main.css off disk, so it needs node:fs, which the Nuxt
-    // base config hides with `"types": []`.
-    "types": ["node"]
+    // The tests read main.css and the locale file off disk, and the seed
+    // writes images: all of it needs node:fs, which the Nuxt base config hides
+    // with `"types": []`.
+    "types": ["node"],
+    // `yarn seed` is a plain node process: its imports carry the `.ts`
+    // extension node's ESM resolver requires.
+    "allowImportingTsExtensions": true
   },
-  "include": ["tests/**/*", "vitest.config.ts"]
+  "include": ["tests/**/*", "scripts/**/*", "vitest.config.ts", "drizzle.config.ts"]
 }

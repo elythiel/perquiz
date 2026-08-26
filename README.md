@@ -61,8 +61,10 @@ instead. Group-based Entra deployments are out of scope.
 | `yarn build` | Production build into `.output/` |
 | `yarn preview` | Serve the production build locally |
 | `yarn lint` / `yarn lint:fix` | ESLint (Nuxt preset, stylistic rules) |
-| `yarn typecheck` | `vue-tsc` over the whole project, `tests/` included |
+| `yarn typecheck` | `vue-tsc` over the whole project, `tests/` and `scripts/` included |
 | `yarn test` / `yarn test:watch` | Vitest unit tests |
+| `yarn db:generate` | Write a migration from the changes made to the schema |
+| `yarn seed` | Refill the development database with a playable game |
 
 `yarn test` includes a contrast audit that reads the design tokens straight out
 of `app/assets/css/main.css` and computes WCAG ratios for both themes — it
@@ -114,7 +116,42 @@ data/
 
 That directory is the only thing to back up, and the only volume the container
 needs. It is git-ignored except for the `.gitkeep` files that keep the layout
-present on a fresh clone.
+present on a fresh clone. The app creates the tree itself at boot, so a fresh
+clone, a bind mount and an empty volume all behave the same.
+
+## Database
+
+Drizzle over `better-sqlite3`, one file, one connection, synchronous calls —
+for a dozen phones reading a local file, a pool would be machinery without a
+purpose. The schema is [server/database/schema.ts](server/database/schema.ts);
+it also carries the rules of the game that are worth enforcing in SQL rather
+than trusting to an endpoint (a sheet skips its owner's room, nobody names
+themselves, `app_state` holds exactly one row).
+
+**Changing the schema** — edit `schema.ts`, then:
+
+```bash
+yarn db:generate      # writes server/database/migrations/NNNN_*.sql
+```
+
+Commit the generated SQL. The server replays pending migrations at boot, so
+there is no deploy step to remember and no way to run the app against a stale
+file. That folder is a runtime input: the Dockerfile copies it next to
+`.output`.
+
+**Seeding** — `yarn seed` wipes the game tables and rewrites them from
+[scripts/seed-plan.ts](scripts/seed-plan.ts): ten players, nine rooms, 29
+generated placeholder photos and 51 guesses. It refuses to run with
+`NODE_ENV=production`.
+
+The plan is deliberate rather than random, and deterministic — two runs give
+the same game, down to the ids. It holds one room with no photos, one player
+who never opened their sheet, another who filled it entirely, rooms left
+unanswered, the same suspect named twice on one sheet, a podium with three
+distinct steps and ties just below it. Every one of those exists to keep a
+later screen testable without real players, and
+[tests/unit/seed-plan.spec.ts](tests/unit/seed-plan.spec.ts) fails if one
+disappears.
 
 ## Docker
 

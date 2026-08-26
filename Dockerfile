@@ -31,12 +31,13 @@ ENV NODE_ENV=production \
     NUXT_DATA_DIR=/app/data \
     PORT=3000
 COPY --from=build /app/.output ./.output
-# All persistent state (app.db + photos) fits in this single volume.
-# The build-time mkdir only seeds a named volume; a bind mount of a host
-# directory, on the other hand, masks the image's content — hence the mkdir at
-# startup. To be removed once M1 creates the directory tree at application boot
-# (useful outside Docker too), going back to CMD ["node", ...].
-RUN mkdir -p /app/data/photos
+# The migrations are a RUNTIME input, not a build artefact: the server replays
+# them at boot from this path (server/database/client.ts). Bundling the SQL
+# into .output instead would mean hand-writing a migration runner.
+COPY --from=build /app/server/database/migrations ./server/database/migrations
+# All persistent state (app.db + photos) fits in this single volume. No mkdir
+# here: the app creates its own tree at boot, which also covers a bind mount
+# masking the image's content.
 VOLUME ["/app/data"]
 EXPOSE 3000
-CMD ["sh", "-c", "mkdir -p \"$NUXT_DATA_DIR/photos\" && exec node .output/server/index.mjs"]
+CMD ["node", ".output/server/index.mjs"]
