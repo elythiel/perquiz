@@ -104,6 +104,7 @@ async function removePerson() {
     <AdminParticipationList
       :participants="data.participants"
       :ready="data.ready"
+      :me="data.me"
       @remove="askPerson"
     />
 

@@ -9,7 +9,12 @@ interface Participant {
   ready: boolean
 }
 
-defineProps<{ participants: readonly Participant[], ready: number }>()
+defineProps<{
+  participants: readonly Participant[]
+  ready: number
+  /** The admin reading the page: their own row offers no removal. */
+  me: number
+}>()
 const emit = defineEmits<{ remove: [id: number] }>()
 
 const { t } = useI18n()
@@ -50,7 +55,15 @@ function when(seconds: number | null): string {
         <GuessSuspectAvatar :display-name="person.displayName" />
 
         <span class="flex min-w-0 flex-1 flex-col">
-          <span class="truncate text-base text-text">{{ person.displayName }}</span>
+          <span class="truncate text-base text-text">
+            {{ person.displayName }}
+            <!-- Marks the row whose button is off, so the disabled state reads
+                 as a rule rather than as a glitch. -->
+            <span
+              v-if="person.id === me"
+              class="text-text-muted"
+            >{{ t('admin.you') }}</span>
+          </span>
           <span class="font-mono text-label tracking-label text-text-muted">
             {{ when(person.lastActivity) }}
           </span>
@@ -68,9 +81,17 @@ function when(seconds: number | null): string {
           {{ person.total === 0 ? '—' : `${person.answered}/${person.total}` }}
         </p>
 
+        <!--
+          Off on your own row. The server refuses it with a 422 (deleting
+          yourself would sign you out mid-action), and an interface that offers
+          what the server will refuse is how that refusal became a console
+          message nobody saw.
+        -->
         <button
           type="button"
-          class="grid size-8 shrink-0 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-alert-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
+          class="grid size-8 shrink-0 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro enabled:hover:text-alert-ink disabled:opacity-25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
+          :disabled="person.id === me"
+          :title="person.id === me ? t('admin.cannotRemoveYourself') : undefined"
           :aria-label="t('admin.removeParticipant', { name: person.displayName })"
           @click="emit('remove', person.id)"
         >

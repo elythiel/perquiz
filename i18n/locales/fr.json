@@ -173,6 +173,8 @@
     "confirm": "Confirmer",
     "cancel": "Annuler",
     "participation": "Participation",
+    "you": "(vous)",
+    "cannotRemoveYourself": "Vous ne pouvez pas supprimer vos propres données.",
     "ready": "{ready}/{total} prêts",
     "photosShort": "{count} ph",
     "neverSeen": "Jamais venu",

@@ -39,6 +39,8 @@ export interface AdminPanel {
   phase: GamePhase
   lockedAt: number | null
   participants: Participation[]
+  /** The admin reading this. They may not remove their own data. */
+  me: number
   ready: number
   /** Every photo in the game, owner stripped and order broken. */
   moderation: string[]
@@ -58,7 +60,7 @@ function moderationOrder(names: readonly string[], secret: string): string[] {
   return [...names].sort((left, right) => rank(left).localeCompare(rank(right)))
 }
 
-export function adminPanel(): AdminPanel {
+export function adminPanel(viewerId: number): AdminPanel {
   const db = useDatabase()
   const state = useGameState()
 
@@ -113,6 +115,7 @@ export function adminPanel(): AdminPanel {
     phase: state.phase,
     lockedAt: state.lockedAt ? Math.floor(state.lockedAt.getTime() / 1000) : null,
     participants,
+    me: viewerId,
     ready: participants.filter(person => person.ready).length,
     moderation: moderationOrder(names, useRuntimeConfig().sessionPassword),
   }
