@@ -15,7 +15,7 @@ Execution plan for building Perquiz from scratch, against [SPEC.md](./SPEC.md) a
 
 ## Prerequisite: identity provider (manual)
 
-Perquiz needs an OIDC provider **able to assert roles in the token**; everything about it is configuration (`.env.example`). The steps below are the **reference setup**, on the homelab's Zitadel — the only instance this is tested against. Another provider follows the same four steps under different names, and needs `NUXT_OIDC_ROLES_CLAIM` pointed at wherever it puts roles.
+Perquiz needs an OIDC provider **able to assert roles in the token**; everything about it is configuration (`.env.example`). The steps below are the **reference setup**, on a Zitadel instance — the only provider this is tested against. Another provider follows the same four steps under different names, and needs `NUXT_OIDC_ROLES_CLAIM` pointed at wherever it puts roles.
 
 1. Create a **project** "Perquiz"; add **roles** `player` and `admin`; enable **"Assert Roles on Authentication"**.
 2. Create an **application** in the project: type Web, **PKCE** (no secret), redirect URI `https://<host>/api/auth/callback`, post-logout URI `https://<host>/login`.
@@ -34,7 +34,7 @@ Drizzle schema (`users`, `identities`, `photos`, `guesses`, `app_state`) + migra
 
 ### M2 — Auth (OIDC)
 `/api/auth/login|callback|logout`, PKCE flow via `openid-client` on the discovery document, role gate through `extractRoles` and the configured claim, JIT provisioning + display-name collision suffix (seeded by `extractDisplayName`), `is_admin` sync at every login, session cookie, global server-side guard (all routes except login/callback) + client route middleware, `/login` page with its three states (nominal, not-on-the-guest-list, IdP error). Configuration and claim reading already landed — see `server/utils/oidc.ts`; no provider name belongs anywhere else.
-**Done when**: real round-trip against the homelab provider works for a `player`, an `admin`, and a role-less user.
+**Done when**: real round-trip against the reference provider works for a `player`, an `admin`, and a role-less user.
 
 ### M3 — My room (`/my-room`)
 Upload API (multipart, size/type limits, magic bytes, sharp pipeline), authenticated photo-serving route (`/api/photos/…`, no identity leakage), list/reorder/delete, display-name edit, player-preview mode, per-phase read-only. UI per `screens/my-room.png` (upload progress, per-file errors, processing state).
@@ -58,7 +58,8 @@ Reveal API (admin + `locked` only): stable shuffled order (seed persisted in `ap
 Scoring util (correct-guess count, shared-rank competition ranking) with unit tests; page per `screens/results.png`: score, rank (ex æquo), leaderboard, per-room detail (my guess vs owner, unanswered); `revealed`-only guard with redirect.
 
 ### M9 — Hardening & ship
-Security pass on the invariants (§9 of SPEC.md) with endpoint tests; final Dockerfile (single volume `./data`); README (setup, the reference provider guide from the prerequisite section, backup note); French copy proofread; Lighthouse-style mobile pass on the three participant pages.
+Security pass on the invariants (§9 of SPEC.md) with endpoint tests; final Dockerfile (single volume `./data`); image published to GHCR on every push to `main` behind a lint/typecheck/test gate, with an immutable `sha-<short>` tag next to the moving ones, plus a portable `compose.example.yml`; README (setup, the reference provider guide from the prerequisite section, backup note); French copy proofread; Lighthouse-style mobile pass on the three participant pages.
+**Deployment stays a pull.** The repository's responsibility ends at "an immutable image exists at a public address": no host, no domain, no proxy config and no deploy credential enters it, so the publish workflow needs no secret beyond the job's own token. What pulls the image, and everything that knows where the app runs, is configured on the machine that runs it.
 
 ## Design deltas to fold back into the mockups
 

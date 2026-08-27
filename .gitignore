@@ -29,6 +29,10 @@ data/*
 data/photos/*
 !data/photos/.gitkeep
 
+# editor
+.vscode/
+.idea/
+
 # system
 .DS_Store
 *.log

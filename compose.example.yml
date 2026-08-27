@@ -1,0 +1,28 @@
+# A portable starting point, not the deployment. Everything specific to where
+# Perquiz actually runs — reverse-proxy labels, hostname, TLS, external
+# networks, backup jobs — belongs in your own infrastructure config, which is
+# why none of it is here. HTTPS termination is assumed to be the host's job
+# (SPEC.md §10).
+#
+#   cp compose.example.yml compose.yml   # then edit
+#   cp .env.example .env                 # then fill it in
+#   docker compose up -d
+
+services:
+  perquiz:
+    # `:main` follows the default branch — convenient with an auto-updater.
+    # Pin `:sha-<short>` instead when you want to know exactly what is running
+    # and be able to roll back to a previous line of this file.
+    image: ghcr.io/elythiel/perquiz:main
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      # Bind to the loopback (127.0.0.1:3000:3000) if a reverse proxy on the
+      # same host is the only thing that should reach it.
+      - "3000:3000"
+    volumes:
+      # All persistent state: app.db + photos/. The only thing to back up.
+      - perquiz-data:/app/data
+
+volumes:
+  perquiz-data:

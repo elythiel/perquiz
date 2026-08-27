@@ -190,3 +190,22 @@ docker run --rm -p 3000:3000 --env-file .env -v perquiz-data:/app/data perquiz
 
 The image is a skeleton for now (M0); M9 finalizes it — non-root user,
 healthcheck, native dependencies on musl.
+
+## Publishing
+
+Every push to `main` runs lint, typecheck and the test suite, then builds and
+pushes an image to `ghcr.io/elythiel/perquiz`
+([.github/workflows/release.yml](.github/workflows/release.yml)). Two kinds of
+tag come out of it: `sha-<short>` is immutable and is what a deployment pins
+and rolls back to; `main`, `latest` and `vX.Y.Z` move, and are what an
+auto-updater watches.
+
+That is where this repository's responsibility ends. **Deployment is a pull**,
+and it is deliberately not described here: no host, no domain, no proxy config
+and no deploy credential lives in this repo, which is why the workflow needs no
+secret beyond the token GitHub gives the job. Whatever pulls the image —
+Watchtower on a moving tag, a cron `docker compose pull && up -d`, or a digest
+pinned in your own infrastructure repository — is configured on the machine
+that runs it. [compose.example.yml](compose.example.yml) is a portable
+starting point for that side; it carries the image, the env file and the one
+volume, and nothing about any particular host.

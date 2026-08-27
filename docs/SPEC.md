@@ -146,6 +146,7 @@ Scores are derived (computed from `guesses` at read time in `locked`/`revealed`)
 - All persistent state under `./data/` (SQLite file + photos) → one volume to back up.
 - Runtime config via env vars: session secret, public base URL, OIDC issuer + client ID (+ client secret if the app is registered as a confidential client), roles claim and role names. Full annotated list in `.env.example`.
 - A simple `Dockerfile` is provided; HTTPS termination is assumed to be handled by the host's reverse proxy.
+- Images are published to a public container registry on each push to the default branch, tagged both immutably (by commit) and movingly (by branch/version). Deployment is a **pull**: nothing about a particular host — address, proxy configuration, credentials — lives in the repository.
 
 ## 11. Out of scope (v1)
 
