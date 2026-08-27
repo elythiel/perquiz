@@ -143,21 +143,33 @@ async function rename(displayName: string) {
     <ThemePicker />
 
     <div class="flex flex-wrap gap-3">
+      <!-- Icon beside the label, never instead of it: these two buttons sit
+           side by side and do very different things. -->
       <button
         type="button"
-        class="flex-1 rounded-2xl border border-edge-strong px-5 py-4 text-base text-text transition-colors duration-100 ease-micro hover:border-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-edge-strong px-5 py-4 text-base text-text transition-colors duration-100 ease-micro hover:border-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
         :disabled="!inPlay"
         @click="preview?.open()"
       >
+        <Icon
+          name="mingcute:eye-line"
+          class="block size-5 shrink-0"
+          aria-hidden="true"
+        />
         {{ t('myRoom.playerPreview') }}
       </button>
       <button
         v-if="!readOnly"
         type="button"
-        class="flex-1 rounded-2xl bg-torch px-5 py-4 text-base font-bold text-on-torch transition-opacity duration-100 ease-micro enabled:hover:opacity-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-torch px-5 py-4 text-base font-bold text-on-torch transition-opacity duration-100 ease-micro enabled:hover:opacity-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
         :disabled="full"
         @click="pick"
       >
+        <Icon
+          name="mingcute:pic-line"
+          class="block size-5 shrink-0"
+          aria-hidden="true"
+        />
         {{ t('myRoom.addPhotos') }}
       </button>
     </div>

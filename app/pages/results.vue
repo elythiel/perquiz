@@ -125,11 +125,25 @@ function openRoom(photos: readonly string[]) {
           <span
             v-if="room.correct"
             class="text-base text-torch-ink"
-          >✓ {{ t('results.correct') }}</span>
+          >
+            <Icon
+              name="mingcute:check-line"
+              class="block size-4"
+              aria-hidden="true"
+            />
+            {{ t('results.correct') }}
+          </span>
           <span
             v-else-if="room.guessName"
             class="text-base text-alert-ink"
-          >✗ {{ t('results.wrong', { name: room.ownerName }) }}</span>
+          >
+            <Icon
+              name="mingcute:close-line"
+              class="block size-4"
+              aria-hidden="true"
+            />
+            {{ t('results.wrong', { name: room.ownerName }) }}
+          </span>
           <span
             v-else
             class="text-base text-text-muted"

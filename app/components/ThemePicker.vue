@@ -16,7 +16,19 @@ import type { ThemeChoice } from '#shared/types/theme'
 const { choice } = useTheme()
 const { t } = useI18n()
 
-const OPTIONS: readonly ThemeChoice[] = ['auto', 'light', 'dark']
+/**
+ * The icon rides alongside the label, never instead of it.
+ *
+ * The art direction's mono uppercase micro-labels are its signature, and a
+ * setting whose three states differ only by a pictogram would make people
+ * guess. `auto` gets a screen rather than a half-sun: it is not a brightness
+ * between the other two, it is "whatever this device says".
+ */
+const OPTIONS: readonly { value: ThemeChoice, icon: string }[] = [
+  { value: 'auto', icon: 'mingcute:computer-line' },
+  { value: 'light', icon: 'mingcute:sun-line' },
+  { value: 'dark', icon: 'mingcute:moon-line' },
+]
 </script>
 
 <template>
@@ -28,18 +40,23 @@ const OPTIONS: readonly ThemeChoice[] = ['auto', 'light', 'dark']
     <div class="flex gap-1 rounded-xl bg-night p-1">
       <label
         v-for="option in OPTIONS"
-        :key="option"
-        class="flex-1 cursor-pointer rounded-lg px-3 py-2.5 text-center font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-torch-ink"
-        :class="choice === option ? 'bg-torch/10 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
+        :key="option.value"
+        class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-torch-ink"
+        :class="choice === option.value ? 'bg-torch/10 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
       >
         <input
           v-model="choice"
           type="radio"
           name="theme"
-          :value="option"
+          :value="option.value"
           class="sr-only"
         >
-        {{ t(`theme.${option}`) }}
+        <Icon
+          :name="option.icon"
+          class="block size-4 shrink-0"
+          aria-hidden="true"
+        />
+        {{ t(`theme.${option.value}`) }}
       </label>
     </div>
 

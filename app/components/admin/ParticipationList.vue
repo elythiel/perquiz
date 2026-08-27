@@ -70,11 +70,15 @@ function when(seconds: number | null): string {
 
         <button
           type="button"
-          class="shrink-0 rounded-lg px-2 py-1 font-mono text-label tracking-label text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-alert-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
+          class="grid size-8 shrink-0 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-alert-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
           :aria-label="t('admin.removeParticipant', { name: person.displayName })"
           @click="emit('remove', person.id)"
         >
-          &times;
+          <Icon
+            name="mingcute:close-line"
+            class="block size-4"
+            aria-hidden="true"
+          />
         </button>
       </li>
     </ul>

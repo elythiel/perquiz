@@ -60,10 +60,15 @@ function choose(id: number) {
     <header class="flex flex-col gap-3 px-5 pt-5">
       <button
         type="button"
-        class="self-end rounded-lg px-2 py-1 font-mono text-label tracking-label whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="self-end grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        :aria-label="t('guess.pickerClose')"
         @click="dialog?.close()"
       >
-        {{ t('guess.pickerClose') }}
+        <Icon
+          name="mingcute:close-line"
+          class="block size-5"
+          aria-hidden="true"
+        />
       </button>
 
       <h2 class="text-xl leading-tight">
@@ -126,20 +131,11 @@ function choose(id: number) {
             v-if="person.id === selected"
             class="shrink-0 text-torch-ink"
           >
-            <svg
-              viewBox="0 0 16 16"
-              class="size-5"
+            <Icon
+              name="mingcute:check-line"
+              class="block size-5"
               aria-hidden="true"
-            >
-              <path
-                d="M3 8.5l3.2 3.2L13 5"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
+            />
             <span class="sr-only">{{ t('guess.pickerCurrent') }}</span>
           </span>
         </button>

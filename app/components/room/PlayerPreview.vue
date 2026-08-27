@@ -32,10 +32,15 @@ defineExpose({
     <header class="flex flex-col gap-3 px-5 pt-5">
       <button
         type="button"
-        class="self-end rounded-lg px-2 py-1 font-mono text-label tracking-label whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="self-end grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        :aria-label="t('myRoom.closePreview')"
         @click="dialog?.close()"
       >
-        {{ t('myRoom.closePreview') }}
+        <Icon
+          name="mingcute:close-line"
+          class="block size-5"
+          aria-hidden="true"
+        />
       </button>
 
       <div class="flex flex-col gap-1">

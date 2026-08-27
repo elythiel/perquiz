@@ -59,10 +59,11 @@ const { t } = useI18n()
         class="flex aspect-4/3 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-edge-strong text-text-soft transition-colors duration-100 ease-micro hover:border-torch-ink hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
         @click="$emit('pick')"
       >
-        <span
-          class="text-2xl text-torch-ink"
+        <Icon
+          name="mingcute:add-line"
+          class="block size-6 text-torch-ink"
           aria-hidden="true"
-        >+</span>
+        />
         {{ t('myRoom.add') }}
       </button>
     </li>

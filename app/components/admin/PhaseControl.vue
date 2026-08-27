@@ -13,6 +13,20 @@ const LABELS: Record<GamePhase, string> = {
   revealed: 'admin.phaseRevealed',
 }
 
+/**
+ * One icon per phase, beside its label rather than instead of it.
+ *
+ * A trophy for `revealed` and not an eye: an eye already means "preview my
+ * room as others see it" elsewhere, and one shape meaning two things is the
+ * drift an icon set exists to prevent. A trophy also says what `revealed`
+ * actually is — the scores are out.
+ */
+const ICONS: Record<GamePhase, string> = {
+  open: 'mingcute:play-line',
+  locked: 'mingcute:lock-line',
+  revealed: 'mingcute:trophy-line',
+}
+
 /** What the button under the cursor would actually do, in one sentence. */
 const CONSEQUENCES: Record<GamePhase, string> = {
   open: 'admin.toOpen',
@@ -53,11 +67,16 @@ const nextAlong = computed<GamePhase>(() =>
         v-for="option in GAME_PHASES"
         :key="option"
         type="button"
-        class="flex-1 rounded-lg px-3 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
         :class="option === phase ? 'bg-torch/15 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
         :aria-pressed="option === phase"
         @click="ask(option)"
       >
+        <Icon
+          :name="ICONS[option]"
+          class="block size-4 shrink-0"
+          aria-hidden="true"
+        />
         {{ t(LABELS[option]) }}
       </button>
     </div>

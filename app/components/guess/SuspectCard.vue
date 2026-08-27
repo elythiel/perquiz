@@ -31,7 +31,14 @@ const { t } = useI18n()
           >
             <template v-if="state === 'saving'">{{ t('guess.saving') }}</template>
             <template v-else-if="state === 'failed'">{{ t('guess.retry') }}</template>
-            <template v-else-if="state === 'saved'">✓ {{ t('guess.saved') }}</template>
+            <template v-else-if="state === 'saved'">
+              <Icon
+                name="mingcute:check-line"
+                class="block size-3.5"
+                aria-hidden="true"
+              />
+              {{ t('guess.saved') }}
+            </template>
           </span>
         </span>
       </template>

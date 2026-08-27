@@ -36,18 +36,11 @@ const label = computed(() => props.position + 1)
         :aria-label="t('myRoom.deletePhoto', { position: label })"
         @click="$emit('remove')"
       >
-        <svg
-          viewBox="0 0 16 16"
-          class="size-3.5"
+        <Icon
+          name="mingcute:close-line"
+          class="block size-4"
           aria-hidden="true"
-        >
-          <path
-            d="M3 3l10 10M13 3L3 13"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
+        />
       </button>
 
       <!-- Two buttons rather than dragging: a drag target is hard to hit on a
@@ -60,7 +53,11 @@ const label = computed(() => props.position + 1)
           :aria-label="t('myRoom.moveEarlier', { position: label })"
           @click="$emit('move', -1)"
         >
-          &lsaquo;
+          <Icon
+            name="mingcute:left-line"
+            class="block size-4"
+            aria-hidden="true"
+          />
         </button>
         <button
           type="button"
@@ -69,7 +66,11 @@ const label = computed(() => props.position + 1)
           :aria-label="t('myRoom.moveLater', { position: label })"
           @click="$emit('move', 1)"
         >
-          &rsaquo;
+          <Icon
+            name="mingcute:right-line"
+            class="block size-4"
+            aria-hidden="true"
+          />
         </button>
       </div>
     </template>

@@ -24,13 +24,23 @@ const remaining = computed(() => Math.max(0, total.value - answered.value))
  * only thing blocking everyone else's sheet from growing (PAGES `/`).
  */
 const action = computed(() => {
-  if (phase.value === 'revealed') return { to: '/results', label: t('home.seeResults') }
-  if (phase.value === 'locked') return undefined
-  if (photos.value.length === 0) return { to: '/my-room', label: t('home.addPhotos') }
-  if (remaining.value > 0) {
-    return { to: '/guess', label: answered.value === 0 ? t('home.startGuessing') : t('home.keepGuessing') }
+  if (phase.value === 'revealed') {
+    return { to: '/results', label: t('home.seeResults'), icon: 'mingcute:trophy-line' }
   }
-  return { to: '/guess', label: t('home.reviewAnswers') }
+  if (phase.value === 'locked') return undefined
+  if (photos.value.length === 0) {
+    return { to: '/my-room', label: t('home.addPhotos'), icon: 'mingcute:pic-line' }
+  }
+  if (remaining.value > 0) {
+    return {
+      to: '/guess',
+      label: answered.value === 0 ? t('home.startGuessing') : t('home.keepGuessing'),
+      // A person with a question mark, which is the game's whole question —
+      // not "what is this?" but "who is this?".
+      icon: 'mingcute:user-question-line',
+    }
+  }
+  return { to: '/guess', label: t('home.reviewAnswers'), icon: 'mingcute:list-check-line' }
 })
 
 const headline = computed(() => {
@@ -66,11 +76,18 @@ const headline = computed(() => {
       :read-only="phase !== 'open'"
     />
 
+    <!-- One button, one icon slot: both follow the same decision, so the icon
+         cannot go missing when the label changes. -->
     <NuxtLink
       v-if="action"
       :to="action.to"
-      class="rounded-2xl bg-torch px-5 py-4 text-center text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      class="flex items-center justify-center gap-2 rounded-2xl bg-torch px-5 py-4 text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
     >
+      <Icon
+        :name="action.icon"
+        class="block size-5 shrink-0"
+        aria-hidden="true"
+      />
       {{ action.label }}
     </NuxtLink>
 

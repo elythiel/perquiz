@@ -29,11 +29,19 @@ const PUBLIC_PREFIXES = ['/api/auth/']
 
 /**
  * Framework and static routes, which never carry game data: the bundle, the
- * dev-tools, HMR, the favicon. Reserving the `_` prefix is a Nuxt convention,
- * so no application route will ever collide with this.
+ * dev-tools, HMR, the favicon, the icon endpoint. Reserving the `_` prefix is
+ * a Nuxt convention, so no application route will ever collide with this —
+ * and it holds under `/api/` too, which is where `/api/_nuxt_icon` lives.
+ *
+ * That one is not hypothetical: without it the icon component asks for a
+ * glyph, gets a 401 from this very middleware, and reports "failed to load
+ * icon" — which is how it was found.
  */
 function isFrameworkRoute(path: string): boolean {
-  return path.startsWith('/_') || path === '/favicon.ico' || path === '/robots.txt'
+  return path.startsWith('/_')
+    || path.startsWith('/api/_')
+    || path === '/favicon.ico'
+    || path === '/robots.txt'
 }
 
 export default defineEventHandler(async (event) => {

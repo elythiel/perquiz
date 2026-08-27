@@ -43,7 +43,11 @@ const SHOWN = 4
           class="grid aspect-square w-full place-items-center rounded-xl border border-dashed border-edge-strong text-2xl text-torch-ink transition-colors duration-100 ease-micro hover:border-torch-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
           :aria-label="t('home.addPhotos')"
         >
-          +
+          <Icon
+            name="mingcute:add-line"
+            class="block size-6"
+            aria-hidden="true"
+          />
         </NuxtLink>
       </li>
     </ul>

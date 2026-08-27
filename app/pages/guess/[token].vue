@@ -147,12 +147,16 @@ async function pick(participantId: number) {
     <div class="flex items-center gap-3">
       <button
         type="button"
-        class="shrink-0 rounded-2xl bg-panel px-5 py-4 text-lg text-text transition-opacity duration-100 ease-micro disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="grid size-14 shrink-0 place-items-center rounded-2xl bg-panel text-text transition-opacity duration-100 ease-micro disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
         :disabled="position <= 0"
         :aria-label="t('guess.previous')"
         @click="step(-1)"
       >
-        &larr;
+        <Icon
+          name="mingcute:arrow-left-line"
+          class="block size-6"
+          aria-hidden="true"
+        />
       </button>
       <button
         type="button"

@@ -35,7 +35,11 @@ const { t } = useI18n()
           :aria-label="t('admin.deletePhoto')"
           @click="emit('remove', photo)"
         >
-          &times;
+          <Icon
+            name="mingcute:close-line"
+            class="block size-4"
+            aria-hidden="true"
+          />
         </button>
       </li>
     </ul>

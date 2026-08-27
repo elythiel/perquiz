@@ -54,10 +54,15 @@ defineExpose({
       </p>
       <button
         type="button"
-        class="rounded-lg px-2 py-1 font-mono text-label tracking-label whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        :aria-label="t('photoZoom.close')"
         @click="dialog?.close()"
       >
-        {{ t('photoZoom.close') }}
+        <Icon
+          name="mingcute:close-line"
+          class="block size-5"
+          aria-hidden="true"
+        />
       </button>
     </header>
 
@@ -90,7 +95,11 @@ defineExpose({
           :aria-label="t('photoZoom.previous')"
           @click="step(-1)"
         >
-          &lsaquo;
+          <Icon
+            name="mingcute:left-line"
+            class="block size-6"
+            aria-hidden="true"
+          />
         </button>
         <button
           type="button"
@@ -99,7 +108,11 @@ defineExpose({
           :aria-label="t('photoZoom.next')"
           @click="step(1)"
         >
-          &rsaquo;
+          <Icon
+            name="mingcute:right-line"
+            class="block size-6"
+            aria-hidden="true"
+          />
         </button>
       </template>
     </div>

@@ -2,7 +2,27 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxtjs/i18n'],
+  modules: ['@nuxt/eslint', '@nuxt/icon', '@nuxtjs/i18n'],
+
+  /*
+   * Development resolves icons on demand; production does not.
+   *
+   * `clientBundle.scan` collects the icon names at build time, so a name added
+   * to a component while the dev server is up is in no bundle and renders as
+   * "failed to load icon" until a restart. Here the locally installed
+   * collection answers over the dev server's own endpoint instead — still no
+   * network, just no rebuild. Production keeps the strict setup above.
+   */
+  $development: {
+    icon: {
+      serverBundle: 'local',
+      provider: 'server',
+      // The base config sets this to `false`, which is what stops the client
+      // asking for an icon it has not got. `'server-only'` re-opens exactly
+      // one door: this project's own dev endpoint, never api.iconify.design.
+      fallbackToApi: 'server-only',
+    },
+  },
 
   devtools: { enabled: true },
 
@@ -87,5 +107,34 @@ export default defineNuxtConfig({
     strategy: 'no_prefix',
     // A single locale: nothing to detect, and no cookie worth setting.
     detectBrowserLanguage: false,
+  },
+
+  // Icons ship in the bundle, never fetched. `scan` walks the source for the
+  // `mingcute:*` names actually used and embeds only those, so the page makes no
+  // request to the Iconify API — the same rule as the self-hosted fonts.
+  icon: {
+    /*
+     * A real `<svg>` element, not the default CSS mask.
+     *
+     * In CSS mode the module writes the size — and `display: inline-block` —
+     * into an inline `style` attribute, which beats any class: `size-5` and
+     * `block` were silently ignored, and every icon rendered at 1em of
+     * whatever font-size it happened to inherit. An svg element takes its
+     * dimensions from CSS like anything else.
+     */
+    mode: 'svg',
+    // Scan the source and embed the handful of `mingcute:*` actually used.
+    clientBundle: { scan: true },
+    // Off: measured, the server bundle changes nothing in the HTML the browser
+    // first receives — the glyphs come from the client bundle either way — and
+    // it costs ~570 kB of Lucide-sized collection inside .output.
+    serverBundle: false,
+    // No provider and no fallback: a missing icon is a hole in the build, not
+    // a request to a third party.
+    provider: 'none',
+    // The flag the runtime would actually act on. Left at its default it stays
+    // `true` even with no provider, so it is turned off by name: a missing
+    // icon is a hole in the build, never a request to a third party.
+    fallbackToApi: false,
   },
 })
