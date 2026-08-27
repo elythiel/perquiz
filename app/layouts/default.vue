@@ -30,7 +30,7 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
           class="fixed inset-x-4 bottom-4 z-10 rounded-2xl bg-panel p-3 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0"
         />
 
-        <ShellUserChip :display-name="displayName" />
+        <ShellUserMenu :display-name="displayName" />
       </header>
 
       <div class="pt-4">

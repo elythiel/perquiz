@@ -22,6 +22,7 @@ Features:
 
 States & edge cases:
 - Already authenticated → redirected to `/`.
+- Just signed out → a notice saying the app session is over but the identity provider's is not, so signing back in will not ask for a password again (single logout is out of scope, SPEC §1).
 - Back from the IdP without a `player`/`admin` role → "you're not on the guest list" screen: explain that access is granted by the organizer; no account is created.
 - IdP unreachable / OIDC error → readable error + retry action.
 - First login: account auto-created; display name defaults from the token — `name`, else `preferred_username`, else the local part of `email`, else a prefix of `sub`. If that name is already taken, a suffix is appended and the user is nudged to pick a better one in « Ma pièce ».

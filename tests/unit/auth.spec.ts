@@ -1,15 +1,20 @@
+import { readdirSync } from 'node:fs'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { tidyDisplayName } from '../../shared/utils/display-name'
 import { uniqueDisplayName } from '../../server/utils/display-name'
 import { resolveAccess } from '../../server/utils/oidc'
 
 /**
- * The two decisions a login makes on its own.
+ * The two decisions a login makes on its own, and the one a sign-out makes.
  *
  * Everything else in M2 is protocol — openid-client does the handshake, and a
  * round trip against a real provider is the only honest test of it. What is
  * ours is who gets in, and under what name; both are pure, so both are here.
  */
+
+const ROOT = fileURLToPath(new URL('../..', import.meta.url))
 
 const ROLES = { player: 'player', admin: 'admin' }
 
@@ -74,5 +79,26 @@ describe('the name a first login lands on', () => {
 
   it.each(['', ' ', 'a'])('refuses to build on %o', (candidate) => {
     expect(() => uniqueDisplayName(candidate, free)).toThrow(/too short/)
+  })
+})
+
+/**
+ * The route that ends a session answers POST, and nothing else.
+ *
+ * Nitro reads the method off the filename, so this guarantee *is* a filename —
+ * which makes it exactly the kind of thing a later move renames back without
+ * anyone noticing. A `logout.get.ts` is all a third-party page needs to sign a
+ * visitor out with an `<img src>`: no consent, no click, no trace.
+ */
+describe('the way out', () => {
+  const handlers = readdirSync(join(ROOT, 'server/api/auth'))
+
+  it('answers POST', () => {
+    expect(handlers).toContain('logout.post.ts')
+  })
+
+  it('answers no other method', () => {
+    const others = handlers.filter(name => name.startsWith('logout.') && name !== 'logout.post.ts')
+    expect(others).toEqual([])
   })
 })

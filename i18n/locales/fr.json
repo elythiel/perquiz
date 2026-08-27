@@ -11,6 +11,10 @@
     "results": "Résultats",
     "admin": "Admin"
   },
+  "userMenu": {
+    "trigger": "Votre compte — {name}",
+    "signOut": "Se déconnecter"
+  },
   "phase": {
     "open": "Partie en cours",
     "locked": "Partie verrouillée",
@@ -27,6 +31,8 @@
     "pitch": "Chacun photographie une pièce de chez lui. À vous de deviner qui habite où. Réponses dévoilées le soir de la révélation.",
     "signIn": "Se connecter",
     "retry": "Réessayer",
+    "signedOutTitle": "Vous êtes déconnecté",
+    "signedOut": "Vous êtes déconnecté de Perquiz. Votre navigateur reste connecté au fournisseur d'identité : vous reconnecter ne redemandera pas votre mot de passe.",
     "notInvitedTitle": "Vous n'êtes pas sur la liste des invités",
     "notInvited": "Votre compte existe, mais l'organisateur ne vous a pas encore ouvert cette partie. Demandez-lui de vous ajouter, puis reconnectez-vous.",
     "providerErrorTitle": "La connexion n'a pas abouti",

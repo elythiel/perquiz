@@ -20,6 +20,16 @@ const problem = computed(() => {
   const error = route.query.error
   return typeof error === 'string' ? PROBLEMS[error as keyof typeof PROBLEMS] : undefined
 })
+
+/**
+ * Arriving here from the sign-out button, which is the only thing that adds
+ * `?bye`.
+ *
+ * Worth a sentence because the next tap looks like a bug: single logout is out
+ * of v1 (SPEC §1), so the provider still knows this browser and signing back
+ * in asks for nothing. Unexplained, that reads as "the button did not work".
+ */
+const signedOut = computed(() => route.query.bye !== undefined)
 </script>
 
 <template>
@@ -50,6 +60,19 @@ const problem = computed(() => {
         </h2>
         <p class="text-base leading-relaxed text-text-soft">
           {{ $t(problem.body) }}
+        </p>
+      </section>
+
+      <!-- `clue` and not `alert`: nothing went wrong here, a state changed. -->
+      <section
+        v-else-if="signedOut"
+        class="flex flex-col gap-2 rounded-2xl bg-clue/15 px-5 py-4"
+      >
+        <h2 class="font-mono text-label tracking-label text-clue-ink uppercase">
+          {{ $t('login.signedOutTitle') }}
+        </h2>
+        <p class="text-base leading-relaxed text-text-soft">
+          {{ $t('login.signedOut') }}
         </p>
       </section>
 
