@@ -19,9 +19,8 @@ const route = useRoute()
       travelled. Each segment is also the way to that room — which is what
       makes a room number, quoted in the suspect picker, worth anything.
 
-      Twelve-pixel cells since the HD-2D skin — a fill, the room you are on
-      ringed from the inside, the rest hollow. The padding on the link is
-      negative-margined away, so the tap target stays 28px.
+      Eight-pixel cells since the HD-2D skin — a fill, the room you are on
+      ringed from the inside, the rest hollow.
     -->
     <ol class="flex flex-1 gap-1">
       <li
@@ -39,15 +38,7 @@ const route = useRoute()
           class="block h-2"
           :aria-label="t(room.answered ? 'guess.roomAnswered' : 'guess.roomUnanswered', { position: index + 1 })"
           :aria-current="index === current ? 'page' : undefined"
-        >
-          <!-- <span
-            class="block h-3 transition-colors duration-100 ease-micro"
-            :class="[
-              room.answered ? 'bg-torch' : 'bg-sunken',
-              index === current && 'ring-2 ring-torch-ink',
-            ]"
-          /> -->
-        </NuxtLink>
+        />
       </li>
     </ol>
 

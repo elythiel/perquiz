@@ -1,5 +1,6 @@
 import type { GamePhase } from '#shared/types/game'
 import { and, asc, eq, sql } from 'drizzle-orm'
+import { sessionSecret } from './subkey'
 import { guesses, photos, users } from '../database/schema'
 
 /**
@@ -36,10 +37,6 @@ export interface GuessSheet {
   participants: SheetParticipant[]
   answered: number
   total: number
-}
-
-function secret(): string {
-  return useRuntimeConfig().sessionPassword
 }
 
 /**
@@ -93,7 +90,7 @@ export function guessSheet(viewerId: number): GuessSheet {
   assertSheetIsOut()
 
   const db = useDatabase()
-  const rooms = deckOrder(answerableRooms(viewerId), viewerId, secret())
+  const rooms = deckOrder(answerableRooms(viewerId), viewerId, sessionSecret())
 
   const answers = new Map(db
     .select({ room: guesses.roomUserId, guessed: guesses.guessedUserId })
@@ -115,10 +112,10 @@ export function guessSheet(viewerId: number): GuessSheet {
 
   const sheet = rooms.map<SheetRoom>((roomUserId) => {
     const guess = answers.get(roomUserId) ?? null
-    const offered = suspectsFor(roomUserId, pool, secret())
+    const offered = suspectsFor(roomUserId, pool, sessionSecret())
 
     return {
-      token: roomToken(viewerId, roomUserId, secret()),
+      token: roomToken(viewerId, roomUserId, sessionSecret()),
       photos: roomPhotographs.get(roomUserId) ?? [],
       // Answers about rooms that have left play are kept but not counted: the
       // room may come back, and throwing them away on a phone's whim would be
@@ -186,7 +183,7 @@ function assertGuessingIsOpen(): void {
 export function recordGuess(viewerId: number, token: unknown, participantId: unknown) {
   assertGuessingIsOpen()
 
-  const roomUserId = resolveRoomToken(token, viewerId, answerableRooms(viewerId), secret())
+  const roomUserId = resolveRoomToken(token, viewerId, answerableRooms(viewerId), sessionSecret())
   if (roomUserId === undefined) {
     throw createError({ statusCode: 404, statusMessage: 'unknown-room' })
   }
@@ -219,7 +216,7 @@ export function recordGuess(viewerId: number, token: unknown, participantId: unk
    * The reader's own current answer passes even when it predates the short
    * list, for the same reason the sheet still offers it: it is already theirs.
    */
-  const offered = suspectsFor(roomUserId, roster(), secret())
+  const offered = suspectsFor(roomUserId, roster(), sessionSecret())
   const current = db.select({ guessed: guesses.guessedUserId }).from(guesses)
     .where(and(eq(guesses.guesserId, viewerId), eq(guesses.roomUserId, roomUserId))).get()
 

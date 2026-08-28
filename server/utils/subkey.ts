@@ -39,3 +39,20 @@ export type SubkeyLabel = typeof SUBKEYS[keyof typeof SUBKEYS]
 export function subkey(secret: string, label: SubkeyLabel): Buffer {
   return createHmac('sha256', secret).update(label).digest()
 }
+
+/**
+ * The one read of the session password by anything that derives from it.
+ *
+ * Three call sites had it inline — `sheet.ts` behind a local helper of the same
+ * shape, `admin.ts` and `results.ts` raw — which is three places to visit if
+ * the password ever comes from somewhere else, and three chances to miss one.
+ * It sits here because everything that reads it reads it to feed `subkey()`.
+ *
+ * `usePerquizSession` is deliberately NOT a caller: it uses the password AS the
+ * cookie's seal rather than as key material, and it has its own length check to
+ * fail closed on. Routing it through here would merge two different jobs behind
+ * one name.
+ */
+export function sessionSecret(): string {
+  return useRuntimeConfig().sessionPassword
+}

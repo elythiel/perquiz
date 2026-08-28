@@ -8,5 +8,5 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'The order must be a list of photo names' })
   }
 
-  return { photos: reorderRoomPhotos(event.context.user!.id, order) }
+  return { photos: reorderRoomPhotos(requireUser(event), order) }
 })

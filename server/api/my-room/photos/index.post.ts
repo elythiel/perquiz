@@ -17,7 +17,7 @@ import { sniffImageType, storePhoto } from '../../../utils/photos'
  */
 export default defineEventHandler(async (event) => {
   assertRoomsEditable()
-  const userId = event.context.user!.id
+  const userId = requireUser(event)
 
   // Refuse before reading: the body is buffered to hash and decode it, so the
   // ceiling has to be checked on the announced length, not after the fact.

@@ -11,7 +11,7 @@ import { DISPLAY_NAME_MAX, DISPLAY_NAME_MIN, tidyDisplayName } from '#shared/uti
  */
 export default defineEventHandler(async (event) => {
   assertRoomsEditable()
-  const userId = event.context.user!.id
+  const userId = requireUser(event)
 
   const body = await readBody<{ displayName?: unknown }>(event)
   if (typeof body?.displayName !== 'string') {
