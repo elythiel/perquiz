@@ -27,6 +27,36 @@ useHead({
 
 <template>
   <NuxtLayout>
-    <NuxtPage />
+    <!--
+      The one route transition, in the Micro register: a 120 ms opacity fade,
+      `--ease-micro` (screens/animation-rules.png).
+
+      Those rules name three registers and none of them is "changing page", so
+      this borrows the smallest rather than inventing a fourth. The 240 ms
+      slid-and-scaled one MEANS "next room in the deck"; spending it on every
+      nav click would spend that meaning too.
+
+      Declared here rather than as `app.pageTransition` in nuxt.config, and in
+      utility classes rather than a `.page-*` rule: it is the same shape the
+      reveal show writes its own <Transition> in, and it sits on the element it
+      actually wraps. Only that element moves — <NuxtPage> is inside the layout
+      slot, so the glow and the fixed nav bar are not in the transition and do
+      not blink. `out-in` keeps the two pages from ever coexisting, which is
+      what would make the scroll position jump. No `appear`, so the first paint
+      of a fresh load is not a fade in from nothing.
+
+      A pure fade at 120 ms is also already what prefers-reduced-motion reduces
+      everything to, so the global block in main.css caps it with nothing left
+      to unpick.
+    -->
+    <NuxtPage
+      :transition="{
+        mode: 'out-in',
+        enterActiveClass: 'transition-opacity duration-120 ease-micro',
+        leaveActiveClass: 'transition-opacity duration-120 ease-micro',
+        enterFromClass: 'opacity-0',
+        leaveToClass: 'opacity-0',
+      }"
+    />
   </NuxtLayout>
 </template>

@@ -8,7 +8,22 @@
  * The handle is per-viewer, so a shared link is useless to anybody else —
  * which is a property, not a side effect.
  */
-definePageMeta({ middleware: 'sheet' })
+/*
+ * A fixed route key, the same trick `/reveal/[cursor]` uses.
+ *
+ * Without it Nuxt keys the page on the interpolated path, so every step of the
+ * deck is a different key — the component would remount and the app's page
+ * fade would play between two rooms. The deck has a register of its own for
+ * that move (240ms, slid and scaled, screens/animation-rules.png); a 120ms
+ * fade standing in for it would be the wrong sentence, and two animations
+ * fighting over the same step would be worse.
+ *
+ * Everything on this page already derives from `route.params.token` through
+ * computeds, and the room that vanishes under the reader is caught by the
+ * watcher rather than by a remount — so staying mounted is what this page was
+ * written for anyway.
+ */
+definePageMeta({ middleware: 'sheet', key: 'guess-deck' })
 
 const { t } = useI18n()
 const route = useRoute()
