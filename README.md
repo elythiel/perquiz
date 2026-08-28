@@ -6,7 +6,6 @@ French and mobile-first — participants upload and guess from their phones.
 
 - **What it does, exactly**: [docs/SPEC.md](docs/SPEC.md) (rules, phases, security invariants)
 - **Screen by screen**: [docs/PAGES.md](docs/PAGES.md)
-- **How it gets built**: [docs/PLAN.md](docs/PLAN.md) (milestones, technical decisions)
 
 ## Stack
 

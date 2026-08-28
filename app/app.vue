@@ -29,10 +29,10 @@ useHead({
   <NuxtLayout>
     <!--
       The one route transition, in the Micro register: a 120 ms opacity fade,
-      `--ease-micro` (screens/animation-rules.png).
+      `--ease-micro`.
 
-      Those rules name three registers and none of them is "changing page", so
-      this borrows the smallest rather than inventing a fourth. The 240 ms
+      The art direction names three registers and none of them is "changing
+      page", so this borrows the smallest rather than inventing a fourth. The 240 ms
       slid-and-scaled one MEANS "next room in the deck"; spending it on every
       nav click would spend that meaning too.
 

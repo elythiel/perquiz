@@ -16,7 +16,7 @@ import { SHEET_OUT_PHASES } from '#shared/utils/game'
  * Without it Nuxt keys the page on the interpolated path, so every step of the
  * deck is a different key — the component would remount and the app's page
  * fade would play between two rooms. The deck has a register of its own for
- * that move (240ms, slid and scaled, screens/animation-rules.png); a 120ms
+ * that move (240ms, slid and scaled); a 120ms
  * fade standing in for it would be the wrong sentence, and two animations
  * fighting over the same step would be worse.
  *

@@ -6,10 +6,10 @@ import { describe, expect, it } from 'vitest'
 /**
  * What the page transition is allowed to be, and where a redirect may live.
  *
- * The duration and the easing used to be pinned here, against
- * `docs/screens/animation-rules.png`. They are gone: a skin is allowed to
- * change how long a fade lasts, and a test that says otherwise is red at every
- * legitimate change and has never caught one.
+ * The duration and the easing used to be pinned here, against a mockup the
+ * repository no longer carries. Both pins are gone, and would be even if it
+ * did: a skin is allowed to change how long a fade lasts, and a test that says
+ * otherwise is red at every legitimate change and has never caught one.
  *
  * Two rules survive because neither is about taste. The transition may not
  * translate — `prefers-reduced-motion` says "no translation", and the global
@@ -54,8 +54,9 @@ describe('the motion budget', () => {
     const { dependencies, devDependencies } = JSON.parse(read('package.json'))
     const installed = Object.keys({ ...dependencies, ...devDependencies })
 
-    // PLAN.md: the motion is state to state, which is what CSS transitions do,
-    // and the one hard part — FLIP — is already in Vue's <TransitionGroup>.
+    // The motion is state to state, which is what CSS transitions do, and the
+    // one hard part — FLIP — is already in Vue's <TransitionGroup>. A library
+    // would bring a second animation model along for nothing.
     expect(installed.filter(name => /motion|gsap|anime|animejs|framer|popmotion|tween/i.test(name)))
       .toEqual([])
   })

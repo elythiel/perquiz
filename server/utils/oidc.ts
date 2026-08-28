@@ -17,7 +17,7 @@
  * Nothing else in the codebase reads a token. An IdP whose shapes are not
  * covered here means changing this file, and only this file.
  *
- * Honest label: this is **tested against Zitadel** — the homelab instance, and
+ * Honest label: this is **tested against Zitadel** — the reference instance, and
  * the values shipped as configuration defaults. The other shapes are written
  * from the providers' documented claims, not proven against a live instance.
  */
