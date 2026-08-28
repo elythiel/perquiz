@@ -21,11 +21,20 @@ updates:
     directory: /
     schedule:
       interval: weekly
-    # One pull request for all of them rather than one each. Six separate bumps
-    # a week is how a solo maintainer learns to ignore the bot, and a bot being
-    # ignored is the same as this file not existing.
+    # One pull request for the small stuff rather than one each: six separate
+    # bumps a week is how a solo maintainer learns to ignore the bot, and a bot
+    # being ignored is the same as this file not existing.
+    #
+    # But majors do NOT ride along, and that was learned from the first pull
+    # request this file produced: grouping everything turned "keep the digests
+    # fresh" into six major bumps at once — checkout jumped three majors — with
+    # no CI on the branch to exercise any of them, since the workflow triggers
+    # on pushes to `main` and not on pull requests. A group like that is one
+    # nobody can bisect. Each major now arrives alone, with its own release
+    # notes, and gets judged for itself.
     groups:
       actions:
         patterns: ['*']
+        update-types: [minor, patch]
     commit-message:
       prefix: '👷 ci'
