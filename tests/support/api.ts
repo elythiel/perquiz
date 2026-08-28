@@ -215,9 +215,18 @@ async function boot(): Promise<TestApi> {
   const router = h3.createRouter()
   const routes = discoverRoutes()
   for (const route of routes) {
-    // The sign-in flow needs a live provider to do anything; the tests only
-    // ever assert that the middleware lets it past, which needs no handler.
-    if (isPublic(route)) continue
+    /*
+     * The sign-in flow needs a live provider to do anything; the tests only
+     * ever assert that the middleware lets it past, which needs no handler.
+     *
+     * One exception, and it earns itself: `login.get.ts` decides whether you
+     * are already signed in BEFORE it reaches for the provider, and it fails
+     * that decision in a way with no way out — so the decision is worth a test
+     * even though what follows it cannot run here. With no issuer configured
+     * the handler catches and answers `/login?error=provider`, which is all
+     * the assertion needs: anything but `/`.
+     */
+    if (isPublic(route) && route.path !== '/api/auth/login') continue
 
     const module = await import(pathToFileURL(join(API_ROOT, route.file)).href)
     router.add(route.path, module.default, route.method.toLowerCase() as Method)

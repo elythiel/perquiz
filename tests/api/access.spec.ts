@@ -176,3 +176,40 @@ describe('the admin gate', () => {
     expect((await api.fetch('/api/admin', { cookie: theirCookie })).status).toBe(403)
   })
 })
+
+/**
+ * The way back in, when the session points at nobody.
+ *
+ * A session outlives the row it points at — a reseeded database, a participant
+ * removed from the panel. The middleware says so and treats the visitor as
+ * signed out; the sign-in route used to disagree, reading the raw id out of the
+ * cookie and sending them to `/`, which sent them back to `/login`, which sent
+ * them here again. A loop whose only exit was deleting the cookie by hand,
+ * because the button that would have done it sits behind the wall.
+ */
+describe('starting a sign-in', () => {
+  it('sends a stale session to the provider, not home', async () => {
+    const api = await useTestApi()
+    api.reset()
+
+    const ghost = api.createUser('Disparue')
+    const cookie = await api.signIn(ghost)
+    api.db.run(sql`delete from users where id = ${ghost}`)
+
+    const response = await api.fetch('/api/auth/login', { cookie })
+
+    // Not `/`: that is the trap. Where it DOES go depends on a provider these
+    // tests have none of, so the assertion is about the door it does not take.
+    expect(response.headers.get('location')).not.toBe('/')
+  })
+
+  it('still sends a signed-in visitor home', async () => {
+    const api = await useTestApi()
+    api.reset()
+
+    const cookie = await api.signIn(api.createUser('Présente'))
+    const response = await api.fetch('/api/auth/login', { cookie })
+
+    expect(response.headers.get('location')).toBe('/')
+  })
+})

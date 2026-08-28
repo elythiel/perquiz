@@ -9,7 +9,19 @@ export default defineEventHandler(async (event) => {
   const session = await usePerquizSession(event)
 
   if (!session) return sendRedirect(event, '/login?error=provider')
-  if (session.data.userId) return sendRedirect(event, '/')
+
+  /*
+   * `context.user`, not `session.data.userId`: the question is "are you signed
+   * in", and the cookie only answers "do you carry an id".
+   *
+   * A session outlives the row it points at — a reseeded database, a
+   * participant removed from the panel — and the middleware upstream already
+   * says so, resolving the user to nothing and letting this public route
+   * through. Reading the raw id instead sent that visitor to `/`, which sent
+   * them back to `/login`, which sent them here again: a loop with no way out,
+   * since the button that would clear the cookie is behind the wall.
+   */
+  if (event.context.user) return sendRedirect(event, '/')
 
   try {
     const { url, codeVerifier, state } = await startAuthorization()
