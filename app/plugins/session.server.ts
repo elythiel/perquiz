@@ -12,8 +12,8 @@ export default defineNuxtPlugin(() => {
   const context = useRequestEvent()?.context
   const user = context?.user
 
-  useState<SessionUser | null>('session:user', () =>
+  useState<SessionUser | null>(STATE_KEYS.sessionUser, () =>
     user ? { displayName: user.displayName, isAdmin: user.isAdmin } : null)
 
-  useState<GamePhase>('game:phase', () => context?.phase ?? 'open')
+  useState<GamePhase>(STATE_KEYS.gamePhase, () => context?.phase ?? DEFAULT_PHASE)
 })

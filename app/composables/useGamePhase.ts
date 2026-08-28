@@ -13,7 +13,7 @@ import { isGamePhase } from '#shared/utils/game'
  */
 export function useGamePhase() {
   const route = useRoute()
-  const server = useState<GamePhase>('game:phase', () => 'open')
+  const server = useState<GamePhase>(STATE_KEYS.gamePhase, () => DEFAULT_PHASE)
 
   const phase = computed<GamePhase>(() => devOverride(route.query) ?? server.value)
 
@@ -28,7 +28,7 @@ export function useGamePhase() {
  * `/guess?phase=locked` would then be judged on the dashboard's query.
  */
 export function gamePhaseOn(route: RouteLocationNormalized): GamePhase {
-  return devOverride(route.query) ?? useState<GamePhase>('game:phase', () => 'open').value
+  return devOverride(route.query) ?? useState<GamePhase>(STATE_KEYS.gamePhase, () => DEFAULT_PHASE).value
 }
 
 function devOverride(query: LocationQuery): GamePhase | undefined {

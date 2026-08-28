@@ -8,7 +8,7 @@ import type { SessionUser } from '#shared/types/user'
  * interface knows less than the server did.
  */
 export function useSession() {
-  const user = useState<SessionUser | null>('session:user', () => null)
+  const user = useState<SessionUser | null>(STATE_KEYS.sessionUser, () => null)
 
   return { user: readonly(user) }
 }
