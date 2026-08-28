@@ -2,7 +2,7 @@ import { readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { sql } from 'drizzle-orm'
-import { beforeAll, describe, expect, it } from 'vitest'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
 import { isAdminOnly, isPublic, useTestApi } from '../support/api'
 
 /**
@@ -97,6 +97,25 @@ describe('the cookie the whole gate rests on', () => {
     expect(header).toMatch(/Secure/i)
     expect(header).toMatch(/SameSite=Lax/i)
     expect(header).toMatch(/Path=\//i)
+  })
+
+  it('carries an expiry, measured in days rather than in minutes', async () => {
+    const api = await useTestApi()
+    api.reset()
+    const header = await api.signInHeader(api.createUser('Éphémère'))
+
+    const maxAge = Number(/Max-Age=(\d+)/i.exec(header)?.[1])
+    expect(maxAge).toBeGreaterThan(0)
+
+    /*
+     * The bounds and not the value, because the value is a decision and the
+     * bounds are the invariant. Below a day, somebody is signed out in front of
+     * the room between the first photograph and the reveal — a worse failure
+     * than the one the expiry closes. Above a year it has stopped being an
+     * expiry. Moving it inside that range needs no test changed.
+     */
+    expect(maxAge).toBeGreaterThanOrEqual(24 * 60 * 60)
+    expect(maxAge).toBeLessThanOrEqual(365 * 24 * 60 * 60)
   })
 
   it('is the only way to present a session', async () => {
@@ -292,5 +311,78 @@ describe('a session whose id has been handed to somebody else', () => {
     expect(again).not.toBe(first)
 
     expect((await api.fetch('/api/dashboard', { cookie })).status).toBe(200)
+  })
+})
+
+/**
+ * A seal that has outlived its ceiling.
+ *
+ * The cookie used to carry no expiry at all, so an exfiltrated one stayed valid
+ * for as long as the account existed — `httpOnly`, `secure` and `SameSite` make
+ * the theft hard, and nothing made the loot go stale (audit, 2026-08-28).
+ *
+ * What is tested here is the SEAL and not the attribute. `Max-Age` is a request
+ * to the browser, and whoever holds a stolen value is not making it; the expiry
+ * that matters is the one h3 bakes into the encrypted payload and checks when it
+ * opens it. Hence a clock moved forward rather than a header inspected — the
+ * assertion above covers the attribute.
+ */
+describe('a session past its expiry', () => {
+  /** Only `Date`: faking timers wholesale would stall the promises underneath. */
+  function travel(milliseconds: number) {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(Date.now() + milliseconds)
+  }
+
+  const THIRTY_ONE_DAYS = 31 * 24 * 60 * 60 * 1000
+
+  it('is a 401 on the API, not a 500', async () => {
+    const api = await useTestApi()
+    api.reset()
+    const cookie = await api.signIn(api.createUser('Ancienne'))
+    expect((await api.fetch('/api/dashboard', { cookie })).status).toBe(200)
+
+    travel(THIRTY_ONE_DAYS)
+    try {
+      // h3 swallows a failed unseal and mints an empty session instead, which
+      // is what makes this a clean "signed out" rather than a stack trace.
+      expect((await api.fetch('/api/dashboard', { cookie })).status).toBe(401)
+    }
+    finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('sends a page visitor to the login screen', async () => {
+    const api = await useTestApi()
+    api.reset()
+    const cookie = await api.signIn(api.createUser('Ancienne'))
+
+    travel(THIRTY_ONE_DAYS)
+    try {
+      const response = await api.fetch('/my-room', { cookie, redirect: 'manual' })
+
+      expect(response.status).toBe(302)
+      expect(response.headers.get('location')).toBe('/login')
+    }
+    finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('still works the day before', async () => {
+    const api = await useTestApi()
+    api.reset()
+    const cookie = await api.signIn(api.createUser('Ancienne'))
+
+    // The other half of the claim: the ceiling is where it was put, not
+    // somewhere short of it. A party lasts an evening; this is 29 days.
+    travel(29 * 24 * 60 * 60 * 1000)
+    try {
+      expect((await api.fetch('/api/dashboard', { cookie })).status).toBe(200)
+    }
+    finally {
+      vi.useRealTimers()
+    }
   })
 })
