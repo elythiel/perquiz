@@ -18,6 +18,20 @@ const SESSION_NAME = 'perquiz'
 /** iron-webcrypto's floor, and h3 refuses anything shorter. */
 const MINIMUM_PASSWORD_LENGTH = 32
 
+/**
+ * How long a session stays valid: thirty days, in seconds.
+ *
+ * Chosen from the two ends rather than from a habit. The lower bound is a
+ * party: a game is played in an evening, so anything measured in days already
+ * guarantees nobody is signed out between the first photograph and the reveal
+ * — and being signed out mid-game, in front of the room, is a worse failure
+ * than the one this closes. The upper bound is a stolen cookie: without an
+ * expiry the seal is valid for as long as the account exists, so the window is
+ * the account's lifetime. Thirty days shuts it at no cost, because getting back
+ * in is one click through the provider.
+ */
+const SESSION_MAX_AGE = 30 * 24 * 60 * 60
+
 export interface PerquizSession {
   /**
    * Who the cookie belongs to: `identities.provider` + `identities.subject`,
@@ -75,6 +89,20 @@ export async function usePerquizSession(event: H3Event) {
     name: SESSION_NAME,
     password,
     /*
+     * `maxAge` at THIS level, and not only in `cookie` below: this is the one
+     * that reaches the seal.
+     *
+     * h3 hands it to iron as a `ttl`, so the expiry is baked into the encrypted
+     * value and checked when that value is opened — twice, in fact, since h3
+     * also compares `Date.now()` against the session's own `createdAt`. A
+     * `Max-Age` on the cookie is only a request to the browser, which an
+     * attacker holding an exfiltrated value does not make. MEASURED: with the
+     * attribute alone and this line removed, the header test still passes and
+     * both expiry tests fail. The seal closes the window; the attribute is what
+     * makes an honest browser forget.
+     */
+    maxAge: SESSION_MAX_AGE,
+    /*
      * `httpOnly` and `secure` are h3's defaults; `sameSite` is not, and it is
      * the one that matters here.
      *
@@ -87,8 +115,15 @@ export async function usePerquizSession(event: H3Event) {
      *
      * `secure` is kept in development too: browsers treat http://localhost as
      * a secure context, so the cookie is set there all the same.
+     *
+     * `maxAge` again, because the two levels write different attributes: this
+     * one becomes `Max-Age`, while the one above also makes h3 emit an
+     * `Expires` computed from `createdAt`. Both go out and they agree, since
+     * the cookie is only rewritten when the session is. Where they could ever
+     * disagree by a few seconds — an `update()` long after the session was
+     * minted — the seal is the one being enforced.
      */
-    cookie: { sameSite: 'lax' },
+    cookie: { sameSite: 'lax', maxAge: SESSION_MAX_AGE },
     /*
      * By default h3 also accepts a sealed session in an `x-perquiz-session`
      * request header, and prefers it over the cookie. Nothing in this app ever
