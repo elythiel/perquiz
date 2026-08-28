@@ -47,7 +47,7 @@ describe('the headers on every response', () => {
     ['form-action', '\'self\''],
     // No CDN, no analytics, fonts self-hosted, icons embedded at build time:
     // the policy the project follows by hand, enforced.
-    ['img-src', '\'self\''],
+    ['img-src', '\'self\' data:'],
     ['font-src', '\'self\''],
     ['connect-src', '\'self\''],
   ])('pins %s to %s', (directive, value) => {
@@ -71,5 +71,23 @@ describe('the headers on every response', () => {
 
   it('never allows eval', () => {
     expect(CSP).not.toContain('unsafe-eval')
+  })
+
+  /**
+   * `data:` belongs to images and to nothing else.
+   *
+   * The design system's pixel frames are inline SVGs, so `img-src` has to name
+   * the scheme — see the comment beside it in nuxt.config.ts, and note that
+   * taking it away does not soften the skin but hides every block wearing
+   * `frame-fill`, a blocked mask being an empty one.
+   *
+   * The risk that allowance carries is that it spreads. An image cannot
+   * execute; a `data:` script can, and `data:` in `script-src` is one of the
+   * bypasses CSP exists to close. So the scheme is pinned to exactly one
+   * directive, here, rather than trusted to stay put.
+   */
+  it('allows data: URLs for images, and for nothing else', () => {
+    const directives = [...CSP.matchAll(/'([\w-]+-src[\w-]*)'?[^,]*\bdata:/g)].map(match => match[1])
+    expect(directives).toEqual(['img-src'])
   })
 })

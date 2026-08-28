@@ -57,12 +57,12 @@ defineExpose({
       </p>
       <button
         type="button"
-        class="grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text"
+        class="grid size-11 place-items-center text-text-muted transition-colors duration-100 ease-micro hover:text-text"
         :aria-label="t('photoZoom.close')"
         @click="dialog?.close()"
       >
         <Icon
-          name="mingcute:close-line"
+          name="pixelarticons:close"
           class="block size-5"
           aria-hidden="true"
         />
@@ -102,26 +102,26 @@ defineExpose({
       <template v-if="photos.length > 1">
         <button
           type="button"
-          class="absolute top-1/2 left-2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
+          class="frame frame-edge frame-fill absolute top-1/2 left-2 grid size-11 -translate-y-1/2 place-items-center bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
           :disabled="index === 0"
           :aria-label="t('photoZoom.previous')"
           @click="step(-1)"
         >
           <Icon
-            name="mingcute:left-line"
+            name="pixelarticons:chevron-left"
             class="block size-6"
             aria-hidden="true"
           />
         </button>
         <button
           type="button"
-          class="absolute top-1/2 right-2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
+          class="frame frame-edge frame-fill absolute top-1/2 right-2 grid size-11 -translate-y-1/2 place-items-center bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
           :disabled="index >= photos.length - 1"
           :aria-label="t('photoZoom.next')"
           @click="step(1)"
         >
           <Icon
-            name="mingcute:right-line"
+            name="pixelarticons:chevron-right"
             class="block size-6"
             aria-hidden="true"
           />

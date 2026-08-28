@@ -104,6 +104,9 @@ export default defineNuxtConfig({
    * no form posting anywhere but here. What it does not buy is protection from
    * an injected inline script — against which the actual defences are Vue
    * escaping every string it renders, and the absence of `v-html`.
+   *
+   * A second exception sits on `img-src`, narrower and explained where it is
+   * written: the design system's pixel frames are inline SVGs.
    */
   routeRules: {
     '/**': {
@@ -114,7 +117,29 @@ export default defineNuxtConfig({
           'object-src \'none\'',
           'frame-ancestors \'none\'',
           'form-action \'self\'',
-          'img-src \'self\'',
+          /*
+           * `data:` and the reason it is not laziness.
+           *
+           * The HD-2D frames are SVGs carried in `url("data:image/svg+xml,…")`
+           * custom properties — one per tint, recoloured with the theme, which
+           * is the whole point of not shipping a frozen PNG. CSS images are
+           * governed by `img-src`, and `'self'` alone does NOT match a `data:`
+           * URL: the scheme has to be named.
+           *
+           * MEASURED, 2026-08-28, and it cost an invisible sign-in button
+           * before it was: a blocked `border-image` degrades quietly to the
+           * border colour, but a blocked `mask-border` is an EMPTY MASK, and an
+           * empty mask hides the element it is on. Every block wearing
+           * `frame-fill` disappeared. Tightening this back does not soften the
+           * skin, it deletes fourteen controls.
+           *
+           * What it opens: an inline image. It cannot execute, cannot be
+           * fetched from anywhere, and cannot phone home — `data:` is not
+           * another origin, so the no-third-party rule this policy enforces is
+           * untouched. `data:` stays out of every other directive, which
+           * tests/unit/headers.spec.ts asserts by name.
+           */
+          'img-src \'self\' data:',
           'font-src \'self\'',
           'connect-src \'self\'',
           'script-src \'self\' \'unsafe-inline\'',
@@ -187,8 +212,15 @@ export default defineNuxtConfig({
   },
 
   // Icons ship in the bundle, never fetched. `scan` walks the source for the
-  // `mingcute:*` names actually used and embeds only those, so the page makes no
-  // request to the Iconify API — the same rule as the self-hosted fonts.
+  // `pixelarticons:*` names actually used and embeds only those, so the page
+  // makes no request to the Iconify API — the same rule as the self-hosted
+  // fonts.
+  //
+  // pixelarticons and no longer MingCute: the HD-2D skin crenellates every
+  // corner it draws, and a smoothly rounded line icon in the middle of it was
+  // the one thing on the page still speaking the old language. The glyphs are
+  // vector and blocky by construction, so they stay crisp at any size without
+  // `image-rendering` — unlike the frames, which need it.
   icon: {
     /*
      * A real `<svg>` element, not the default CSS mask.
@@ -200,7 +232,7 @@ export default defineNuxtConfig({
      * dimensions from CSS like anything else.
      */
     mode: 'svg',
-    // Scan the source and embed the handful of `mingcute:*` actually used.
+    // Scan the source and embed the handful of `pixelarticons:*` actually used.
     clientBundle: { scan: true },
     // Off: measured, the server bundle changes nothing in the HTML the browser
     // first receives — the glyphs come from the client bundle either way — and

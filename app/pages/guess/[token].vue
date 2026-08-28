@@ -142,10 +142,8 @@ async function pick(participantId: number) {
         v-for="option in [false, true]"
         :key="String(option)"
         type="button"
-        class="tap-target relative rounded-lg px-3 py-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro"
-        :class="onlyUnanswered === option
-          ? 'bg-torch/10 text-torch-ink'
-          : 'border border-edge-strong text-text-muted hover:text-text-soft'"
+        class="frame tap-target relative px-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro"
+        :class="onlyUnanswered === option ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch' : 'frame-edge text-text-muted hover:text-text-soft'"
         :aria-pressed="onlyUnanswered === option"
         @click="onlyUnanswered = option"
       >
@@ -178,7 +176,7 @@ async function pick(participantId: number) {
          harden it. -->
     <p
       v-if="sheet.nameOf(room.guess) && sheet.timesNamed(room.guess) > 1"
-      class="rounded-xl bg-amber/15 px-4 py-2.5 text-sm leading-relaxed text-amber-ink"
+      class="frame frame-amber bg-amber/15 px-2.5 py-1 text-sm leading-relaxed text-amber-ink"
     >
       {{ t('guess.duplicate', { name: sheet.nameOf(room.guess) }) }}
     </p>
@@ -186,20 +184,20 @@ async function pick(participantId: number) {
     <div class="flex items-center gap-3">
       <button
         type="button"
-        class="grid size-14 shrink-0 place-items-center rounded-2xl bg-panel text-text transition-opacity duration-100 ease-micro disabled:opacity-30"
+        class="frame frame-edge frame-fill press grid size-14 shrink-0 place-items-center bg-panel text-text transition-opacity duration-100 ease-micro disabled:opacity-30"
         :disabled="position <= 0"
         :aria-label="t('guess.previous')"
         @click="step(-1)"
       >
         <Icon
-          name="mingcute:arrow-left-line"
+          name="pixelarticons:arrow-left"
           class="block size-6"
           aria-hidden="true"
         />
       </button>
       <button
         type="button"
-        class="flex-1 rounded-2xl bg-text px-5 py-4 text-lg font-bold text-night transition-opacity duration-100 ease-micro disabled:opacity-30"
+        class="frame frame-edge frame-fill press flex-1 bg-text px-3.5 py-2.5 text-lg font-bold text-night transition-opacity duration-100 ease-micro disabled:opacity-30"
         :disabled="position >= walk.length - 1"
         @click="step(1)"
       >

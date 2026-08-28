@@ -58,18 +58,41 @@ export interface DesignSystem {
   classOverrides: Palette
   /** The light overrides from the media query (the `auto` setting). */
   mediaOverrides: Palette
-  /** The torchlight glow's opacity, as a fraction. */
+  /**
+   * EVERY custom property the two light blocks declare, colours and otherwise.
+   * The palettes above drop anything that is not a `--color-*`, and the light
+   * theme also redeclares the six frame tints — which are the copies most
+   * likely to drift, being one long data URI each.
+   */
+  classProps: Palette
+  mediaProps: Palette
+  /**
+   * The torchlight glow's PEAK opacity, as a fraction: the first stop of the
+   * gradient, which is the most opaque point and therefore the worst case for
+   * anything painted on top of it.
+   */
   glowAlpha: number
+  /** The scanline grain's opacity per theme, as a fraction. */
+  grainAlpha: { dark: number, light: number }
   /** The mono label size, exactly as written (e.g. `0.6875rem`). */
   labelSize: string
+}
+
+/** A percentage written as `2%` or `1.4%`, as a fraction. */
+function fraction(value: string | undefined, what: string): number {
+  const percent = /^(\d+(?:\.\d+)?)%$/.exec(value?.trim() ?? '')
+  if (!percent) throw new Error(`${what} is not a percentage in main.css: ${value}`)
+  return Number(percent[1]) / 100
 }
 
 export function readDesignSystem(): DesignSystem {
   const css = readFileSync(CSS_PATH, 'utf8')
 
   const theme = customProperties(blockBody(css, /@theme\s*\{/))
-  const classOverrides = colours(customProperties(blockBody(css, /\.light\s*\{/)))
-  const mediaOverrides = colours(customProperties(blockBody(css, /:root:not\(\.dark\)\s*\{/)))
+  const classProps = customProperties(blockBody(css, /\.light\s*\{/))
+  const mediaProps = customProperties(blockBody(css, /:root:not\(\.dark\)\s*\{/))
+  const classOverrides = colours(classProps)
+  const mediaOverrides = colours(mediaProps)
 
   const dark = colours(theme)
 
@@ -84,7 +107,13 @@ export function readDesignSystem(): DesignSystem {
     light: { ...dark, ...classOverrides },
     classOverrides,
     mediaOverrides,
+    classProps,
+    mediaProps,
     glowAlpha: Number(glow[1]) / 100,
+    grainAlpha: {
+      dark: fraction(theme['grain-alpha'], 'The dark grain'),
+      light: fraction(classProps['grain-alpha'], 'The light grain'),
+    },
     labelSize,
   }
 }

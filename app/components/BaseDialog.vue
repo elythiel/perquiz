@@ -19,6 +19,15 @@
  * is not a decision anybody made. Padding, gap and max height are the caller's
  * for the same reason.
  *
+ * The frame is `edge` and the dialog is one of the two blocks that keep the
+ * `panel` flat — a modal has to sit ON something, or the page reads through it.
+ * And it IS `frame-fill`. The first pass argued the other way — that a cut
+ * corner on an opaque box floating over a dimmed page would read as damage —
+ * and that was wrong in the only way that counts: an UNCUT corner puts a square
+ * of `panel` outside an octagonal frame, which does not read as anything, it
+ * just looks broken. What the notch shows is the dimmed backdrop, which is
+ * exactly what a pixel frame is supposed to show through it.
+ *
  * Nothing here touches focus. `showModal()` already moves it into the dialog,
  * and the picker moves it on to its search field afterwards; a second opinion
  * from this component would be a race with no winner. Nothing here closes on a
@@ -36,7 +45,7 @@ defineExpose({
 <template>
   <dialog
     ref="dialog"
-    class="m-auto w-full rounded-2xl bg-panel text-text open:flex open:flex-col"
+    class="frame frame-edge frame-fill m-auto w-full bg-panel text-text open:flex open:flex-col"
   >
     <slot />
   </dialog>

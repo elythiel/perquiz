@@ -11,8 +11,8 @@ const { t } = useI18n()
     screens, is the whole point of a status chip.
   -->
   <p
-    class="rounded-lg px-3 py-1.5 font-mono text-label tracking-label whitespace-nowrap uppercase"
-    :class="inPlay ? 'bg-torch/10 text-torch-ink' : 'border border-edge-strong bg-panel text-text-muted'"
+    class="frame px-1.5 font-mono text-label tracking-label whitespace-nowrap uppercase"
+    :class="inPlay ? 'frame-torch text-torch-ink' : 'frame-edge text-text-muted'"
   >
     {{ inPlay ? t('roomStatus.inPlay') : t('roomStatus.notInPlay') }}
   </p>

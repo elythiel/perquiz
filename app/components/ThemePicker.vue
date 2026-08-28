@@ -24,9 +24,9 @@ const { t } = useI18n()
  * between the other two, it is "whatever this device says".
  */
 const OPTIONS: readonly { value: ThemeChoice, icon: string }[] = [
-  { value: 'auto', icon: 'mingcute:computer-line' },
-  { value: 'light', icon: 'mingcute:sun-line' },
-  { value: 'dark', icon: 'mingcute:moon-line' },
+  { value: 'auto', icon: 'pixelarticons:laptop' },
+  { value: 'light', icon: 'pixelarticons:sun' },
+  { value: 'dark', icon: 'pixelarticons:moon' },
 ]
 
 /** The labels are translated here: `<RadioGroup>` takes words, not keys. */
@@ -35,18 +35,17 @@ const options = computed(() =>
 </script>
 
 <template>
-  <!-- The panel surface rides on the class, so the `<fieldset>` inside keeps
-       being both the group and the card — as it was before there was a
-       component to put it in. -->
-  <RadioGroup
-    v-model="choice"
-    class="rounded-2xl bg-panel px-5 py-4"
-    name="theme"
-    :legend="t('theme.label')"
-    :options="options"
-  >
-    <p class="text-sm leading-relaxed text-text-muted">
-      {{ t('theme.hint') }}
-    </p>
-  </RadioGroup>
+  <BaseCard>
+    <RadioGroup
+      v-model="choice"
+      class="py-2.5"
+      name="theme"
+      :legend="t('theme.label')"
+      :options="options"
+    >
+      <p class="text-sm leading-relaxed text-text-muted">
+        {{ t('theme.hint') }}
+      </p>
+    </RadioGroup>
+  </BaseCard>
 </template>

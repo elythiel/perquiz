@@ -12,18 +12,18 @@ defineProps<{ standings: readonly Standing[] }>()
     <li
       v-for="(player, index) in standings"
       :key="player.id"
-      class="flex animate-soft-fade items-center gap-4 rounded-xl px-3 py-2"
-      :class="player.rank === 1 && 'bg-torch/10'"
+      class="frame frame-xs frame-fill flex animate-soft-fade items-center gap-4 px-4 py-0.5"
+      :class="player.rank === 1 ? 'frame-torch bg-torch/10' : 'frame-none'"
       :style="{ animationDelay: `${index * 40}ms` }"
     >
       <span
-        class="w-12 shrink-0 text-right font-mono text-label tracking-label uppercase tabular-nums"
+        class="shrink-0 text-right font-mono text-label tracking-label uppercase tabular-nums"
         :class="player.rank === 1 ? 'text-torch-ink' : 'text-text-muted'"
       >{{ ordinal(player.rank) }}</span>
 
       <AvatarBadge
         :name="player.displayName"
-        class="size-9 shrink-0 text-xs"
+        class="frame-none! size-11 shrink-0 text-xs"
       />
 
       <span class="min-w-0 flex-1 truncate text-lg">{{ player.displayName }}</span>

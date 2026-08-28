@@ -20,13 +20,13 @@ const { t } = useI18n()
     v-if="photos.length"
     tag="ul"
     move-class="transition-transform duration-[600ms] ease-deck motion-reduce:transition-none"
-    class="flex h-full min-h-0 gap-3"
+    class="flex h-full min-h-0 gap-3 max-w-full overflow-x-auto"
     :class="compact ? 'justify-start' : 'flex-wrap content-center justify-center'"
   >
     <li
       v-for="photo in photos"
       :key="photo"
-      class="min-h-0 overflow-hidden rounded-2xl bg-sunken transition-[width,height] duration-[600ms] ease-deck motion-reduce:transition-none"
+      class="frame-flush frame-azure frame-fill relative min-h-0 overflow-hidden bg-sunken transition-[width,height] duration600 ease-deck motion-reduce:transition-none"
       :class="compact ? 'h-full w-28 shrink-0 sm:w-40' : 'h-full min-w-64 flex-1'"
     >
       <img

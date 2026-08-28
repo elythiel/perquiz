@@ -34,7 +34,7 @@ const HEIGHTS: Record<number, string> = { 1: 'h-56 sm:h-72', 2: 'h-40 sm:h-52', 
 </script>
 
 <template>
-  <div class="flex h-full items-end justify-center gap-4 sm:gap-8">
+  <div class="flex items-end justify-center gap-4 sm:gap-8">
     <div
       v-for="(step, index) in shown"
       :key="COLUMNS[index]"
@@ -63,10 +63,12 @@ const HEIGHTS: Record<number, string> = { 1: 'h-56 sm:h-72', 2: 'h-40 sm:h-52', 
         </span>
 
         <div
-          class="flex w-full animate-step-up flex-col items-center justify-center gap-1 rounded-t-2xl motion-reduce:animate-soft-fade"
+          class="frame frame-fill flex w-full animate-step-up flex-col items-center justify-center gap-1 motion-reduce:animate-soft-fade"
           :class="[
             HEIGHTS[COLUMNS[index]!],
-            step.rank === 1 ? 'bg-gradient-to-t from-torch/10 to-torch/40 ring-1 ring-torch' : 'bg-panel',
+            step.rank === 1
+              ? 'frame-torch bg-linear-to-t from-torch/10 to-torch/40'
+              : 'frame-edge bg-panel',
           ]"
         >
           <span

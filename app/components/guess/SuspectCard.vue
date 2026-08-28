@@ -18,7 +18,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="flex items-center gap-3 rounded-2xl bg-panel px-4 py-3">
+  <div class="frame frame-edge flex items-center gap-3 px-2.5 py-1.5">
     <template v-if="name">
       <GuessSuspectAvatar :display-name="name" />
       <span class="min-w-0 flex-1 truncate text-lg font-bold text-text">{{ name }}</span>

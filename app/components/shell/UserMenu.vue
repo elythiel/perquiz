@@ -90,17 +90,17 @@ onBeforeUnmount(() => {
     <summary
       ref="trigger"
       :aria-label="t('userMenu.trigger', { name: displayName })"
-      class="flex cursor-pointer list-none items-center gap-1.5 rounded-full transition-opacity duration-100 ease-micro hover:opacity-80 [&::-webkit-details-marker]:hidden"
+      class="flex cursor-pointer list-none items-center gap-1.5 transition-opacity duration-100 ease-micro hover:opacity-80 [&::-webkit-details-marker]:hidden"
     >
       <ShellUserChip :display-name="displayName" />
       <Icon
-        name="mingcute:down-small-line"
+        name="pixelarticons:chevron-down"
         class="block size-4 shrink-0 text-text-muted transition-transform duration-100 ease-micro group-open:rotate-180"
         aria-hidden="true"
       />
     </summary>
 
-    <div class="absolute top-full right-0 z-20 mt-2 flex min-w-56 flex-col gap-1 rounded-2xl border border-edge-strong bg-panel p-2">
+    <div class="frame frame-xs frame-edge frame-fill absolute top-full right-0 z-20 mt-2 flex min-w-56 flex-col gap-1 bg-panel p-0.5">
       <!-- On a phone the header shows initials only: this is the one place the
            display name is readable. -->
       <p class="truncate px-3 pt-1.5 pb-2 text-base font-bold text-text">
@@ -123,10 +123,10 @@ onBeforeUnmount(() => {
       >
         <button
           type="submit"
-          class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-base text-text-soft transition-colors duration-100 ease-micro hover:bg-sunken hover:text-text focus-ring-inset"
+          class="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base text-text-soft transition-colors duration-100 ease-micro hover:bg-sunken hover:text-text focus-ring-inset"
         >
           <Icon
-            name="mingcute:exit-door-line"
+            name="pixelarticons:logout"
             class="block size-5 shrink-0"
             aria-hidden="true"
           />

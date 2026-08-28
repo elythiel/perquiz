@@ -22,9 +22,9 @@ const { t } = useI18n()
 
 <template>
   <section class="flex flex-col gap-4">
-    <h1 class="text-3xl leading-tight sm:text-4xl">
+    <ShellPageTitle>
       {{ t('guess.emptyTitle') }}
-    </h1>
+    </ShellPageTitle>
     <p class="max-w-measure text-base leading-relaxed text-text-soft">
       {{ t('guess.emptyBody') }}
     </p>

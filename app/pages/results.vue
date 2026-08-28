@@ -32,9 +32,9 @@ function openRoom(photos: readonly string[]) {
     v-if="data && me"
     class="flex flex-col gap-6"
   >
-    <h1 class="self-start rounded-lg bg-clue/15 px-3 py-1.5 font-mono text-label tracking-label text-clue-ink uppercase">
+    <ShellPageTitle>
       {{ t('results.title') }}
-    </h1>
+    </ShellPageTitle>
 
     <!-- The score first and biggest: it is what the page is opened for. -->
     <p class="flex flex-wrap items-baseline gap-x-3">
@@ -51,14 +51,17 @@ function openRoom(photos: readonly string[]) {
       </template>
     </p>
 
+    <!-- Two signals, kept apart: the leader keeps the torch wash, « you »
+         keeps the highlighted line — the frame now rather than a ring, so a
+         player who is both still reads as both. -->
     <ol class="flex flex-col gap-2">
       <li
         v-for="player in data.standings"
         :key="player.id"
-        class="flex items-center gap-3 rounded-2xl px-4 py-3"
+        class="frame frame-sm frame-fill flex items-center gap-3 px-2.5 py-1.5"
         :class="[
-          player.rank === 1 ? 'bg-gradient-to-r from-torch/20 to-transparent' : 'bg-panel',
-          player.id === me.id && 'ring-1 ring-torch-ink',
+          player.rank === 1 && 'bg-linear-to-r from-torch/20 to-transparent',
+          player.id === me.id ? 'frame-torch' : 'frame-edge',
         ]"
         :aria-current="player.id === me.id ? 'true' : undefined"
       >
@@ -94,11 +97,11 @@ function openRoom(photos: readonly string[]) {
       <li
         v-for="(room, index) in rooms"
         :key="index"
-        class="flex items-center gap-4 rounded-2xl bg-panel p-3"
+        class="frame frame-sm frame-edge flex items-center gap-4 p-1.5"
       >
         <button
           type="button"
-          class="size-20 shrink-0 overflow-hidden rounded-xl bg-sunken"
+          class="frame-fill press relative size-20 shrink-0 overflow-hidden bg-sunken"
           :aria-label="t('photoZoom.gallery')"
           @click="openRoom(room.photos)"
         >
@@ -124,7 +127,7 @@ function openRoom(photos: readonly string[]) {
             class="text-base text-torch-ink"
           >
             <Icon
-              name="mingcute:check-line"
+              name="pixelarticons:check"
               class="block size-4"
               aria-hidden="true"
             />
@@ -135,7 +138,7 @@ function openRoom(photos: readonly string[]) {
             class="text-base text-alert-ink"
           >
             <Icon
-              name="mingcute:close-line"
+              name="pixelarticons:close"
               class="block size-4"
               aria-hidden="true"
             />

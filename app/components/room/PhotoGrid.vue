@@ -43,7 +43,7 @@ const { t } = useI18n()
            that vanishes leaves people wondering what they did wrong. -->
       <p
         v-if="full"
-        class="flex aspect-4/3 w-full flex-col items-center justify-center gap-1 rounded-2xl border border-edge-strong bg-panel text-center"
+        class="frame frame-edge flex aspect-4/3 w-full flex-col items-center justify-center gap-1 text-center"
       >
         <span class="font-mono text-label tracking-label text-text tabular-nums">
           {{ t('myRoom.photoCount', { count: photos.length, max: MAX_PHOTOS_PER_ROOM }) }}
@@ -56,11 +56,11 @@ const { t } = useI18n()
       <button
         v-else
         type="button"
-        class="flex aspect-4/3 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-edge-strong text-text-soft transition-colors duration-100 ease-micro hover:border-torch-ink hover:text-text"
+        class="frame frame-torch press flex aspect-4/3 w-full flex-col items-center justify-center gap-2 text-text-soft transition-colors duration-100 ease-micro hover:text-text"
         @click="$emit('pick')"
       >
         <Icon
-          name="mingcute:add-line"
+          name="pixelarticons:plus"
           class="block size-6 text-torch-ink"
           aria-hidden="true"
         />

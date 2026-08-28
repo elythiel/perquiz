@@ -22,15 +22,15 @@ const LABELS: Record<GamePhase, string> = {
  * drift an icon set exists to prevent. A trophy also says what `revealed`
  * actually is — the scores are out.
  *
- * A crate for `preparation`, for the same reason in reverse: the obvious pick
- * would be a picture, and a picture already means "add a photo". A crate is
+ * An archive box for `preparation`, for the same reason in reverse: the obvious
+ * pick would be a picture, and a picture already means "add a photo". A box is
  * what the phase is for — filling something before it goes out.
  */
 const ICONS: Record<GamePhase, string> = {
-  preparation: 'mingcute:box-line',
-  open: 'mingcute:play-line',
-  locked: 'mingcute:lock-line',
-  revealed: 'mingcute:trophy-line',
+  preparation: 'pixelarticons:archive',
+  open: 'pixelarticons:play',
+  locked: 'pixelarticons:lock',
+  revealed: 'pixelarticons:trophy',
 }
 
 /** What the button under the cursor would actually do, in one sentence. */
@@ -82,7 +82,7 @@ const nextAlong = computed<GamePhase>(() =>
         :key="option"
         type="button"
         class="segment focus-ring-inset"
-        :class="option === phase ? 'bg-torch/10 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
+        :class="option === phase ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch' : 'frame-none text-text-muted hover:text-text-soft'"
         :aria-pressed="option === phase"
         @click="ask(option)"
       >

@@ -1,9 +1,12 @@
 @import "tailwindcss";
 
 /*
- * Perquiz design-system tokens — the "torchlight" art direction.
- * Reference: docs/design-system.png (colours, type) and
- * docs/screens/animation-rules.png (motion).
+ * Perquiz design-system tokens — the "torchlight" art direction, worn as the
+ * HD-2D skin: crenellated corners, flat coloured frames, a smooth glow and a
+ * static scanline grain.
+ * Reference: docs/design-system.png (colours, type),
+ * docs/screens/animation-rules.png (motion) and the HD-2D component guide,
+ * which is where the frame technique below comes from.
  *
  * The art direction names its seven colours in French; the tokens are English.
  * This table is the only place that mapping is written down, so keep it here:
@@ -36,7 +39,13 @@
   --color-edge: #2e3348;
   --color-sunken: #1a1d2b;
   --color-text-soft: #b7bcd1;
-  --color-text-muted: #858ba6;
+  /* #8b91ab and no longer #858ba6. The HD-2D skin puts two decorative layers
+     under the header — the scanline grain, then the glow — and this is the
+     token the desktop nav's links are written in: at #858ba6 the pair sat at
+     4.62:1 with the glow alone and fell to 4.40:1 once the grain was under it.
+     A few points of luminance buy the ambience its budget and raise every
+     other pair this token appears in. Measured, in contrast.spec.ts. */
+  --color-text-muted: #8b91ab;
   --color-on-torch: #06251f;
   --color-amber: #ffc45a;
   --color-azure: #78b4ff;
@@ -54,6 +63,58 @@
   --color-alert-ink: #ff95ab;
   --color-amber-ink: #ffc45a;
   --color-azure-ink: #78b4ff;
+
+  /*
+   * The pixel frame, as data: one 8x8 SVG per tint, plus the mask that cuts a
+   * flat to the same steps.
+   *
+   * `border-image` takes an image, and an image in a `data:` URI cannot read a
+   * CSS variable — so the tint is baked into each SVG's `fill`, which is why
+   * there is one declaration per colour and why the light theme redeclares six
+   * of them further down, exactly as it redeclares the inks they follow. A
+   * single frozen PNG would have been shorter and unrecolourable, and these
+   * frames are torch, azure, clue, amber, alert and edge.
+   *
+   * `--fr-*` is a one-cell octagonal OUTLINE on an 8x8 grid; `--mask-oct` is
+   * the SOLID octagon on the very same grid. That shared grid is the whole
+   * trick: sliced three cells in, the corners carry the stair steps while the
+   * edges stretch a straight line between them, so a filled block's cut corners
+   * land on precisely the steps its frame draws, at any size.
+   *
+   * ONE CELL OF THAT GRID IS THREE PIXELS, and that is what makes the aliasing
+   * read as a deliberate one rather than as a rendering artefact. At one pixel
+   * the crenellation was there and invisible; at two it was legible and still
+   * easy to miss, because a corner's whole staircase is three steps and three
+   * steps of two pixels is six pixels of evidence. At three it is unmistakably
+   * drawn rather than rendered.
+   *
+   * The scale is baked into the raster size (`width='24'` over a `viewBox` of
+   * 8) rather than left to `border-image` to stretch, so the mapping is exactly
+   * 3:1 whether an engine renders the SVG at destination size or rasterises it
+   * at its own and scales. No `image-rendering` needed, and none wanted — see
+   * `@utility frame`.
+   *
+   * The three numbers that have to agree: the raster is 24, the slice is 9, and
+   * the border is 9px. Changing the scale means changing all three — and it
+   * means re-reading the fixed-size blocks with it, because the band now costs
+   * 18px of a box's width and of its height, which is most of a small badge.
+   *
+   * `svg+xml,` and not `svg+xml;utf8,`: the charset buys nothing here and the
+   * semicolon would sit inside a declaration value, which is where
+   * tests/support/design-system.ts stops reading.
+   */
+  --fr-torch: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%234fe3c1' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+  --fr-azure: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%2378b4ff' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+  --fr-clue: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%23a99bff' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+  --fr-amber: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%23ffc45a' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+  --fr-alert: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%23ff95ab' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+  --fr-edge: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%23646b85' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+  --fr-on-torch: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%2306251f' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+  --mask-oct: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><g fill='%23fff'><rect x='3' width='2' height='1'/><rect x='2' y='1' width='4' height='1'/><rect x='1' y='2' width='6' height='1'/><rect y='3' width='8' height='2'/><rect x='1' y='5' width='6' height='1'/><rect x='2' y='6' width='4' height='1'/><rect x='3' y='7' width='2' height='1'/></g></svg>");
+
+  /* The scanline grain's opacity, as a percentage, so the audit can read it
+     the way it reads the glow's. Marked in the dark, fainter on paper. */
+  --grain-alpha: 2%;
 
   /* Type: Space Grotesk (headings, body) + IBM Plex Mono (counters, states,
      phases). Both self-hosted through @fontsource. */
@@ -119,16 +180,372 @@
 }
 
 /* The torchlight glow washing the top-left corner of the shell.
-   13% and not 16%: the desktop nav lives inside this glow, and at 16% its
-   links (`text-muted`) fell to 4.27:1 in dark. The glow is decorative, the
-   text on top of it is not — so the decoration is what gives way. Measured by
-   tests/unit/contrast.spec.ts, which reads the alpha straight from here. */
+
+   Reinforced in its BODY rather than at its peak. Two stops had it half spent
+   by 45% of the radius, which is why it read as a smudge; four carry visible
+   light across the whole corner and fade out past it, still perfectly smooth —
+   the aliasing in this skin belongs to the chrome, never to the light.
+
+   The peak stays at 13%, and that is not timidity: the desktop nav lives
+   inside this glow, and 13% is what its links can hold at AA now that the
+   grain sits underneath as well. The peak is also what the audit measures,
+   because the peak is the worst case for everything painted on top. Measured
+   by tests/unit/contrast.spec.ts, which reads the alpha straight from here. */
 @utility torch-glow {
   background: radial-gradient(
     circle,
-    color-mix(in oklab, var(--color-torch) 13%, transparent),
-    transparent 70%
+    color-mix(in oklab, var(--color-torch) 13%, transparent) 0%,
+    color-mix(in oklab, var(--color-torch) 9%, transparent) 42%,
+    color-mix(in oklab, var(--color-torch) 4%, transparent) 68%,
+    transparent 88%
   );
+}
+
+/* The scanline grain: one line in three, and never a moving one.
+
+   Static in the strict sense — no animation under either motion preference.
+   An animated grain would be the only thing on the page that never stops,
+   which is precisely what `prefers-reduced-motion` exists to spare people,
+   and this is a photograph album rather than a cathode tube.
+
+   Painted in `text` and not in white, so one declaration lifts the night in
+   the dark theme and darkens the paper in the light one. Fainter on paper on
+   purpose: lines that read as grain in the dark read as dirt on white. Both
+   alphas are measured, and measured UNDER the glow — the two decorative
+   layers stack, and their sum is what text has to hold AA against.
+
+   `background-image`, so it composes with whatever `background-color` the
+   surface already has instead of replacing it. */
+@utility grain {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, var(--color-text) var(--grain-alpha), transparent) 0 1px,
+    transparent 1px 3px
+  );
+}
+
+/* The pixel frame: `frame` draws the outline, `frame-<tint>` colours it, and
+   `frame-fill` cuts the flat underneath to the same steps.
+
+   ONE CONSEQUENCE FOR EVERY CALL SITE: a framed block carries SIX PIXELS LESS
+   padding than it otherwise would, on each axis. The band is nine pixels and
+   only its outer three are painted, so the six behind the line are a gap
+   between the frame and the content — which is what padding is. Counting them
+   twice is what made every block look inflated the first time this skin went
+   on. The two exceptions are named where they sit: the segment group's well and
+   the gauge's, both of which separate a frame from something other than text.
+
+   Three utilities and not one, because the tint is a conditional class at half
+   the call sites — the tab you are on, the field in error, the phase the game
+   is in. A utility that writes nothing but a custom property can be swapped
+   without fighting anything, so the order Tailwind emits them in stops
+   mattering: `frame` reads `--frame-source`, `frame-<tint>` sets it.
+
+   `border-image` and not a background: the 3px band is a real border, so it
+   participates in the box the way a border does, and `box-sizing: border-box`
+   keeps every `size-*` in the app meaning what it meant.
+
+   `border-color` is the fallback and nothing more. A renderer without
+   `border-image` still gets 3px in the right colour, square instead of
+   stepped — less crenellated, never broken.
+
+   One consequence of driving the tint through a custom property: it INHERITS.
+   A framed block inside a framed block wears its parent's tint unless it names
+   its own, which is why every call site here pairs `frame` with a tint — and
+   why `frame-none` exists for the ones whose answer is "no line".
+
+   And deliberately NO `image-rendering: pixelated`, which every write-up of
+   this technique reaches for. That property inherits too, and it would have
+   reached the photographs and the gradients inside every framed block — a
+   room's thumbnails put through nearest-neighbour scaling, the podium's wash
+   banded. It also buys nothing here: the source is an SVG carrying
+   `shape-rendering='crispEdges'`, the corner slices land 3px on 3px with no
+   resampling at all, and the edge slices only ever stretch a straight line
+   along its own length. The frames are the pixels in this skin; the pictures
+   are not. */
+@utility frame {
+  /*
+   * The focus ring goes INSIDE the band, and this is the one place it can be
+   * decided for every framed control at once.
+   *
+   * `@layer base` rings every `:focus-visible` element at `outline-offset: 2px`
+   * — two pixels OUTSIDE the box. Around an unframed control that is exactly
+   * right. Around a framed one it is a second concentric rectangle two pixels
+   * off the first, and the eye reads two frames rather than one focused
+   * control. Drawn two pixels inward instead, the ring lands on the band's own
+   * outer pixels: the frame simply thickens into torch, which is what the
+   * guide draws for a focused field.
+   *
+   * Only the offset moves. The colour and the width stay the base rule's, so
+   * there is still exactly one place that decides what a focus ring looks like
+   * — and no `outline: none` anywhere in this file.
+   *
+   * Which matters, because the tempting shortcut does not survive measurement:
+   * the frame turning from `edge` to `torch` is NOT an adequate indicator on
+   * its own. `edge-strong` against `torch-ink` is 3.29:1 in the dark theme and
+   * 1.55:1 in the light one, where the two are nearly the same luminance —
+   * WCAG 2.4.11 asks 3:1 of the pixels that change. So the outline stays and
+   * the recolour is what it looks like, not what does the work.
+   */
+  &:focus-visible {
+    outline-offset: -2px;
+  }
+
+  border-style: solid;
+  /*
+   * The band, and the one number `frame-sm` and `frame-xs` move.
+   *
+   * 9px against a slice of 9 is the 1:1 case: three cells of the source drawn
+   * into three cells of border, three pixels each. The SLICE never changes —
+   * three cells is the minimum that keeps a corner's staircase in the corner
+   * region, and at two the step pixel falls into the edge region and gets
+   * stretched into a line along the whole side. So a smaller frame is a smaller
+   * BAND over the same slice, and `border-image-width` is left at its default
+   * of 1 so the image follows the band without being told twice.
+   */
+  border-width: var(--frame-band, 9px);
+  border-radius: 0;
+
+  /*
+   * The gradient's ramp spans the BORDER box, not the padding box.
+   *
+   * One declaration for a defect that looked like five other things first. A
+   * background image — and a gradient is one — is positioned in the
+   * `background-origin` area, which defaults to the PADDING box, and then
+   * painted across the `background-clip` area, which defaults to the BORDER
+   * box. The nine pixels of band are in the second and not the first, so the
+   * browser does what it always does with a background image too small for its
+   * clip area: it TILES it. Which means the left band shows the ramp's far end
+   * and the right band shows its start.
+   *
+   * MEASURED, not guessed — headless Firefox on a probe page, pixels read off
+   * the render: inside the padding box the ramp ran (24,54,53) to (10,12,19)
+   * exactly as written, while the left band sat at (10,11,18) and the right
+   * band at (24,54,53). Both ends, on the wrong sides, in a nine-pixel strip.
+   *
+   * `background-color` was never affected, which is why only the two gradient
+   * blocks looked broken and every solid one looked fine: a colour has no
+   * geometry to tile. `frame-flush` needs nothing here — its border is zero, so
+   * its two boxes are the same box.
+   */
+  background-origin: border-box;
+  border-color: var(--frame-ink, currentColor);
+  border-image: var(--frame-source, var(--fr-edge)) 9 stretch;
+}
+
+/* The flat, cut to the frame's own steps.
+
+   THE RULE IS SIMPLER THAN IT FIRST LOOKED, and it took two rounds of review
+   to get there: a framed block that paints ANY flat has to be cut, and a block
+   that paints none does not need this at all.
+
+   The first attempt said "only where the flat means something" and listed the
+   button, the photograph, the active tab, the avatar. That left eleven blocks
+   drawing an octagonal frame with a square of colour outside it. The second
+   attempt exempted `bg-night`, on the grounds that `night` is the page's own
+   ground — also wrong, and the dashboard gauge is where it showed: the ground
+   is not a flat colour. It carries the scanline grain everywhere and the glow
+   across the top-left, so an opaque `night` block covers both and its uncut
+   corners read as darker, un-grained squares.
+
+   Which leaves the honest version. Hollow blocks — the cards, the chips — need
+   nothing, because there is nothing behind the corner but the page they were
+   already showing. Everything with a flat is cut. Enforced now rather than
+   described: tests/unit/design-primitives.spec.ts sweeps for a framed element
+   carrying a `bg-*` without this utility.
+
+   `fill` IS NOT OPTIONAL, and leaving it out does not degrade — it deletes.
+   Sliced at 3, the mask image is cut into nine regions and the middle one is
+   DISCARDED unless `fill` says to keep it, exactly as for `border-image`. A
+   mask with no middle is a mask that hides everything but a 3px ring: the
+   primary button rendered as an empty frame with no torch and no label in it.
+   No warning, no error, just an invisible control.
+
+   Two properties for one effect, and both need the keyword.
+   `-webkit-mask-box-image` is the only one Chrome and Safari actually carry —
+   `mask-border` is the standard name and Chrome drops it on the floor, so it
+   cannot be the one holding the `fill`. Firefox carries neither, and what it
+   loses is the cut on the flat alone: the frame around it is a `border-image`
+   and stays stepped. A square corner on a filled tile is the whole of the
+   degradation there. */
+@utility frame-fill {
+  -webkit-mask-box-image: var(--mask-oct) 9 fill stretch;
+  mask-border: var(--mask-oct) 9 fill stretch;
+  /*
+   * The mask's ring has to be as wide as the frame's band, and it does not work
+   * that out on its own: `mask-border-width` defaults to the SLICE, not to the
+   * border. Left alone, a `frame-sm` block would be cut on a 9px octagon while
+   * its frame drew a 6px one, and the corners would miss each other by three
+   * pixels — the one thing the shared grid exists to prevent.
+   *
+   * Two longhands rather than the `/ <width>` form inside the shorthands: the
+   * prefixed shorthand is the only one Chrome acts on, and it is already known
+   * to work exactly as written above. If a renderer ignores these two lines it
+   * keeps a 9px cut, which is right for every block but the small ones — a
+   * failure that costs three pixels instead of the whole mask.
+   */
+  -webkit-mask-box-image-width: var(--frame-band, 9px);
+  mask-border-width: var(--frame-band, 9px);
+}
+
+/* Two smaller bands, and the grain shrinks with them.
+
+   The ladder is exact and that is the point: the band is three cells and the
+   source is three pixels a cell, so 9px is 3px per cell, 6px is 2px, and 3px is
+   1px. Every step divides the source cell by a whole number, so nothing is ever
+   resampled onto a fraction of a pixel — crisp whether the engine renders the
+   SVG at destination size or rasterises it at its own and scales down.
+
+   The drawn line is one cell wide, so it thins with the band: three pixels, two,
+   one. `frame-sm` is for the blocks the full band overwhelms — a chip, a badge,
+   a tab, anything whose text is one line of mono. `frame-xs` is the finest the
+   grid can go, where the crenellation is a texture rather than a statement.
+
+   Nothing else changes: same sources, same slice, same mask. */
+@utility frame-sm {
+  --frame-band: 6px;
+}
+
+@utility frame-xs {
+  --frame-band: 3px;
+}
+
+/* The seven tints. Six follow an ink token and swap with the theme; `on-torch`
+   is the dark green that frames a torch flat and does not move. */
+@utility frame-torch {
+  --frame-source: var(--fr-torch);
+  --frame-ink: var(--color-torch-ink);
+}
+
+@utility frame-azure {
+  --frame-source: var(--fr-azure);
+  --frame-ink: var(--color-azure-ink);
+}
+
+@utility frame-clue {
+  --frame-source: var(--fr-clue);
+  --frame-ink: var(--color-clue-ink);
+}
+
+@utility frame-amber {
+  --frame-source: var(--fr-amber);
+  --frame-ink: var(--color-amber-ink);
+}
+
+@utility frame-alert {
+  --frame-source: var(--fr-alert);
+  --frame-ink: var(--color-alert-ink);
+}
+
+@utility frame-edge {
+  --frame-source: var(--fr-edge);
+  --frame-ink: var(--color-edge-strong);
+}
+
+@utility frame-on-torch {
+  --frame-source: var(--fr-on-torch);
+  --frame-ink: var(--color-on-torch);
+}
+
+/* The same frame, costing no border: for the blocks whose content has to reach
+   the line rather than stop short of it.
+
+   `@utility frame` spends nine real pixels of border, and `box-sizing:
+   border-box` means those nine come out of the content box. That is right for
+   anything holding words — a label must not sit under the crenellation. It is
+   wrong for a photograph: the picture stopped nine pixels inside its own frame
+   and the tile's flat showed through the gap, which read as a mount around the
+   print rather than as a frame on it. And no child could fill that gap either,
+   because `overflow` clips at the PADDING box: the band is unreachable from
+   inside.
+
+   So here the ring is drawn by a pseudo-element instead, inset to nothing and
+   painted after the children — `::after` is the last thing in the box, so it
+   lands over the photograph rather than under it. The element itself keeps a
+   zero border, its content box IS its box, and the picture runs edge to edge.
+   `frame-fill` still cuts the corners: `mask-border-width` defaults to the
+   slice, so the mask does not care that there is no border to hang on.
+
+   Like `tap-target`, this does NOT set `position` — the call site must already
+   be positioned, because a utility that quietly declares `relative` is one
+   that fights the `absolute` on whatever needed it most. */
+@utility frame-flush {
+  /* Inside, for the reason `@utility frame` sets out at length. */
+  &:focus-visible {
+    outline-offset: -2px;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-style: solid;
+    border-width: var(--frame-band, 9px);
+    border-color: var(--frame-ink, currentColor);
+    border-image: var(--frame-source, var(--fr-edge)) 9 stretch;
+  }
+}
+
+/* No line at all, and still three pixels wide.
+
+   A tint like the others, so a block whose frame comes and goes — the tab you
+   are on, the option you picked — keeps one geometry through both states
+   instead of growing 18px the moment it is chosen. It is also the answer to
+   custom properties being INHERITED: a framed child of a framed parent picks
+   up the parent's tint unless it names its own, so "no frame here" has to be
+   something a call site can say out loud. */
+@utility frame-none {
+  --frame-source: none;
+  --frame-ink: transparent;
+}
+
+/* No frame here at all — not even the three pixels.
+
+   `frame-none` keeps the band and spends it on nothing, which is what a state
+   that comes and goes needs. This one takes the band away, for the block that
+   is a framed card on a phone and a bare row of tabs on a desktop.
+
+   The band only. It does NOT undo `frame-fill`, because it cannot be trusted
+   to: the minifier prunes a declaration whose value is the property's initial
+   one, so `mask-border: none` vanished from the built CSS. The call site adds
+   the mask under `max-sm:` instead, which needs no reset at all. */
+@utility unframed {
+  border-width: 0;
+}
+
+/* The progress gauge's fill: torch in 12px cells, three pixels apart — a game
+   bar rather than a smooth ribbon. The cells are the fill and the frame stays
+   whole, so a gauge at 3% still shows one honest cell instead of a sliver. */
+@utility gauge-fill {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-torch) 0 12px,
+    transparent 12px 15px
+  );
+}
+
+/* The press: two cells of the pixel grid down and right, six pixels at this
+   scale. Two CELLS and not two pixels — the guide drew it as two on a grid
+   whose cell was one, so what it pinned was a proportion, and the proportion is
+   what survives a change of scale. Hover already dims, and dimming twice says
+   nothing new.
+
+   Not a transition and not an animation, so the global reduced-motion block
+   cannot reach it — the second rule is that block's clause for this one
+   property, written here rather than left to every call site to remember.
+   `:not(:disabled)` rather than `:enabled`, because `:enabled` matches form
+   controls only and half of these buttons are links. */
+@utility press {
+  &:not(:disabled):active {
+    translate: 6px 6px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:active {
+      translate: none;
+    }
+  }
 }
 
 /* The focus ring, only where it has to differ from the base rule.
@@ -165,14 +582,21 @@
 @utility focus-ring-alert {
   &:focus-visible {
     outline: 2px solid var(--color-alert-ink);
-    outline-offset: 2px;
+    /* Inward, like every ring in this skin. Stated rather than inherited from
+       `@utility frame`: half of these controls are unframed buttons laid over a
+       photograph, where an outward ring was already the wrong answer — and two
+       utilities quietly disagreeing about one property is a race decided by
+       whatever order Tailwind happens to emit them in. */
+    outline-offset: -2px;
   }
 }
 
 @utility focus-ring-within {
   &:has(:focus-visible) {
     outline: 2px solid var(--color-torch-ink);
-    outline-offset: 2px;
+    /* Inward: every label that wears this is a framed block — a segment option,
+       a suspect tile — so an outward ring would double its frame. */
+    outline-offset: -2px;
   }
 }
 
@@ -195,11 +619,22 @@
    different facts: a checked radio here, `aria-pressed` there. A single
    selector (`:has(input:checked)`) would only ever catch the first. */
 @utility segment-group {
-  @apply gap-1 rounded-xl bg-night p-1;
+  /* Filled, unlike the hollow cards: the well paints a `sunken` flat, and a
+     flat has to be cut to the frame or its four square corners say the opposite
+     of the frame around them.
+
+     `p-1` survives the six pixels every other framed block gave back, and for
+     a different job: here the padding separates a frame from a FRAME — the
+     chosen option's — rather than a frame from text. Take it away and the two
+     bands sit flush, eighteen pixels of chrome reading as one thick smear. */
+  @apply frame-sm frame-edge frame-fill gap-1 bg-sunken p-1;
 }
 
 @utility segment {
-  @apply flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro;
+  /* `frame` on every option, tinted by the caller: the chosen one is a filled
+     torch block, the others say `frame-none`. Both are three pixels wide, so
+     choosing an option does not make it taller than its neighbours. */
+  @apply frame flex items-center justify-center gap-1 px-0.5 py-1 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro;
 }
 
 /* Growing a control's hit area without growing the control.
@@ -263,6 +698,18 @@
     --color-alert-ink: #c11b41;
     --color-amber-ink: #8a5a00;
     --color-azure-ink: #0f5fb8;
+
+    /* The six frame tints that follow an ink token. `--fr-on-torch` is absent
+       for the same reason the flat accents are: it does not move. */
+    --fr-torch: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%230a7159' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+    --fr-azure: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%230f5fb8' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+    --fr-clue: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%235335d2' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+    --fr-amber: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%238a5a00' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+    --fr-alert: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%23c11b41' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+    --fr-edge: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%237a8293' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+
+    /* Fainter on paper: at 2% these lines read as dirt on white, not as grain. */
+    --grain-alpha: 1.4%;
   }
 
   @media (prefers-color-scheme: light) {
@@ -283,6 +730,18 @@
       --color-alert-ink: #c11b41;
       --color-amber-ink: #8a5a00;
       --color-azure-ink: #0f5fb8;
+
+      /* The six frame tints that follow an ink token. `--fr-on-torch` is absent
+         for the same reason the flat accents are: it does not move. */
+      --fr-torch: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%230a7159' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+      --fr-azure: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%230f5fb8' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+      --fr-clue: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%235335d2' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+      --fr-amber: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%238a5a00' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+      --fr-alert: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%23c11b41' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+      --fr-edge: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 8 8' shape-rendering='crispEdges'><path fill='%237a8293' d='M3,0h2v1H3zM2,1h1v1H2zM5,1h1v1H5zM1,2h1v1H1zM6,2h1v1H6zM0,3h1v2H0zM7,3h1v2H7zM1,5h1v1H1zM6,5h1v1H6zM2,6h1v1H2zM5,6h1v1H5zM3,7h2v1H3z'/></svg>");
+
+      /* Fainter on paper: at 2% these lines read as dirt on white, not as grain. */
+      --grain-alpha: 1.4%;
     }
   }
 

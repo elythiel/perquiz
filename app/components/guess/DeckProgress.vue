@@ -19,28 +19,34 @@ const route = useRoute()
       travelled. Each segment is also the way to that room — which is what
       makes a room number, quoted in the suspect picker, worth anything.
 
-      The bar stays 4px tall; the padding on the link is negative-margined
-      away, so the tap target is 28px without the row growing.
+      Twelve-pixel cells since the HD-2D skin — a fill, the room you are on
+      ringed from the inside, the rest hollow. The padding on the link is
+      negative-margined away, so the tap target stays 28px.
     -->
     <ol class="flex flex-1 gap-1">
       <li
         v-for="(room, index) in rooms"
         :key="room.token"
-        class="flex-1"
+        class="flex-1 border"
+        :class="[
+          room.answered ? 'bg-torch' : 'bg-sunken',
+          index === current && 'ring-2 ring-torch-ink',
+          room.answered || index === current ? 'border-transparent' : 'opacity-50',
+        ]"
       >
         <NuxtLink
           :to="{ path: `/guess/${room.token}`, query: route.query }"
-          class="-my-3 block py-3"
+          class="block h-2"
           :aria-label="t(room.answered ? 'guess.roomAnswered' : 'guess.roomUnanswered', { position: index + 1 })"
           :aria-current="index === current ? 'page' : undefined"
         >
-          <span
-            class="block h-1 rounded-full transition-colors duration-100 ease-micro"
+          <!-- <span
+            class="block h-3 transition-colors duration-100 ease-micro"
             :class="[
-              room.answered ? 'bg-torch' : 'bg-edge',
-              index === current && 'ring-2 ring-torch-ink ring-offset-2 ring-offset-night',
+              room.answered ? 'bg-torch' : 'bg-sunken',
+              index === current && 'ring-2 ring-torch-ink',
             ]"
-          />
+          /> -->
         </NuxtLink>
       </li>
     </ol>

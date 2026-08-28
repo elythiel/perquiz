@@ -79,20 +79,20 @@ const stepName = computed(() => {
 </script>
 
 <template>
-  <div class="flex min-h-dvh flex-col gap-6 bg-night px-6 py-6 text-text sm:px-12 sm:py-10">
+  <div class="grain flex min-h-dvh flex-col gap-6 bg-night px-6 py-6 text-text sm:px-12 sm:py-10">
     <template v-if="error">
       <!-- The guard PAGES asks for: the show would project a ranking that is
            not final while people can still change their answers. -->
       <div class="m-auto flex max-w-measure flex-col gap-4 text-center">
-        <h1 class="text-3xl leading-tight sm:text-4xl">
+        <ShellPageTitle>
           {{ t('reveal.notLockedTitle') }}
-        </h1>
+        </ShellPageTitle>
         <p class="text-lg leading-relaxed text-text-soft">
           {{ t('reveal.notLockedBody') }}
         </p>
         <NuxtLink
           to="/admin"
-          class="self-center rounded-2xl bg-torch px-5 py-3 text-base font-bold text-on-torch"
+          class="frame frame-on-torch frame-fill press self-center bg-torch px-3.5 py-1.5 text-base font-bold text-on-torch"
         >
           {{ t('reveal.toAdmin') }}
         </NuxtLink>
@@ -145,7 +145,7 @@ const stepName = computed(() => {
               class="flex min-h-0 flex-1 flex-col gap-8"
             >
               <div
-                class="min-h-0 transition-[height,flex-grow] duration-[600ms] ease-deck motion-reduce:transition-none"
+                class="min-h-0 transition-[height,flex-grow] duration-600 ease-deck motion-reduce:transition-none"
                 :class="scene.step === 1 ? 'flex-1' : 'h-24 flex-none sm:h-32'"
               >
                 <RevealPhotoStage
@@ -178,6 +178,7 @@ const stepName = computed(() => {
           :steps="steps"
           :revealed="scene.step + 1"
           :total="rooms.length"
+          class="mt-auto"
         />
 
         <RevealStandings
