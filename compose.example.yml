@@ -10,10 +10,11 @@
 
 services:
   perquiz:
-    # `:main` follows the default branch — convenient with an auto-updater.
-    # Pin `:sha-<short>` instead when you want to know exactly what is running
-    # and be able to roll back to a previous line of this file.
-    image: ghcr.io/elythiel/perquiz:main
+    # Always a version, because that is the only kind of tag published: it
+    # never moves, so this line says exactly what is running, and rolling back
+    # is the previous version of this file. A bot that watches semver — Renovate
+    # and friends — bumps it for you.
+    image: ghcr.io/elythiel/perquiz:v0.1.0
     restart: unless-stopped
     env_file: .env
     ports:
