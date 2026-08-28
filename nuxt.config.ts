@@ -34,6 +34,31 @@ export default defineNuxtConfig({
       meta: [
         { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
       ],
+      /*
+       * The pixel lantern, three files because no one of them is enough.
+       *
+       * The SVG is the real icon and the only theme-aware one: it carries its
+       * own `prefers-color-scheme` query, so it turns dark torch on a light tab
+       * strip and mint on a dark one. That query follows the SYSTEM, not the
+       * app's theme picker — someone forcing "light" in Perquiz under a dark OS
+       * sees the dark variant in their tab. A limit of the format, accepted:
+       * the alternative is JavaScript rewriting an icon, for a 16px glyph.
+       *
+       * The `.ico` is what the SVG cannot be. Safari ignored SVG favicons for
+       * years, and plenty of things that show a site's icon — feed readers,
+       * chat unfurlers, bookmark managers — fetch `/favicon.ico` by convention
+       * and read nothing else. It is declared here anyway rather than left to
+       * that convention, so the icon a browser uses is the one this file names.
+       *
+       * The apple-touch icon is PNG and opaque, both because iOS demands it:
+       * it blackens transparency and rounds the corners itself, so the tile is
+       * painted on `night` with a margin the rounding can eat.
+       */
+      link: [
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+        { rel: 'icon', type: 'image/x-icon', sizes: '16x16 32x32 48x48', href: '/favicon.ico' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      ],
     },
   },
 
