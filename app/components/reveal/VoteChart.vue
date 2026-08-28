@@ -86,9 +86,9 @@ const bars = computed(() => {
            disagreed about. -->
       <div class="relative min-h-0 flex-1">
         <div
-          class="absolute inset-x-0 bottom-0 origin-bottom transition-[height,opacity,background-color] duration-[700ms] ease-deck motion-reduce:transition-[opacity] motion-reduce:duration-120"
+          class="absolute inset-x-0 bottom-0 origin-bottom transition-[height,opacity,background-color] duration-700 ease-deck motion-reduce:transition-opacity motion-reduce:duration-120"
           :class="revealed && bar.owner
-            ? 'bg-gradient-to-t from-torch/30 to-torch'
+            ? 'bg-linear-to-t from-torch/30 to-torch'
             : bar.blank ? 'bg-sunken' : 'bg-panel'"
           :style="{
             height: shown ? `${bar.share}%` : '0%',
