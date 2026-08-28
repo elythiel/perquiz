@@ -1,5 +1,6 @@
 import { SUSPECTS_PER_ROOM } from '#shared/utils/guessing'
 import { createHmac } from 'node:crypto'
+import { SUBKEYS, subkey } from './subkey'
 
 /**
  * Handing someone a guess sheet without handing them the answers.
@@ -19,14 +20,9 @@ import { createHmac } from 'node:crypto'
  * viewer for free: position in the list stops correlating with user id.
  */
 
-/** A subkey, so the session secret is not used raw for a second purpose. */
-function key(secret: string): Buffer {
-  return createHmac('sha256', secret).update('perquiz:guess-room-token').digest()
-}
-
 /** Stable for one viewer, meaningless to anyone else. */
 export function roomToken(viewerId: number, roomUserId: number, secret: string): string {
-  return createHmac('sha256', key(secret))
+  return createHmac('sha256', subkey(secret, SUBKEYS.guessRoomToken))
     .update(`${viewerId}:${roomUserId}`)
     .digest('hex')
     .slice(0, 32)
@@ -100,7 +96,7 @@ export function suspectsFor(
   secret: string,
 ): Set<number> {
   const rank = (candidate: number) =>
-    createHmac('sha256', suspectKey(secret)).update(`${roomUserId}:${candidate}`).digest('hex')
+    createHmac('sha256', subkey(secret, SUBKEYS.guessSuspects)).update(`${roomUserId}:${candidate}`).digest('hex')
 
   const decoys = roster
     .filter(candidate => candidate !== roomUserId)
@@ -108,14 +104,4 @@ export function suspectsFor(
     .slice(0, SUSPECTS_PER_ROOM - 1)
 
   return new Set([roomUserId, ...decoys])
-}
-
-/**
- * Its own subkey, distinct from the handles'.
- *
- * Two uses of the session secret, two subkeys — the rule this file set in M4.
- * Sharing one would let a handle and a ranking be computed from each other.
- */
-function suspectKey(secret: string): Buffer {
-  return createHmac('sha256', secret).update('perquiz:guess-suspects').digest()
 }

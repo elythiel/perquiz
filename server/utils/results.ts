@@ -1,5 +1,4 @@
 import type { Standing } from './scoring'
-import { asc } from 'drizzle-orm'
 import { guesses, photos, users } from '../database/schema'
 
 /**
@@ -51,11 +50,7 @@ export function personalResults(viewerId: number): PersonalResults {
   const mine = table.find(player => player.id === viewerId)
   const rank = mine?.rank ?? table.length
 
-  const photosByOwner = new Map<number, string[]>()
-  for (const row of db.select({ owner: photos.userId, name: photos.filename })
-    .from(photos).orderBy(asc(photos.userId), asc(photos.position)).all()) {
-    photosByOwner.set(row.owner, [...(photosByOwner.get(row.owner) ?? []), row.name])
-  }
+  const roomPhotographs = photosByOwner()
 
   const myAnswers = new Map(answers
     .filter(answer => answer.guesserId === viewerId)
@@ -68,7 +63,7 @@ export function personalResults(viewerId: number): PersonalResults {
     .map<ResultRoom>((ownerId) => {
       const guessed = myAnswers.get(ownerId)
       return {
-        photos: photosByOwner.get(ownerId) ?? [],
+        photos: roomPhotographs.get(ownerId) ?? [],
         ownerName: names.get(ownerId) ?? '',
         guessName: guessed === undefined ? null : (names.get(guessed) ?? ''),
         correct: guessed === ownerId,

@@ -39,7 +39,6 @@ export interface DashboardState {
  */
 export function dashboardState(viewerId: number): DashboardState {
   const db = useDatabase()
-  const count = (row: { count: number } | undefined) => row?.count ?? 0
 
   const myPhotos = db
     .select({ name: photos.filename })
@@ -58,7 +57,7 @@ export function dashboardState(viewerId: number): DashboardState {
   // A room enters play with its first photo, so that is the moment to compare
   // against — not the owner's account, which is far older.
   const newRooms = lastSeenAt
-    ? count(db.get<{ count: number }>(sql`
+    ? toCount(db.get<{ count: number }>(sql`
         select count(*) as count from (
           select user_id, min(created_at) as entered
           from photos where user_id <> ${viewerId}
@@ -67,21 +66,21 @@ export function dashboardState(viewerId: number): DashboardState {
       `))
     : 0
 
-  const total = count(db.get<{ count: number }>(sql`
+  const total = toCount(db.get<{ count: number }>(sql`
     select count(distinct user_id) as count from ${photos} where user_id <> ${viewerId}
   `))
 
   const state: DashboardState = {
     phase: useGameState().phase,
     myPhotos,
-    roomsInPlay: count(db.get<{ count: number }>(sql`
+    roomsInPlay: toCount(db.get<{ count: number }>(sql`
       select count(distinct user_id) as count from ${photos}
     `)),
-    participants: count(db.select({ count: sql<number>`count(*)` }).from(users).get()),
+    participants: toCount(db.select({ count: sql<number>`count(*)` }).from(users).get()),
     // Only answers about rooms still in play, or the dashboard would say 9/8
     // the day somebody deletes their last photo. The guess sheet counts the
     // same way; these two numbers are read side by side.
-    answered: count(db.get<{ count: number }>(sql`
+    answered: toCount(db.get<{ count: number }>(sql`
       select count(*) as count from ${guesses}
       where guesser_id = ${viewerId}
         and room_user_id in (select distinct user_id from ${photos})

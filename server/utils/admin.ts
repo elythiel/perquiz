@@ -2,6 +2,7 @@ import type { H3Event } from 'h3'
 import type { GamePhase } from '#shared/types/game'
 import { isBeforeLock } from '#shared/utils/game'
 import { createHmac } from 'node:crypto'
+import { SUBKEYS, subkey } from './subkey'
 import { asc, eq, sql } from 'drizzle-orm'
 import { APP_STATE_ID, appState, guesses, photos, users } from '../database/schema'
 
@@ -56,7 +57,7 @@ export interface AdminPanel {
  * under the moderator's finger, and unrelated to who uploaded what.
  */
 function moderationOrder(names: readonly string[], secret: string): string[] {
-  const key = createHmac('sha256', secret).update('perquiz:moderation-order').digest()
+  const key = subkey(secret, SUBKEYS.moderationOrder)
   const rank = (name: string) => createHmac('sha256', key).update(name).digest('hex')
   return [...names].sort((left, right) => rank(left).localeCompare(rank(right)))
 }
@@ -166,15 +167,13 @@ export function removalPreview(userId: number): Removal {
 
   if (!person) throw createError({ statusCode: 404, statusMessage: 'unknown-participant' })
 
-  const count = (row: { count: number } | undefined) => row?.count ?? 0
-
   return {
     displayName: person.displayName,
     photos: db.select({ name: photos.filename }).from(photos)
       .where(eq(photos.userId, userId)).all().map(row => row.name),
-    guessesMade: count(db.select({ count: sql<number>`count(*)` }).from(guesses)
+    guessesMade: toCount(db.select({ count: sql<number>`count(*)` }).from(guesses)
       .where(eq(guesses.guesserId, userId)).get()),
-    guessesLost: count(db.get<{ count: number }>(sql`
+    guessesLost: toCount(db.get<{ count: number }>(sql`
       select count(*) as count from ${guesses}
       where guesser_id <> ${userId}
         and (room_user_id = ${userId} or guessed_user_id = ${userId})

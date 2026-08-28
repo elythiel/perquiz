@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { deckOrder, resolveRoomToken, roomToken } from '../../server/utils/guessing'
+import { deckOrder, resolveRoomToken, roomToken, suspectsFor } from '../../server/utils/guessing'
 
 /**
  * The guard on the one secret this game has: which room belongs to whom.
@@ -109,5 +109,35 @@ describe('the order the deck is dealt in', () => {
     const input = [...ROOMS]
     deckOrder(input, 1, SECRET)
     expect(input).toEqual(ROOMS)
+  })
+})
+
+/**
+ * The values themselves, pinned.
+ *
+ * The three subkeys of the session password now come from one helper and a
+ * registry of labels. Centralising them must move nothing: a label is not a
+ * name, it is an input, and rewriting one silently regenerates everything
+ * derived from it. A room handle is short-lived — re-derived on every read of
+ * the sheet — but changing its label mid-party invalidates every `/guess/<token>`
+ * URL already open.
+ *
+ * So these are golden values, computed from the code as it stood before the
+ * helper existed. They are not asserting that HMAC works; they are asserting
+ * that nobody renamed a label while tidying.
+ */
+describe('what the labels produce', () => {
+  const SEED_SECRET = '0123456789abcdef0123456789abcdef'
+
+  it('gives a room the handle it always gave', () => {
+    expect(roomToken(1, 7, SEED_SECRET)).toBe('6f542711027d69cf0fc0bba5050d1700')
+    expect(roomToken(2, 7, SEED_SECRET)).toBe('6c1e772687abcdfdc6e4d39485d90e57')
+  })
+
+  it('ranks a room\'s candidates the way it always did', () => {
+    // The suspect ranking is not exposed as a value, so it is read through the
+    // list it decides: a different label would deal a different five.
+    expect([...suspectsFor(7, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], SEED_SECRET)].sort((a, b) => a - b))
+      .toEqual([2, 3, 5, 6, 7, 10])
   })
 })

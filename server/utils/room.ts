@@ -44,6 +44,31 @@ export function roomPhotos(userId: number): RoomPhoto[] {
     .all()
 }
 
+/**
+ * Every room's photographs at once, in the order their owners arranged them.
+ *
+ * The sibling of `roomPhotos()` above, for the three screens that draw the
+ * whole game rather than one room — the guess sheet, the reveal show and the
+ * results. All three had copied the same loop, and none of them filters: it is
+ * always the whole table, always the same order.
+ *
+ * That order is not decoration. `position` is what the owner set, and the show
+ * and the debrief walk a room's pictures in it.
+ */
+export function photosByOwner(): Map<number, string[]> {
+  const byOwner = new Map<number, string[]>()
+
+  for (const row of useDatabase()
+    .select({ owner: photos.userId, name: photos.filename })
+    .from(photos)
+    .orderBy(asc(photos.userId), asc(photos.position))
+    .all()) {
+    byOwner.set(row.owner, [...(byOwner.get(row.owner) ?? []), row.name])
+  }
+
+  return byOwner
+}
+
 export interface RoomState {
   phase: GamePhase
   displayName: string
@@ -56,16 +81,15 @@ export interface RoomState {
 
 export function roomState(userId: number): RoomState {
   const db = useDatabase()
-  const count = (rows: { count: number } | undefined) => rows?.count ?? 0
 
   return {
     phase: useGameState().phase,
     displayName: db.select({ name: users.displayName }).from(users)
       .where(eq(users.id, userId)).get()?.name ?? '',
     photos: roomPhotos(userId),
-    otherPlayers: count(db.select({ count: sql<number>`count(*)` }).from(users)
+    otherPlayers: toCount(db.select({ count: sql<number>`count(*)` }).from(users)
       .where(sql`${users.id} <> ${userId}`).get()),
-    guessesOnMyRoom: count(db.select({ count: sql<number>`count(*)` }).from(guesses)
+    guessesOnMyRoom: toCount(db.select({ count: sql<number>`count(*)` }).from(guesses)
       .where(eq(guesses.roomUserId, userId)).get()),
   }
 }

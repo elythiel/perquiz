@@ -1,7 +1,7 @@
 import type { Standing } from './scoring'
 import { isBeforeLock } from '#shared/utils/game'
 import { createHmac, randomBytes } from 'node:crypto'
-import { asc, eq } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { APP_STATE_ID, appState, guesses, photos, users } from '../database/schema'
 
 /**
@@ -91,11 +91,7 @@ export function revealShow(): RevealShow {
     .from(users).all()
   const names = new Map(players.map(player => [player.id, player.displayName]))
 
-  const photosByOwner = new Map<number, string[]>()
-  for (const row of db.select({ owner: photos.userId, name: photos.filename })
-    .from(photos).orderBy(asc(photos.userId), asc(photos.position)).all()) {
-    photosByOwner.set(row.owner, [...(photosByOwner.get(row.owner) ?? []), row.name])
-  }
+  const roomPhotographs = photosByOwner()
 
   const answers = db.select({
     guesserId: guesses.guesserId,
@@ -124,7 +120,7 @@ export function revealShow(): RevealShow {
 
     return {
       owner: { id: ownerId, displayName: names.get(ownerId) ?? '' },
-      photos: photosByOwner.get(ownerId) ?? [],
+      photos: roomPhotographs.get(ownerId) ?? [],
       votes,
       // Everyone but the owner could have answered; those who did not are
       // their own bar on the chart.

@@ -102,16 +102,7 @@ export function guessSheet(viewerId: number): GuessSheet {
     .all()
     .map(row => [row.room, row.guessed]))
 
-  const photosByOwner = new Map<number, string[]>()
-  for (const row of db
-    .select({ owner: photos.userId, name: photos.filename })
-    .from(photos)
-    .orderBy(asc(photos.userId), asc(photos.position))
-    .all()) {
-    const list = photosByOwner.get(row.owner) ?? []
-    list.push(row.name)
-    photosByOwner.set(row.owner, list)
-  }
+  const roomPhotographs = photosByOwner()
 
   const participants = db
     .select({ id: users.id, displayName: users.displayName })
@@ -128,7 +119,7 @@ export function guessSheet(viewerId: number): GuessSheet {
 
     return {
       token: roomToken(viewerId, roomUserId, secret()),
-      photos: photosByOwner.get(roomUserId) ?? [],
+      photos: roomPhotographs.get(roomUserId) ?? [],
       // Answers about rooms that have left play are kept but not counted: the
       // room may come back, and throwing them away on a phone's whim would be
       // worse than carrying them.

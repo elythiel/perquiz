@@ -34,3 +34,16 @@ export function useGameState() {
   if (!row) throw new Error('app_state is empty: the boot migration did not run')
   return row
 }
+
+/**
+ * A `count(*)` that came back as no row at all.
+ *
+ * SQLite always answers an aggregate, so this is defensive rather than
+ * expected — but the type says `| undefined`, and the value goes straight into
+ * an addition or a comparison. Zero is the only honest reading of "no row":
+ * `undefined` would poison the sum, and `null` would compare false against
+ * everything. Written once because three files had written it identically.
+ */
+export function toCount(row: { count: number } | undefined): number {
+  return row?.count ?? 0
+}

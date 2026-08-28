@@ -294,6 +294,17 @@ describe('the admin panel, whose admin also plays', () => {
     // has to come from the names alone — which also means the grid does not
     // reshuffle under the moderator's finger between two visits.
     expect(await gridAfter([0, 1, 2, 3])).toEqual(await gridAfter([3, 2, 1, 0]))
+
+    /*
+     * And it is THIS order, not merely a consistent one.
+     *
+     * The two calls above would agree just as happily on a different shuffle,
+     * so they cannot see a renamed subkey label — and the label is an input,
+     * not a name. Pinned against the value the derivation gave before the
+     * labels were moved into a registry.
+     */
+    expect((await gridAfter([0, 1, 2, 3])).map((name: string) => name[0]))
+      .toEqual(['c', 'b', 'a', 'd'])
   })
 
   it('says what a removal would destroy without saying whose room it touches', async () => {
