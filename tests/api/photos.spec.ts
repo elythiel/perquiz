@@ -232,11 +232,37 @@ describe('what gets stored', () => {
   })
 
   it('names the file after nothing at all', async () => {
-    const response = await upload(await image('png'))
-    const { name } = await response.json()
+    /*
+     * The invariant is SPEC §9: nothing in a photograph's name may point back
+     * at whose room it is. What is hard is saying so without asking the
+     * question of a coin.
+     *
+     * This used to search one random name for the owner's id as a substring,
+     * which tested the dice rather than the code: a 32-character hex string
+     * contains a given two-digit number about 11% of the time, so the suite
+     * went red roughly one run in nine. Worse, the odds were an accident of
+     * how many accounts happened to exist before it ran — a single-digit id
+     * would have failed 87% of the time, a four-digit one never.
+     *
+     * So the question is asked of the code instead. A name derived from the
+     * owner — hashed, prefixed, however — is the same name twice for the same
+     * owner; a name derived from the bytes is the same name for the same
+     * image. Both collide, and a random one never does. No dice, and it
+     * catches the two ways this could actually be got wrong.
+     */
+    const same = await image('png')
 
-    expect(name).toMatch(/^[0-9a-f]{32}$/)
-    expect(name).not.toContain(String(owner))
+    const mine = await (await upload(same)).json()
+    const again = await (await upload(same)).json()
+    const theirs = await (await upload(same, { cookie: neighbourCookie })).json()
+
+    for (const { name } of [mine, again, theirs]) {
+      expect(name).toMatch(/^[0-9a-f]{32}$/)
+    }
+
+    // Same owner, same bytes, twice: nothing about either was reused.
+    expect(again.name).not.toBe(mine.name)
+    expect(theirs.name).not.toBe(mine.name)
   })
 
   it('resizes the long edge down to the web variant', async () => {
