@@ -125,7 +125,7 @@ Detailed per-page functional specs (features, states, edge cases) live in [PAGES
 - **Nuxt 4** (Vue 3, `<script setup>`, TypeScript) with the Nitro server for the API.
 - **SQLite** via **Drizzle ORM**, migrations with **drizzle-kit**. DB file at `./data/app.db`.
 - **Tailwind CSS** (v4) — custom design, no component library.
-- OIDC client: `openid-client` hand-wired in Nitro (decided in PLAN). Issuer, client, roles claim and role names all arrive from the environment — the only code that knows what a given IdP's tokens look like is `server/utils/oidc.ts`.
+- OIDC client: `openid-client` hand-wired in Nitro. Issuer, client, roles claim and role names all arrive from the environment — the only code that knows what a given IdP's tokens look like is `server/utils/oidc.ts`.
 - **sharp** for image processing (resize, re-encode, EXIF stripping).
 - Package manager: **Yarn 4 via corepack**.
 - Lint: ESLint (Nuxt preset).

@@ -26,7 +26,7 @@ const { t } = useI18n()
  *
  * The cascade is a transition, not a keyframe: the bars are mounted from the
  * first step at height zero and grow when `shown` turns true, each 60 ms after
- * the last (screens/animation-rules.png). Driving it from state rather than
+ * the last. Driving it from state rather than
  * from mounting is what lets the whole room live on one page.
  *
  * Each bar sits in a TRACK of its own — the space the column has left once the
@@ -73,10 +73,10 @@ const bars = computed(() => {
       </p>
 
       <!--
-        The cascade of animation-rules.png: 60 ms between bars, growing from
-        the baseline. `motion-reduce` swaps the rise for the 120 ms fade the
-        same rules prescribe, which is why it is a second animation rather
-        than a disabled transform.
+        The cascade the art direction prescribes: 60 ms between bars, growing
+        from the baseline. `motion-reduce` swaps the rise for the 120 ms fade
+        the same registers prescribe, which is why it is a second animation
+        rather than a disabled transform.
       -->
       <!-- The track: what the column has left, and the height every bar's
            percentage is measured against. The bar is absolutely positioned in

@@ -4,9 +4,11 @@
  * Perquiz design-system tokens — the "torchlight" art direction, worn as the
  * HD-2D skin: crenellated corners, flat coloured frames, a smooth glow and a
  * static scanline grain.
- * Reference: docs/design-system.png (colours, type),
- * docs/screens/animation-rules.png (motion) and the HD-2D component guide,
- * which is where the frame technique below comes from.
+ * Reference: the HD-2D component guide, which is where the frame technique
+ * below comes from. The mockups this started from — colours, type, and the
+ * three motion registers — described the product at its beginning and stopped
+ * matching it, so they are out of the repository (git history keeps them).
+ * What survived them is written here, as tokens.
  *
  * The art direction names its seven colours in French; the tokens are English.
  * This table is the only place that mapping is written down, so keep it here:
@@ -147,7 +149,7 @@
     }
   }
 
-  /* Stage motion, /reveal only (screens/animation-rules.png): the podium
+  /* Stage motion, /reveal only: the podium
      climbs step by step, and everything else on that screen is a transition
      between two states rather than a keyframe — the show lives on one page,
      so its blocks move instead of being mounted. `soft-fade` is the 120 ms

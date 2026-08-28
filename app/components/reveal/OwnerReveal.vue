@@ -39,7 +39,7 @@ const leadIn = computed(() => {
     </p>
 
     <div class="flex items-center gap-6">
-      <!-- The halo of animation-rules.png: it widens once, then holds. -->
+      <!-- The halo the art direction prescribes: it widens once, then holds. -->
       <AvatarBadge
         :name="owner.displayName"
         class="size-20 shrink-0 text-2xl transition-transform duration-900 ease-deck motion-reduce:transition-none sm:size-28 sm:text-3xl"
