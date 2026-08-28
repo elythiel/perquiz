@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SHEET_OUT_PHASES } from '#shared/utils/game'
+
 /**
  * The way in to the sheet: it holds no room of its own.
  *
@@ -6,7 +8,7 @@
  * and delete photos (PAGES `/guess`) — and then hands over to the first room
  * still unanswered, which is where anyone opening « Deviner » wants to be.
  */
-definePageMeta({ middleware: 'sheet' })
+definePageMeta({ access: { phase: SHEET_OUT_PHASES } })
 
 const { t } = useI18n()
 const sheet = await useGuessSheet()

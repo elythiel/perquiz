@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { SHEET_OUT_PHASES } from '#shared/utils/game'
+
 /**
  * One room, one page.
  *
@@ -23,7 +25,7 @@
  * watcher rather than by a remount — so staying mounted is what this page was
  * written for anyway.
  */
-definePageMeta({ middleware: 'sheet', key: 'guess-deck' })
+definePageMeta({ key: 'guess-deck', access: { phase: SHEET_OUT_PHASES } })
 
 const { t } = useI18n()
 const route = useRoute()

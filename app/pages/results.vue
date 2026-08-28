@@ -9,12 +9,9 @@ import { ordinal } from '#shared/utils/show'
  * explaining itself, and the dashboard says which phase the game is in
  * (PAGES `/results`).
  */
-const { t } = useI18n()
-const { phase } = useGamePhase()
+definePageMeta({ access: { phase: 'revealed' } })
 
-if (phase.value !== 'revealed') {
-  await navigateTo('/', { replace: true })
-}
+const { t } = useI18n()
 
 const { data } = await useFetch('/api/results')
 

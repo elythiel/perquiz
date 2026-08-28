@@ -25,3 +25,19 @@ export function isGamePhase(value: unknown): value is GamePhase {
 export function isBeforeLock(phase: GamePhase): boolean {
   return phase === 'preparation' || phase === 'open'
 }
+
+/**
+ * The phases in which the guess sheet exists at all.
+ *
+ * `/guess` is not shown closed during `preparation` — there is nothing on it
+ * to close. Like `/results` before `revealed`, the page sends you home rather
+ * than explaining itself, and the dashboard is where the explanation lives
+ * (PAGES `/guess`). The server refuses the route that feeds it in the same
+ * phase (`assertSheetIsOut`), so a direct URL cannot get past the redirect.
+ *
+ * Derived rather than listed, and shared rather than declared on each of the
+ * two pages that ask: the rule is "every phase but the one before the game",
+ * and a rule written twice is one that gets widened once.
+ */
+export const SHEET_OUT_PHASES: readonly GamePhase[]
+  = GAME_PHASES.filter(phase => phase !== 'preparation')

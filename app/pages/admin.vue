@@ -9,14 +9,11 @@ import { isBeforeLock } from '#shared/utils/game'
  * shown nor sent, because admins play too (SPEC §7): a panel that leaked the
  * mapping would hand the game to the one person who runs it.
  */
-const { t } = useI18n()
-const { user } = useSession()
-
 // The API refuses non-admins on its own; this keeps the page from rendering an
-// empty shell to somebody who typed the URL.
-if (!user.value?.isAdmin) {
-  await navigateTo('/', { replace: true })
-}
+// empty shell to somebody who typed the URL (middleware/access.global.ts).
+definePageMeta({ access: { role: 'admin' } })
+
+const { t } = useI18n()
 
 const { data, refresh } = await useFetch('/api/admin')
 

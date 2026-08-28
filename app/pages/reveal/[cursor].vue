@@ -23,7 +23,7 @@ import { clampCursor, ordinal, sceneAt, totalScenes } from '#shared/utils/show'
  * photographs, the chart and the reveal are all present from the first step
  * and merely change size and opacity: blocks move, nothing is swapped.
  */
-definePageMeta({ layout: false, key: 'reveal-show' })
+definePageMeta({ layout: false, key: 'reveal-show', access: { role: 'admin' } })
 
 const { t } = useI18n()
 const route = useRoute()
