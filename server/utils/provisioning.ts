@@ -1,3 +1,5 @@
+import type { PerquizDatabase } from '../database/client'
+import type { SessionIdentity } from './session'
 import { eq, sql } from 'drizzle-orm'
 import { identities, users } from '../database/schema'
 
@@ -11,6 +13,9 @@ import { identities, users } from '../database/schema'
  * `is_admin` is rewritten at EVERY login, never only at creation: it is a
  * cache of the provider's role, and a cache that is only ever filled once is
  * a stale answer waiting to happen (SPEC §1).
+ *
+ * That identity row is also what a session names, so resolving one is the same
+ * query here and on every later request — see `selectByIdentity`.
  */
 
 export interface Provisioning {
@@ -26,18 +31,37 @@ export interface SignedInUser {
   isAdmin: boolean
 }
 
+/**
+ * Just the `select`, so the same query serves the login — which runs it inside
+ * its transaction, and must see its own uncommitted writes — and the request
+ * middleware, which runs it outside of one.
+ */
+type Reader = Pick<PerquizDatabase, 'select'>
+
+/**
+ * The user behind an identity: the ONE resolution both a login and every later
+ * request go through.
+ *
+ * Written once because the two must not drift: the login decides who an
+ * identity already belongs to, and the middleware decides who a cookie is —
+ * and those are the same question asked twice.
+ */
+function selectByIdentity(db: Reader, provider: string, subject: string): SignedInUser | undefined {
+  return db
+    .select({ id: users.id, displayName: users.displayName, isAdmin: users.isAdmin })
+    .from(identities)
+    .innerJoin(users, eq(users.id, identities.userId))
+    .where(sql`${identities.provider} = ${provider} and ${identities.subject} = ${subject}`)
+    .get()
+}
+
 export function provisionUser(provisioning: Provisioning): SignedInUser {
   const db = useDatabase()
 
   // One transaction: a user without their identity would be an account nobody
   // can ever sign into again, and the next login would create a duplicate.
   return db.transaction((tx): SignedInUser => {
-    const existing = tx
-      .select({ id: users.id, displayName: users.displayName })
-      .from(identities)
-      .innerJoin(users, eq(users.id, identities.userId))
-      .where(sql`${identities.provider} = ${provisioning.provider} and ${identities.subject} = ${provisioning.subject}`)
-      .get()
+    const existing = selectByIdentity(tx, provisioning.provider, provisioning.subject)
 
     if (existing) {
       tx.update(users)
@@ -73,11 +97,16 @@ export function provisionUser(provisioning: Provisioning): SignedInUser {
   })
 }
 
-/** The signed-in user behind a session's `userId`, or `undefined` if it is stale. */
-export function findUserById(id: number): SignedInUser | undefined {
-  return useDatabase()
-    .select({ id: users.id, displayName: users.displayName, isAdmin: users.isAdmin })
-    .from(users)
-    .where(eq(users.id, id))
-    .get()
+/**
+ * The signed-in user a session's identity points at, or `undefined` when it
+ * points at nobody.
+ *
+ * Two ways to get `undefined`, and the second is the reason this takes an
+ * identity rather than a `users.id` (card 79): the account was removed, or the
+ * database was rebuilt and nothing there answers to that provider and subject
+ * any more. Neither can resolve to a DIFFERENT person, because the pair is not
+ * a row number that a reset counter hands to the next arrival.
+ */
+export function findUserByIdentity({ provider, subject }: SessionIdentity): SignedInUser | undefined {
+  return selectByIdentity(useDatabase(), provider, subject)
 }

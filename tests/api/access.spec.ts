@@ -166,9 +166,9 @@ describe('the admin gate', () => {
     expect((await api.fetch('/api/admin', { cookie: theirCookie })).status).toBe(403)
 
     // `is_admin` is a cache of the provider's role, rewritten at every login
-    // (SPEC §1). The session holds a user id and nothing else, which is what
-    // makes a revoked role take effect on the next request rather than the
-    // next sign-in.
+    // (SPEC §1). The session holds an identity and nothing else — no role, no
+    // name — which is what makes a revoked role take effect on the next
+    // request rather than the next sign-in.
     api.db.run(sql`update users set is_admin = 1 where id = ${id}`)
     expect((await api.fetch('/api/admin', { cookie: theirCookie })).status).toBe(200)
 
@@ -178,14 +178,14 @@ describe('the admin gate', () => {
 })
 
 /**
- * The way back in, when the session points at nobody.
+ * The way back in, when the session names nobody.
  *
- * A session outlives the row it points at — a reseeded database, a participant
+ * A session outlives the account it names — a reseeded database, a participant
  * removed from the panel. The middleware says so and treats the visitor as
- * signed out; the sign-in route used to disagree, reading the raw id out of the
- * cookie and sending them to `/`, which sent them back to `/login`, which sent
- * them here again. A loop whose only exit was deleting the cookie by hand,
- * because the button that would have done it sits behind the wall.
+ * signed out; the sign-in route used to disagree, reading the cookie itself and
+ * sending them to `/`, which sent them back to `/login`, which sent them here
+ * again. A loop whose only exit was deleting the cookie by hand, because the
+ * button that would have done it sits behind the wall.
  */
 describe('starting a sign-in', () => {
   it('sends a stale session to the provider, not home', async () => {
@@ -211,5 +211,86 @@ describe('starting a sign-in', () => {
     const response = await api.fetch('/api/auth/login', { cookie })
 
     expect(response.headers.get('location')).toBe('/')
+  })
+})
+/**
+ * The other half of "a session outlives the account it names", and the half
+ * that is not a dead end but a swap.
+ *
+ * The row can DISAPPEAR — covered above and by card 71 — or it can be
+ * REPLACED. `users.id` is AUTOINCREMENT, so replacement takes a reset counter;
+ * `yarn seed` resets one on purpose, to make two runs produce the same game
+ * down to the ids. A cookie holding a row number survives that intact and
+ * comes back as whoever now sits at the number, privileges included, with no
+ * trip through the provider. Which is why it holds an identity instead.
+ *
+ * The staging below is the real mechanism, not a stand-in for it: the same
+ * `delete from sqlite_sequence` the seed runs.
+ */
+describe('a session whose id has been handed to somebody else', () => {
+  it('does not become the new occupant', async () => {
+    const api = await useTestApi()
+
+    api.reset()
+    api.renumberUsers()
+    const mickael = api.createUser('Mickaël')
+    const cookie = await api.signIn(mickael)
+
+    // A player, as the panel confirms by turning him away.
+    expect((await api.fetch('/api/dashboard', { cookie })).status).toBe(200)
+    expect((await api.fetch('/api/admin', { cookie })).status).toBe(403)
+
+    // `yarn seed`: the table is emptied, the counter reset, and the first
+    // person written is Sofia — an admin, because the seed wants one.
+    api.reset()
+    api.renumberUsers()
+    const sofia = api.createUser('Sofia', { isAdmin: true })
+    // Without this the test proves nothing: the id has to actually be reused.
+    expect(sofia).toBe(mickael)
+
+    // Not 200, and above all not the 200 the 403 above would have become.
+    expect((await api.fetch('/api/dashboard', { cookie })).status).toBe(401)
+    expect((await api.fetch('/api/admin', { cookie })).status).toBe(401)
+  })
+
+  it('sends that visitor back through the provider', async () => {
+    const api = await useTestApi()
+
+    api.reset()
+    api.renumberUsers()
+    const cookie = await api.signIn(api.createUser('Mickaël'))
+
+    api.reset()
+    api.renumberUsers()
+    api.createUser('Sofia', { isAdmin: true })
+
+    // A page, not an API route: the visitor gets the login screen — and from
+    // there `/api/auth/login` starts a real sign-in rather than looping (the
+    // guard card 71 fixed reads `context.user`, which is now nobody).
+    const page = await api.fetch('/my-room', { cookie, redirect: 'manual' })
+    expect(page.status).toBe(302)
+    expect(page.headers.get('location')).toBe('/login')
+
+    expect((await api.fetch('/api/auth/login', { cookie })).headers.get('location')).not.toBe('/')
+  })
+
+  it('still resolves when the account comes back with the same identity', async () => {
+    const api = await useTestApi()
+
+    api.reset()
+    api.renumberUsers()
+    const first = api.createUser('Mickaël')
+    const cookie = await api.signIn(first)
+
+    // Two re-seeds of the same fixture, or a restored backup: a new row, a new
+    // id even, but the same provider and subject. That IS the same person, and
+    // refusing here would be refusing on the wrong grounds — the identity is
+    // what the cookie names, and it answers.
+    api.reset()
+    api.createUser('Autre')
+    const again = api.createUser('Mickaël')
+    expect(again).not.toBe(first)
+
+    expect((await api.fetch('/api/dashboard', { cookie })).status).toBe(200)
   })
 })

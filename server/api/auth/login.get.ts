@@ -11,13 +11,13 @@ export default defineEventHandler(async (event) => {
   if (!session) return sendRedirect(event, '/login?error=provider')
 
   /*
-   * `context.user`, not `session.data.userId`: the question is "are you signed
-   * in", and the cookie only answers "do you carry an id".
+   * `context.user`, not the cookie's own contents: the question is "are you
+   * signed in", and the cookie only answers "do you name somebody".
    *
-   * A session outlives the row it points at — a reseeded database, a
+   * A session outlives the account it names — a reseeded database, a
    * participant removed from the panel — and the middleware upstream already
    * says so, resolving the user to nothing and letting this public route
-   * through. Reading the raw id instead sent that visitor to `/`, which sent
+   * through. Reading the cookie instead sent that visitor to `/`, which sent
    * them back to `/login`, which sent them here again: a loop with no way out,
    * since the button that would clear the cookie is behind the wall.
    */
