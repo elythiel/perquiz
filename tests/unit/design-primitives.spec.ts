@@ -85,7 +85,6 @@ describe('the button components', () => {
     // its markup, and none of them became one.
     for (const path of [
       'app/components/room/DisplayNameField.vue', // an input, beside a real button
-      'app/components/guess/SuspectPicker.vue', //   the search input
       'app/components/room/PhotoGrid.vue', //        the dotted add tile
       'app/components/room/StatusChip.vue', //       a chip
       'app/pages/guess/[token].vue', //              a segmented toggle
@@ -148,7 +147,6 @@ describe('the dialog shell', () => {
     for (const path of [
       'app/components/ConfirmDialog.vue',
       'app/components/PhotoZoom.vue',
-      'app/components/guess/SuspectPicker.vue',
       'app/components/room/DeletePhotoDialog.vue',
       'app/components/room/PlayerPreview.vue',
     ]) {

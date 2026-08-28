@@ -84,7 +84,8 @@ Purpose: assign an owner to every room in play (except mine), revisable until lo
 Features (`open` phase):
 - All in-play rooms except my own, each with:
   - the room's photos (all of them, browsable),
-  - an owner picker: searchable list of **all** participants except myself; one selection per room, changeable at will.
+  - a grid of **six names** — the owner and five decoys, the same six for every player (SPEC §4) — two columns on a phone. One tap answers; the choice is changeable at will. No search: six names do not need one.
+  - the grid is a native radio group, so it is one tab stop, the arrow keys move between names, and the browser announces « 2 sur 6 ».
 - Auto-save on every selection, with visible save-state feedback (saved / saving / failed-retry).
 - Progress "X / N" always visible.
 - Filter: all rooms / unanswered only.

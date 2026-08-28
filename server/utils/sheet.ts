@@ -1,5 +1,5 @@
 import type { GamePhase } from '#shared/types/game'
-import { asc, eq, sql } from 'drizzle-orm'
+import { and, asc, eq, sql } from 'drizzle-orm'
 import { guesses, photos, users } from '../database/schema'
 
 /**
@@ -17,6 +17,12 @@ export interface SheetRoom {
   photos: string[]
   /** The viewer's own answer: a participant id, or null. Their own to know. */
   guess: number | null
+  /**
+   * The names this room offers, in the same alphabetical order as
+   * `participants` — never in the order they were derived in, which would put
+   * the owner first.
+   */
+  suspects: number[]
 }
 
 export interface SheetParticipant {
@@ -34,6 +40,22 @@ export interface GuessSheet {
 
 function secret(): string {
   return useRuntimeConfig().sessionPassword
+}
+
+/**
+ * Everyone who could plausibly live somewhere: the pool the decoys come from.
+ *
+ * Every user, photographs or not — a player who has uploaded nothing is still
+ * a credible answer, and leaving them out would make "has a room in play" the
+ * readable half of the secret.
+ *
+ * Deliberately not `participants`, which excludes the viewer. Using that as
+ * the pool would make the derivation depend on who is looking, silently, which
+ * is the one thing `suspectsFor()` exists not to do.
+ */
+function roster(): number[] {
+  return useDatabase().select({ id: users.id }).from(users).orderBy(asc(users.id)).all()
+    .map(row => row.id)
 }
 
 /**
@@ -98,14 +120,41 @@ export function guessSheet(viewerId: number): GuessSheet {
     .orderBy(asc(users.displayName))
     .all()
 
-  const sheet = rooms.map<SheetRoom>(roomUserId => ({
-    token: roomToken(viewerId, roomUserId, secret()),
-    photos: photosByOwner.get(roomUserId) ?? [],
-    // Answers about rooms that have left play are kept but not counted: the
-    // room may come back, and throwing them away on a phone's whim would be
-    // worse than carrying them.
-    guess: answers.get(roomUserId) ?? null,
-  }))
+  const pool = roster()
+
+  const sheet = rooms.map<SheetRoom>((roomUserId) => {
+    const guess = answers.get(roomUserId) ?? null
+    const offered = suspectsFor(roomUserId, pool, secret())
+
+    return {
+      token: roomToken(viewerId, roomUserId, secret()),
+      photos: photosByOwner.get(roomUserId) ?? [],
+      // Answers about rooms that have left play are kept but not counted: the
+      // room may come back, and throwing them away on a phone's whim would be
+      // worse than carrying them.
+      guess,
+      /*
+       * Built by filtering the already-sorted `participants`, which does three
+       * things at once: the order is alphabetical rather than derived, the
+       * viewer is dropped — they are not in that list — and the ids are the
+       * ones the client already knows.
+       *
+       * Dropping the viewer here rather than before the derivation is what
+       * keeps the list the same for everybody. The consequence is deliberate:
+       * on the rooms where the viewer happened to be a decoy, they see five
+       * names instead of six. It tells them nothing they did not know — they
+       * live in none of these rooms — and topping the list back up to six
+       * would be a per-reader sixth name, which is exactly the leak avoided.
+       *
+       * An answer saved before this list existed is added back. The reader
+       * already knows that name: it is on their own sheet. Leaving it out
+       * would show them an answer they cannot see selected.
+       */
+      suspects: participants
+        .filter(person => offered.has(person.id) || person.id === guess)
+        .map(person => person.id),
+    }
+  })
 
   return {
     phase: useGameState().phase,
@@ -164,6 +213,26 @@ export function recordGuess(viewerId: number, token: unknown, participantId: unk
   const exists = db.select({ id: users.id }).from(users)
     .where(eq(users.id, participantId)).get()
   if (!exists) {
+    throw createError({ statusCode: 422, statusMessage: 'invalid-participant' })
+  }
+
+  /*
+   * The fifth refusal: a name this room never offered.
+   *
+   * The grid only draws six, so nobody reaches this by tapping — which is why
+   * it reuses the existing slug rather than earning a message of its own. The
+   * sheet already knows how to say "Non enregistré — réessayer", and a control
+   * that is merely not drawn is a courtesy; the guard is what makes it a rule
+   * (the same reasoning as the moderation route in #58).
+   *
+   * The reader's own current answer passes even when it predates the short
+   * list, for the same reason the sheet still offers it: it is already theirs.
+   */
+  const offered = suspectsFor(roomUserId, roster(), secret())
+  const current = db.select({ guessed: guesses.guessedUserId }).from(guesses)
+    .where(and(eq(guesses.guesserId, viewerId), eq(guesses.roomUserId, roomUserId))).get()
+
+  if (!offered.has(participantId) && current?.guessed !== participantId) {
     throw createError({ statusCode: 422, statusMessage: 'invalid-participant' })
   }
 

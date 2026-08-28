@@ -1,3 +1,4 @@
+import { SUSPECTS_PER_ROOM } from '#shared/utils/guessing'
 import { sql } from 'drizzle-orm'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { roomToken } from '../../server/utils/guessing'
@@ -17,7 +18,7 @@ import { useTestApi } from '../support/api'
 
 interface Sheet {
   phase: string
-  rooms: { token: string, photos: string[], guess: number | null }[]
+  rooms: { token: string, photos: string[], guess: number | null, suspects: number[] }[]
   participants: { id: number, displayName: string }[]
   answered: number
   total: number
@@ -67,31 +68,15 @@ function scalars(value: unknown): unknown[] {
 }
 
 describe('the guess sheet', () => {
-  it('describes a room with a handle, its photographs, and my own answer — nothing else', async () => {
+  it('describes a room with a handle, its photographs, my answer and its short list — nothing else', async () => {
     const sheet = await sheetFor('Alice')
 
     expect(sheet.rooms).not.toHaveLength(0)
     for (const room of sheet.rooms) {
       // The shape *is* the guarantee: there is no field an owner could hide in.
-      expect(Object.keys(room).sort()).toEqual(['guess', 'photos', 'token'])
+      expect(Object.keys(room).sort()).toEqual(['guess', 'photos', 'suspects', 'token'])
       expect(room.token).toMatch(/^[0-9a-f]{32}$/)
     }
-  })
-
-  it('never offers me my own room', async () => {
-    const sheet = await sheetFor('Alice')
-    const owners = await Promise.all(sheet.rooms.map(room => ownerOf(room.token, 'Alice')))
-
-    expect(owners).not.toContain(ids.Alice)
-    expect(sheet.rooms).toHaveLength(4)
-  })
-
-  it('leaves a participant with no photographs out of the deck, but on the list', async () => {
-    const sheet = await sheetFor('Alice')
-    const owners = await Promise.all(sheet.rooms.map(room => ownerOf(room.token, 'Alice')))
-
-    expect(owners).not.toContain(ids.Farid)
-    expect(sheet.participants.map(person => person.displayName)).toContain('Farid')
   })
 
   it('carries no participant id inside a room, only in the suspect list', async () => {
@@ -102,7 +87,9 @@ describe('the guess sheet', () => {
       // Values, not a substring search of the JSON: a 32-hex photo name
       // contains "24" often enough that grepping for ids would pass or fail by
       // luck. `guess` is left out — the reader's own answer is theirs to know.
-      const { guess: _mine, ...rest } = room
+      // `guess` is the reader's own answer, and `suspects` is the short list —
+      // both carry participant ids on purpose, and neither names one room.
+      const { guess: _mine, suspects: _offered, ...rest } = room
       expect(scalars(rest).filter(value => everyone.has(value))).toEqual([])
     }
   })
@@ -320,5 +307,102 @@ describe('the admin panel, whose admin also plays', () => {
     // A count, not the names — those would be the photographs of a named room.
     expect(preview.photos).toBe(2)
     expect(preview.guessesLost).toBe(1)
+  })
+})
+
+/**
+ * The short list, as it comes out of the endpoint.
+ *
+ * A party of its own, and deliberately bigger than the one above: at six
+ * players a room's five decoy slots hold every other player, so every
+ * assertion about "six of them" passes without the derivation doing anything
+ * at all. Twelve is the smallest cast where the list is a choice.
+ */
+describe('the short list a room offers', () => {
+  const PARTY = ['Ana', 'Bea', 'Cyd', 'Dov', 'Eve', 'Fay', 'Gus', 'Hal', 'Ivy', 'Jon', 'Kim', 'Lou']
+  let party: Record<string, number>
+  let cookie: Record<string, string>
+
+  beforeEach(async () => {
+    const api = await useTestApi()
+    api.reset()
+
+    party = {}
+    cookie = {}
+    for (const name of PARTY) {
+      party[name] = api.createUser(name)
+      cookie[name] = await api.signIn(party[name]!)
+      api.addPhoto(party[name]!)
+    }
+  })
+
+  const sheet = async (name: string): Promise<Sheet> => {
+    const api = await useTestApi()
+    return (await api.fetch('/api/guess', { cookie: cookie[name]! })).json()
+  }
+
+  /** This party's own resolver: the file's `ownerOf` closes over the other cast. */
+  const owner = async (token: string, viewer: string) => {
+    const api = await useTestApi()
+    return Object.values(party).find(id => roomToken(party[viewer]!, id, api.sessionPassword) === token)
+  }
+
+  it('names six, not everyone', () => {
+    // The point of the whole card: eleven other rooms, six names each.
+    expect(PARTY.length).toBeGreaterThan(SUSPECTS_PER_ROOM + 1)
+  })
+
+  it('offers six per room, alphabetically — five where the reader was a decoy', async () => {
+    const mine = await sheet('Ana')
+
+    for (const room of mine.rooms) {
+      // Five happens, on purpose: the reader is removed on the way out rather
+      // than before the draw, so a room that drew them comes out one short and
+      // is never topped back up — that sixth name would be per-reader.
+      expect(room.suspects.length).toBeLessThanOrEqual(SUSPECTS_PER_ROOM)
+      expect(room.suspects.length).toBeGreaterThanOrEqual(SUSPECTS_PER_ROOM - 1)
+
+      const names = room.suspects.map(id => mine.participants.find(p => p.id === id)!.displayName)
+      expect(names).toEqual([...names].sort((left, right) => left.localeCompare(right)))
+    }
+
+    // Most rooms are full: a derivation gone wrong could make them all short.
+    const full = mine.rooms.filter(room => room.suspects.length === SUSPECTS_PER_ROOM)
+    expect(full.length).toBeGreaterThan(mine.rooms.length / 2)
+  })
+
+  it('never puts the reader in their own options', async () => {
+    const mine = await sheet('Ana')
+    for (const room of mine.rooms) expect(room.suspects).not.toContain(party.Ana)
+  })
+
+  it('gives two readers the same six for the same room', async () => {
+    /*
+     * The invariant the derivation exists for. Photograph filenames are global,
+     * so Ana and Bea CAN line up Cyd's room across their two sheets; if their
+     * decoys differed, the intersection of the two lists would be Cyd.
+     *
+     * Each reader is missing at most themselves, where they happened to be
+     * drawn as a decoy — hence the filter, and hence a room whose list is five
+     * long for one of them and six for the other.
+     */
+    const ana = await sheet('Ana')
+    const bea = await sheet('Bea')
+
+    const owners = await Promise.all(ana.rooms.map(room => owner(room.token, 'Ana')))
+    const beaOwners = await Promise.all(bea.rooms.map(room => owner(room.token, 'Bea')))
+
+    let compared = 0
+    for (const [index, roomOwner] of owners.entries()) {
+      const forBea = bea.rooms[beaOwners.indexOf(roomOwner!)]
+      if (!forBea) continue
+
+      const strip = (ids: number[]) => ids.filter(id => id !== party.Ana && id !== party.Bea).sort()
+      expect(strip(ana.rooms[index]!.suspects), `room ${index}`).toEqual(strip(forBea.suspects))
+      compared++
+    }
+
+    // Guards the loop: a `continue` that never stopped would prove nothing.
+    expect(compared).toBeGreaterThan(SUSPECTS_PER_ROOM)
   })
 })

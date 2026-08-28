@@ -71,7 +71,15 @@ const walk = computed(() => onlyUnanswered.value
 
 const position = computed(() => walk.value.findIndex(candidate => candidate.token === token.value))
 
-const picker = useTemplateRef<{ open: () => void }>('picker')
+/**
+ * The six names this room offers, as people rather than ids.
+ *
+ * The server chose them and already sorted them; all this does is look them up
+ * in the participant list the same payload carries.
+ */
+const offered = computed(() => (room.value?.suspects ?? [])
+  .map(id => sheet.participants.value.find(person => person.id === id))
+  .filter(person => person !== undefined))
 
 /**
  * Which OTHER rooms already carry each name, by their number in the deck.
@@ -81,7 +89,7 @@ const picker = useTemplateRef<{ open: () => void }>('picker')
  * numbering is the deck's, the same one the progress bar and the heading use.
  *
  * Never counts this room: the answer given here is "your answer", which the
- * picker marks differently.
+ * grid marks differently.
  */
 const usedElsewhere = computed(() => {
   const rooms: Record<number, number[]> = {}
@@ -152,12 +160,28 @@ async function pick(participantId: number) {
     </h2>
 
     <GuessSuspectCard
+      v-if="sheet.readOnly.value"
       :name="sheet.nameOf(room.guess)"
-      :state="sheet.stateOf(room.token)"
-      :duplicate="sheet.timesNamed(room.guess) > 1"
-      :read-only="sheet.readOnly.value"
-      @choose="picker?.open()"
     />
+    <GuessSuspectGrid
+      v-else
+      :suspects="offered"
+      :selected="room.guess"
+      :used-elsewhere="usedElsewhere"
+      :state="sheet.stateOf(room.token)"
+      @pick="pick"
+    />
+
+    <!-- Soft, on purpose: SPEC §4 allows the same name twice, it just makes it
+         very unlikely to be right. With six names on a sheet of twenty-nine
+         rooms this will come up often, which is expected and not a reason to
+         harden it. -->
+    <p
+      v-if="sheet.nameOf(room.guess) && sheet.timesNamed(room.guess) > 1"
+      class="rounded-xl bg-amber/15 px-4 py-2.5 text-sm leading-relaxed text-amber-ink"
+    >
+      {{ t('guess.duplicate', { name: sheet.nameOf(room.guess) }) }}
+    </p>
 
     <div class="flex items-center gap-3">
       <button
@@ -189,13 +213,5 @@ async function pick(participantId: number) {
     >
       {{ t('guess.allAnswered') }}
     </p>
-
-    <GuessSuspectPicker
-      ref="picker"
-      :participants="sheet.participants.value"
-      :used-elsewhere="usedElsewhere"
-      :selected="room.guess"
-      @pick="pick"
-    />
   </section>
 </template>

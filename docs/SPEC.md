@@ -59,7 +59,10 @@ Phase transitions are manual (admin panel), reversible (an admin can reopen if l
 ## 4. Guessing
 
 - Each participant has **one guess sheet** covering every in-play room **except their own**.
-- For each room: pick one participant from the **full participant list** (searchable select). The guesser's own name is excluded from their options.
+- For each room: pick one name from a **short list of six** — the owner and five decoys — shown as a grid under the photographs. One tap, one answer; there is no search, because searching six names is not a thing anyone does.
+- The short list is **derived from the room and a server secret, never from the reader**: two players comparing screens see the same six for the same room. Photograph filenames are global, so they *can* line the room up across two sheets; per-reader decoys would make the intersection of their two lists the owner.
+- The pool the decoys come from is **every participant**, with or without photographs — a player who uploaded nothing is still a credible answer. The reader is removed on the way out rather than before the draw, so on the rooms where they happened to be a decoy they see five names instead of six. The list is never topped back up: that sixth name would be per-reader, which is the leak just avoided.
+- The guesser's own name is excluded from their options. An answer saved before the short list existed stays offered and selected, and the server accepts it — the reader already knows that name.
 - The sheet comes into existence with the `open` phase: during `preparation` there is no sheet at all — `/guess` is not reachable and the route that feeds it refuses.
 - Guesses are **auto-saved** individually and revisable at will until the phase is `locked`.
 - The same name **may** be assigned to several rooms (no hard uniqueness constraint), but the UI shows a discreet warning on duplicates, since each person owns exactly one room.
@@ -71,7 +74,14 @@ Phase transitions are manual (admin panel), reversible (an admin can reopen if l
 
 - **Score = number of correct guesses** at lock time. Nothing else — no speed bonus, no penalty for revisions.
 - Ties share the same rank (standard competition ranking: 1, 2, 2, 4…).
-- Scores and per-guess correctness are computed server-side and exposed **only** in the `revealed` phase (and through the reveal show, §6). Before that, no API response may allow deducing a correct answer.
+- Scores and per-guess correctness are computed server-side and exposed **only** in the `revealed` phase (and through the reveal show, §6).
+
+**Partial disclosure, accepted knowingly.** Before §4's short list, no API response allowed deducing a correct answer at all. That invariant is now weaker, in two named ways, and both are the price of a sheet people finish rather than abandon:
+
+- **The orphan name.** With six names over twenty-nine rooms, roughly one party in seven has a name appearing on *no other* room's short list. That name is certainly its room's owner.
+- **Two readings across a wave of sign-ups.** The owner is in every reading of their room, so intersecting two readings narrows the field. The derivation ranks candidates by HMAC and keeps the five smallest, which means a newcomer can rank in and displace a decoy — so the two lists differ and the intersection is smaller than six. Measured over four hundred simulated parties growing from eight players to thirty *during play*: the intersection averages 2.2 names and 22% of rooms come out named outright. A party where everyone signs up before the first guess never triggers this — the list does not move — and that is how the game is played.
+
+Neither is engineered away. Freezing the pool at opening, or persisting each room's six names, would close the second one; both were weighed and set aside as buying less than they cost.
 
 ## 6. Live reveal show
 
