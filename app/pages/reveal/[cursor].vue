@@ -76,6 +76,19 @@ const stepName = computed(() => {
   if (scene.value.kind !== 'room') return t('reveal.finalRanking')
   return [t('reveal.stepPhotos'), t('reveal.stepVotes'), t('reveal.stepOwner')][scene.value.step - 1]
 })
+
+/**
+ * The right-hand eyebrow — and empty is one of its three answers.
+ *
+ * Empty on the last slide rather than absent: the left-hand label already says
+ * "Classement final", and saying it twice reads as a bug.
+ */
+const headerRight = computed(() => {
+  if (scene.value.kind === 'podium') {
+    return t('reveal.podiumStep', { place: ordinal(steps.value[scene.value.step]?.rank ?? 1) })
+  }
+  return scene.value.kind === 'standings' ? '' : stepName.value
+})
 </script>
 
 <template>
@@ -106,12 +119,8 @@ const stepName = computed(() => {
             ? t('reveal.roomCounter', { position: scene.room + 1, total: rooms.length })
             : t('reveal.finalRanking') }}
         </p>
-        <!-- Empty on the last slide: the left-hand label already says
-             "Classement final", and saying it twice reads as a bug. -->
         <p class="text-torch-ink">
-          {{ scene.kind === 'podium'
-            ? t('reveal.podiumStep', { place: ordinal(steps[scene.step]?.rank ?? 1) })
-            : scene.kind === 'standings' ? '' : stepName }}
+          {{ headerRight }}
         </p>
       </header>
 
@@ -127,12 +136,8 @@ const stepName = computed(() => {
             diluted that. Step three splits the stage: the chart slides right,
             the owner arrives on the left, and the winning bar lights up.
           -->
-          <!--
-            Three beats, one page. The photographs own the stage, then glide up
-            into a strip while the bars grow, then the owner arrives beside
-            them. A room change fades — that boundary is worth marking — but
-            a step change never does.
-          -->
+          <!-- Keyed on the room, so a room change fades — that boundary is
+               worth marking — and a step change never does. -->
           <Transition
             mode="out-in"
             enter-active-class="transition-opacity duration-240 ease-deck"

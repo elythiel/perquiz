@@ -1,4 +1,5 @@
 import type { Standing } from './scoring'
+import { sessionSecret } from './subkey'
 import { guesses, photos, users } from '../database/schema'
 
 /**
@@ -59,7 +60,7 @@ export function personalResults(viewerId: number): PersonalResults {
   // The same order the guess sheet dealt them in, so the debrief reads in the
   // order the reader answered rather than in database order.
   const answerable = roomIds.filter(id => id !== viewerId)
-  const rooms = deckOrder(answerable, viewerId, useRuntimeConfig().sessionPassword)
+  const rooms = deckOrder(answerable, viewerId, sessionSecret())
     .map<ResultRoom>((ownerId) => {
       const guessed = myAnswers.get(ownerId)
       return {

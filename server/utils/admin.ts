@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 import type { GamePhase } from '#shared/types/game'
 import { isBeforeLock } from '#shared/utils/game'
 import { createHmac } from 'node:crypto'
-import { SUBKEYS, subkey } from './subkey'
+import { SUBKEYS, sessionSecret, subkey } from './subkey'
 import { asc, eq, sql } from 'drizzle-orm'
 import { APP_STATE_ID, appState, guesses, photos, users } from '../database/schema'
 
@@ -15,6 +15,31 @@ import { APP_STATE_ID, appState, guesses, photos, users } from '../database/sche
  * WHICH rooms anyone answered, and moderation shows photographs with no owner
  * and in an order that does not group them by room.
  */
+
+/**
+ * The signed-in user's id, on a route the middleware has already gated.
+ *
+ * Nine handlers wrote `event.context.user!.id`, and that `!` was the only
+ * non-null assertion left on the server: nine copies of a contract stated
+ * nowhere — "the middleware resolved a user before this ran" (middleware/
+ * auth.ts). Written once, the contract has a name and a place to be read.
+ *
+ * It throws rather than asserts, and the 401 it throws is unreachable: every
+ * route that calls this is behind the gate, and the gate answers 401 itself
+ * before a handler runs. Which is the point — an unreachable branch that says
+ * what it assumes costs nothing, and an assertion that says it costs a silent
+ * `undefined.id` the day a route is added outside the gate.
+ *
+ * Next to `assertAdmin` because they are the same kind of thing: the two
+ * questions a handler is allowed to ask about who is calling it.
+ */
+export function requireUser(event: H3Event): number {
+  const user = event.context.user
+  if (!user) {
+    throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
+  }
+  return user.id
+}
 
 export function assertAdmin(event: H3Event): number {
   const user = event.context.user
@@ -119,7 +144,7 @@ export function adminPanel(viewerId: number): AdminPanel {
     participants,
     me: viewerId,
     ready: participants.filter(person => person.ready).length,
-    moderation: moderationOrder(names, useRuntimeConfig().sessionPassword),
+    moderation: moderationOrder(names, sessionSecret()),
   }
 }
 

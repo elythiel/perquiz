@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
 
   // The row first: it is what makes the photo visible. An orphan file on disk
   // is litter; a row pointing at a missing file is a broken image on a screen.
-  const result = deleteRoomPhoto(event.context.user!.id, name)
+  const result = deleteRoomPhoto(requireUser(event), name)
   await removePhotoFiles(name)
 
   return result

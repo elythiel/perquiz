@@ -20,6 +20,18 @@ const { data, refresh } = await useFetch('/api/admin')
 const pendingPhoto = ref<string>()
 
 /**
+ * Nitro types a route that can throw as partially optional, so the shape is
+ * declared the way it actually arrives and the template supplies the floors.
+ */
+const pendingPerson = ref<{
+  id: number
+  displayName?: string
+  photos?: number
+  guessesMade?: number
+  guessesLost?: number
+}>()
+
+/**
  * What a removal destroys, in numbers that agree.
  *
  * Three counts in one paragraph, and vue-i18n pluralises on one: at a single
@@ -42,17 +54,6 @@ const removalBody = computed(() => {
     ? `${mine} ${t('admin.confirmRemoveLost', { count: lost }, lost)}`
     : mine
 })
-/**
- * Nitro types a route that can throw as partially optional, so the shape is
- * declared the way it actually arrives and the template supplies the floors.
- */
-const pendingPerson = ref<{
-  id: number
-  displayName?: string
-  photos?: number
-  guessesMade?: number
-  guessesLost?: number
-}>()
 
 const photoDialog = useTemplateRef<{ open: () => void }>('photoDialog')
 const personDialog = useTemplateRef<{ open: () => void }>('personDialog')
