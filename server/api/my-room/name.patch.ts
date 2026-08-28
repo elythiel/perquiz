@@ -1,5 +1,6 @@
 import { eq, sql } from 'drizzle-orm'
 import { users } from '../../database/schema'
+import { JSON_BODY_CEILING, readBodyUnderCap } from '../../utils/body'
 import { DISPLAY_NAME_MAX, DISPLAY_NAME_MIN, tidyDisplayName } from '#shared/utils/display-name'
 
 /**
@@ -13,6 +14,7 @@ export default defineEventHandler(async (event) => {
   assertRoomsEditable()
   const userId = requireUser(event)
 
+  await readBodyUnderCap(event, JSON_BODY_CEILING)
   const body = await readBody<{ displayName?: unknown }>(event)
   if (typeof body?.displayName !== 'string') {
     throw createError({ statusCode: 400, statusMessage: 'invalid' })
