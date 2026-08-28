@@ -73,6 +73,56 @@ async function upload(
   })
 }
 
+/**
+ * The same upload, sent the way a `content-length` header cannot describe.
+ *
+ * A `ReadableStream` body is what makes the request chunked: undici cannot know
+ * the length ahead of time, so it announces none — which is precisely the hole
+ * card 80 closed. The multipart bytes are borrowed from a `FormData` that
+ * undici serialises for us, then re-emitted by hand, so the parser downstream
+ * sees exactly what it would have seen from a browser.
+ *
+ * `pull` is called only when the server reads, so `sent()` counts what was
+ * actually taken off us rather than what we were prepared to give — which is
+ * how the test below can tell "refused" from "refused after swallowing it all".
+ */
+async function chunked(bytes: Uint8Array, options: { repeat?: number } = {}) {
+  const form = new FormData()
+  form.append('photo', new Blob([bytes as BufferSource], { type: 'image/jpeg' }), 'room.jpg')
+
+  const packed = new Request('http://localhost/pack', { method: 'POST', body: form })
+  const contentType = packed.headers.get('content-type')!
+  const multipart = new Uint8Array(await packed.arrayBuffer())
+
+  const offered = multipart.byteLength * (options.repeat ?? 1)
+  let sent = 0
+
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (sent >= offered) return controller.close()
+      // Sixty-four kilobytes at a time, the way a real sender arrives — and
+      // cycling through the payload rather than materialising the whole offer,
+      // so the bound measured below is the ceiling and not the chunk size.
+      const offset = sent % multipart.byteLength
+      const slice = multipart.subarray(offset, Math.min(offset + 64 * 1024, multipart.byteLength))
+      controller.enqueue(slice)
+      sent += slice.byteLength
+    },
+  })
+
+  const api = await useTestApi()
+  const response = await api.fetch('/api/my-room/photos', {
+    method: 'POST',
+    cookie: ownerCookie,
+    headers: { 'content-type': contentType },
+    body,
+    // Required by fetch for a streamed request body, and not in the DOM types.
+    duplex: 'half',
+  } as RequestInit & { cookie: string })
+
+  return { response, sent: () => sent, offered }
+}
+
 describe('serving a photograph', () => {
   it('hands the bytes to any signed-in player, with no shared cache and no name', async () => {
     const api = await useTestApi()
@@ -341,5 +391,56 @@ describe('who may remove a photograph', () => {
     // can see any more.
     expect(await response.json()).toEqual({ remaining: 0, discardedGuesses: 1 })
     expect(api.db.all<{ count: number }>(sql`select count(*) as count from guesses`)[0]!.count).toBe(0)
+  })
+})
+/**
+ * The ceiling, when the request declines to say how heavy it is.
+ *
+ * `content-length` is a claim, and a chunked request does not even make it. The
+ * check that read the header therefore saw zero and waved the request through,
+ * and `readMultipartFormData` buffered the whole body before anything could be
+ * measured — an authenticated player could spend the process's memory (card
+ * 80). The ceiling now counts while reading.
+ */
+describe('an upload that announces no length', () => {
+  it('goes through when it stays under the ceiling', async () => {
+    // First of all a guard on the test itself: if a streamed body did not work
+    // at all, the refusal below would prove nothing about the ceiling.
+    const { response, sent } = await chunked(await image('jpeg'))
+
+    expect(response.status).toBe(201)
+    expect(sent()).toBeGreaterThan(0)
+  })
+
+  it('is refused at the ceiling, without the whole body being read', async () => {
+    // Sixteen copies of a file already at the limit: ~240MB offered, and the
+    // process has no business holding any of it.
+    const atTheLimit = new Uint8Array(MAX_UPLOAD_BYTES)
+    atTheLimit.set([0xFF, 0xD8, 0xFF], 0)
+
+    const { response, sent, offered } = await chunked(atTheLimit, { repeat: 16 })
+
+    expect(response.status).toBe(413)
+
+    // The assertion that makes this test about memory rather than about status
+    // codes: the read stopped near the ceiling instead of at the end.
+    expect(offered).toBeGreaterThan(MAX_UPLOAD_BYTES * 10)
+    // A tight bound on purpose: the ceiling plus one queued slice, not the
+    // ceiling plus whatever the chunk size happened to be.
+    expect(sent()).toBeLessThan(MAX_UPLOAD_BYTES * 1.1)
+  })
+
+  it('does not leave the room holding a photograph it refused', async () => {
+    const api = await useTestApi()
+    const atTheLimit = new Uint8Array(MAX_UPLOAD_BYTES)
+    atTheLimit.set([0xFF, 0xD8, 0xFF], 0)
+
+    await chunked(atTheLimit, { repeat: 16 })
+
+    const held = api.db.all<{ count: number }>(
+      sql`select count(*) as count from photos where user_id = ${owner}`,
+    )[0]!.count
+
+    expect(held).toBe(0)
   })
 })
