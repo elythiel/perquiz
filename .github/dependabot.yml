@@ -1,0 +1,31 @@
+# What keeps the pinned action digests from becoming a freeze.
+#
+# `release.yml` pins every `uses:` to a commit digest, because a tag is mutable:
+# whoever owns an action can move `v4` onto other code, and this repository runs
+# a workflow that may push a tag and an image. A digest cannot move.
+#
+# But a digest that nobody updates is a version that will never receive a fix
+# either, so pinning ALONE trades one risk for another. This file is the other
+# half: Dependabot rewrites both the digest and the `# vX.Y.Z` comment beside
+# it, which is exactly why that comment is a convention rather than a courtesy.
+#
+# Dependabot and not Renovate: it needs no third-party app installed on the
+# account, which for a repository with one maintainer is the difference between
+# a thing that runs and a thing that was meant to be set up.
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    # `/` and not `.github/workflows`: for actions, Dependabot reads the
+    # directory as the repository root and finds the workflows itself.
+    directory: /
+    schedule:
+      interval: weekly
+    # One pull request for all of them rather than one each. Six separate bumps
+    # a week is how a solo maintainer learns to ignore the bot, and a bot being
+    # ignored is the same as this file not existing.
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: '👷 ci'
