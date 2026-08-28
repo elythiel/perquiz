@@ -21,6 +21,12 @@ const route = useRoute()
 
       Eight-pixel cells since the HD-2D skin — a fill, the room you are on
       ringed from the inside, the rest hollow.
+
+      Eight pixels is a cell, not a target. `tap-target-y` grows the hit area to
+      44px of height without touching the width, because ten segments in a row
+      leave about thirty pixels each and a zone wider than its cell would take
+      the tap to the room next door. The bar looks exactly as it did; only the
+      reachable box changed.
     -->
     <ol class="flex flex-1 gap-1">
       <li
@@ -35,7 +41,7 @@ const route = useRoute()
       >
         <NuxtLink
           :to="{ path: `/guess/${room.token}`, query: route.query }"
-          class="block h-2"
+          class="relative tap-target-y block h-2"
           :aria-label="t(room.answered ? 'guess.roomAnswered' : 'guess.roomUnanswered', { position: index + 1 })"
           :aria-current="index === current ? 'page' : undefined"
         />

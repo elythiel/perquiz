@@ -664,6 +664,36 @@
   }
 }
 
+/* The same target, grown in ONE direction, for controls sitting shoulder to
+   shoulder.
+
+   `tap-target` widens as well as heightens, which is right for a chip laid over
+   a photograph and wrong for a row of them: the deck progress bar deals one
+   segment per room, ten of them in a flex row on a phone, so each cell is about
+   thirty pixels wide with four between. A 44px-wide zone centred on thirty
+   overflows seven each side, crosses the gap, and lands a tap on the room next
+   door — MEASURED as arithmetic before it was written, which is what card 87
+   asked for.
+
+   So the width follows the control and only the height grows. Vertically there
+   is room: the segments are centred in a row whose height comes from the
+   counter beside them, and the page leaves a 20px gap above and below, so the
+   zone extends into space no other control occupies.
+
+   Same contract as its sibling otherwise: transparent, centred, never smaller
+   than the control, and it does NOT set `position` — the call site must. */
+@utility tap-target-y {
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: 100%;
+    height: max(100%, 44px);
+  }
+}
+
 @layer base {
   /*
    * Light theme: same tokens, different values. Two selectors for a single
