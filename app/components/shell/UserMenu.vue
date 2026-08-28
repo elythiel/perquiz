@@ -6,9 +6,9 @@
  * `<details>` rather than a hand-rolled dropdown: the browser gives the
  * toggle, the keyboard, and the `aria-expanded` state on the summary for
  * free — the two things it does not give, Escape and a click outside, are the
- * dozen lines below. A `<dialog>` was the alternative (the project has four),
- * but a centred modal anchored to nothing, for a single action, is out of
- * proportion.
+ * dozen lines below. A `<dialog>` was the alternative — `<BaseDialog>` is one
+ * import away — but a centred modal anchored to nothing, for a single action,
+ * is out of proportion.
  *
  * No `role="menu"`: that role promises arrow-key navigation between items,
  * which a disclosure holding one button does not have and does not need.

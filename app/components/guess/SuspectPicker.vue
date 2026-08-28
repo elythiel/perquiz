@@ -15,7 +15,7 @@ const emit = defineEmits<{ pick: [id: number] }>()
 
 const { t } = useI18n()
 
-const dialog = useTemplateRef<HTMLDialogElement>('dialog')
+const dialog = useTemplateRef<{ open: () => void, close: () => void }>('dialog')
 const search = useTemplateRef<HTMLInputElement>('search')
 const query = ref('')
 
@@ -36,13 +36,19 @@ const matches = computed(() => {
   return props.participants.filter(person => fold(person.displayName).includes(needle))
 })
 
+/**
+ * Opening does more here than showing the box: the previous search is cleared
+ * and the field takes the focus once it exists. `<BaseDialog>` deliberately
+ * says nothing about focus, which is what leaves this the last word.
+ */
 defineExpose({
   async open() {
     query.value = ''
-    dialog.value?.showModal()
+    dialog.value?.open()
     await nextTick()
     search.value?.focus()
   },
+  close: () => dialog.value?.close(),
 })
 
 function choose(id: number) {
@@ -52,9 +58,11 @@ function choose(id: number) {
 </script>
 
 <template>
-  <dialog
+  <!-- `p-0`, because the header and the list carry their own padding: the
+       list has to scroll under a header that does not move. -->
+  <BaseDialog
     ref="dialog"
-    class="m-auto max-h-[80dvh] w-full max-w-md rounded-2xl bg-panel p-0 text-text backdrop:bg-night/80 open:flex open:flex-col"
+    class="max-h-[80dvh] max-w-md p-0 backdrop:bg-night/80"
     :aria-label="t('guess.pickerTitle')"
   >
     <header class="flex flex-col gap-3 px-5 pt-5">
@@ -148,5 +156,5 @@ function choose(id: number) {
         {{ t('guess.pickerEmpty') }}
       </li>
     </ul>
-  </dialog>
+  </BaseDialog>
 </template>

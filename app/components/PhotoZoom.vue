@@ -12,7 +12,7 @@ const { t } = useI18n()
  * same gallery, for the people who have no thumb — on a desktop nothing else
  * says that this strip scrolls.
  */
-const dialog = useTemplateRef<HTMLDialogElement>('dialog')
+const dialog = useTemplateRef<{ open: () => void, close: () => void }>('dialog')
 const strip = useTemplateRef<HTMLElement>('strip')
 const index = ref(0)
 
@@ -34,18 +34,21 @@ function step(offset: number) {
 defineExpose({
   async open(at: number) {
     index.value = at
-    dialog.value?.showModal()
+    dialog.value?.open()
     await nextTick()
     // Jump, not glide: the photo that was tapped should already be there.
     strip.value?.scrollTo({ left: at * (strip.value?.clientWidth ?? 0), behavior: 'instant' })
   },
+  close: () => dialog.value?.close(),
 })
 </script>
 
 <template>
-  <dialog
+  <!-- A darker backdrop than the rest, on purpose: what is behind a photograph
+       being looked at should recede further than what is behind a question. -->
+  <BaseDialog
     ref="dialog"
-    class="m-auto max-h-[92dvh] w-full max-w-4xl rounded-2xl bg-panel p-0 text-text backdrop:bg-night/90 open:flex open:flex-col open:gap-4"
+    class="max-h-[92dvh] max-w-4xl p-0 backdrop:bg-night/90 open:gap-4"
     :aria-label="t('photoZoom.title')"
   >
     <header class="flex items-center justify-between gap-4 px-5 pt-5">
@@ -125,5 +128,5 @@ defineExpose({
         </button>
       </template>
     </div>
-  </dialog>
+  </BaseDialog>
 </template>

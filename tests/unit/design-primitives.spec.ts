@@ -35,6 +35,12 @@ function templates(): { path: string, source: string }[] {
 
 const files = templates()
 
+/** A component's template, comments stripped: what it renders, not what it says. */
+function markup(source: string): string {
+  const template = /<template>([\s\S]*)<\/template>/.exec(source)?.[1] ?? ''
+  return template.replace(/<!--[\s\S]*?-->/g, '')
+}
+
 describe('the focus ring', () => {
   it('is stated once, in the base layer, and restated nowhere', () => {
     // `@layer base` rings every `:focus-visible` element, so a control wanting
@@ -106,5 +112,81 @@ describe('the card', () => {
     // `ThemePicker` keeps its own: a radio group is a `<fieldset>` with a
     // `<legend>`, and `<BaseCard>` renders neither.
     expect(offenders.sort()).toEqual(['app/components/BaseCard.vue', 'app/components/ThemePicker.vue'])
+  })
+})
+
+describe('the dialog shell', () => {
+  it('is written once, and every screen borrows it', () => {
+    // Five screens rolled the same native `<dialog>` by hand. The element must
+    // now appear in exactly one file: a sixth copy would come with its own
+    // opinion about the focus trap, which is the part nobody gets right twice.
+    //
+    // Markup only — two files still MENTION the element, in a comment
+    // explaining why they do not use it, and a grep that counted those would
+    // be a grep nobody trusts.
+    const holders = files
+      .filter(file => /<dialog[\s>]/.test(markup(file.source)))
+      .map(file => file.path)
+
+    expect(holders).toEqual(['app/components/BaseDialog.vue'])
+  })
+
+  it('exposes the two methods the wrappers hand on', () => {
+    // The other half of the forwarding: a shell that stops exposing `close()`
+    // leaves five wrappers forwarding into nothing, and TypeScript cannot see
+    // it — the wrappers type their ref by hand.
+    const shell = files.find(file => file.path === 'app/components/BaseDialog.vue')!.source
+
+    expect(shell).toMatch(/open: \(\) => dialog\.value\?\.showModal\(\)/)
+    expect(shell).toMatch(/close: \(\) => dialog\.value\?\.close\(\)/)
+  })
+
+  it('has its API forwarded by every wrapper', () => {
+    // Callers hold a ref to the wrapper, not to the shell. A wrapper that
+    // forgets to hand `open()` on breaks its call sites at once and silently —
+    // no type error, no warning, just a dialog that never appears.
+    for (const path of [
+      'app/components/ConfirmDialog.vue',
+      'app/components/PhotoZoom.vue',
+      'app/components/guess/SuspectPicker.vue',
+      'app/components/room/DeletePhotoDialog.vue',
+      'app/components/room/PlayerPreview.vue',
+    ]) {
+      const source = files.find(candidate => candidate.path === path)!.source
+      expect(source, path).toContain('<BaseDialog')
+      expect(source, path).toMatch(/dialog\.value\?\.open\(\)/)
+      expect(source, path).toMatch(/close: \(\) => dialog\.value\?\.close\(\)/)
+    }
+  })
+
+  it('closes on Escape and nothing else', () => {
+    // None of the five closed on a backdrop click, and adding it here would
+    // change five behaviours at once. Escape is what the element already ships.
+    const shell = files.find(file => file.path === 'app/components/BaseDialog.vue')!.source
+    expect(shell).not.toMatch(/@click|addEventListener/)
+  })
+})
+
+describe('the avatar badge', () => {
+  it('is the only place the initials and the accent are drawn', () => {
+    const holders = files
+      .filter(file => /initialsOf|accentOf/.test(file.source))
+      .map(file => file.path)
+
+    expect(holders).toEqual(['app/components/AvatarBadge.vue'])
+  })
+
+  it('left the round things that are not people alone', () => {
+    // A progress bar, the pulsing phase dot: round, and not avatars. Turning
+    // them into badges would be the mistake this refactor invites.
+    for (const path of [
+      'app/components/room/UploadTile.vue', //     the upload progress bar
+      'app/components/shell/PhaseChip.vue', //     the pulsing phase dot
+      'app/components/home/ProgressPanel.vue', //  the answers bar
+    ]) {
+      const source = files.find(candidate => candidate.path === path)!.source
+      expect(source, path).toContain('rounded-full')
+      expect(source, path).not.toContain('AvatarBadge')
+    }
   })
 })

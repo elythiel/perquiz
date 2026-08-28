@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { Standing } from '~~/server/utils/scoring'
-import { accentOf, initialsOf } from '#shared/utils/identity'
 import { ordinal } from '#shared/utils/show'
 
 defineProps<{ standings: readonly Standing[] }>()
@@ -22,11 +21,10 @@ defineProps<{ standings: readonly Standing[] }>()
         :class="player.rank === 1 ? 'text-torch-ink' : 'text-text-muted'"
       >{{ ordinal(player.rank) }}</span>
 
-      <span
-        class="grid size-9 shrink-0 place-items-center rounded-full text-xs font-bold"
-        :class="accentOf(player.displayName)"
-        aria-hidden="true"
-      >{{ initialsOf(player.displayName) }}</span>
+      <AvatarBadge
+        :name="player.displayName"
+        class="size-9 shrink-0 text-xs"
+      />
 
       <span class="min-w-0 flex-1 truncate text-lg">{{ player.displayName }}</span>
       <span class="shrink-0 text-lg font-bold tabular-nums">{{ player.score }}</span>

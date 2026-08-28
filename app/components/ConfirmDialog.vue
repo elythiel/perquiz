@@ -13,12 +13,18 @@ const emit = defineEmits<{ confirm: [] }>()
 const { t } = useI18n()
 
 /**
- * A native `<dialog>`: the focus trap, Escape and the inert background come
- * with it, and every hand-rolled overlay gets one of the three wrong.
+ * The shell is `<BaseDialog>`; what is forwarded is its API.
+ *
+ * Callers hold a ref to THIS component and call `open()` on it, so the two
+ * methods have to be handed on rather than inherited — a wrapper that forgets
+ * to forward breaks every call site at once, and silently.
  */
-const dialog = useTemplateRef<HTMLDialogElement>('dialog')
+const dialog = useTemplateRef<{ open: () => void, close: () => void }>('dialog')
 
-defineExpose({ open: () => dialog.value?.showModal() })
+defineExpose({
+  open: () => dialog.value?.open(),
+  close: () => dialog.value?.close(),
+})
 
 function confirm() {
   dialog.value?.close()
@@ -27,9 +33,11 @@ function confirm() {
 </script>
 
 <template>
-  <dialog
+  <!-- The padding and `open:gap-4` are this dialog's, not the shell's: the
+       picker has neither, and the width is nobody's default. -->
+  <BaseDialog
     ref="dialog"
-    class="m-auto w-full max-w-md rounded-2xl bg-panel p-5 text-text backdrop:bg-night/80 open:flex open:flex-col open:gap-4"
+    class="max-w-md p-5 backdrop:bg-night/80 open:gap-4"
   >
     <h2 class="text-xl leading-tight">
       {{ title }}
@@ -63,5 +71,5 @@ function confirm() {
         {{ confirmLabel }}
       </button>
     </div>
-  </dialog>
+  </BaseDialog>
 </template>

@@ -4,7 +4,7 @@ const emit = defineEmits<{ confirm: [] }>()
 
 const { t } = useI18n()
 
-const dialog = useTemplateRef<HTMLDialogElement>('dialog')
+const dialog = useTemplateRef<{ open: () => void, close: () => void }>('dialog')
 
 /**
  * The warning PAGES `/my-room` asks for, said in full.
@@ -19,7 +19,10 @@ const consequence = computed(() => {
   return `${t('myRoom.confirmDeleteLast')} ${t('myRoom.confirmDeleteLastGuesses', { count: props.guessesOnMyRoom }, props.guessesOnMyRoom)}`
 })
 
-defineExpose({ open: () => dialog.value?.showModal() })
+defineExpose({
+  open: () => dialog.value?.open(),
+  close: () => dialog.value?.close(),
+})
 
 function confirm() {
   dialog.value?.close()
@@ -28,9 +31,9 @@ function confirm() {
 </script>
 
 <template>
-  <dialog
+  <BaseDialog
     ref="dialog"
-    class="m-auto w-full max-w-md rounded-2xl bg-panel p-5 text-text backdrop:bg-night/80 open:flex open:flex-col open:gap-4"
+    class="max-w-md p-5 backdrop:bg-night/80 open:gap-4"
   >
     <h2 class="text-xl leading-tight">
       {{ t('myRoom.confirmDelete') }}
@@ -55,5 +58,5 @@ function confirm() {
         {{ t('myRoom.confirm') }}
       </button>
     </div>
-  </dialog>
+  </BaseDialog>
 </template>

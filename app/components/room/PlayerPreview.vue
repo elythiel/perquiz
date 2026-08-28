@@ -4,23 +4,25 @@ defineProps<{ photos: readonly { name: string }[] }>()
 const { t } = useI18n()
 
 /**
- * A native `<dialog>`, opened with `showModal()`.
+ * The shell is `<BaseDialog>`, which is where the focus trap, the Escape key
+ * and the inert background come from — all of which a hand-rolled overlay gets
+ * wrong in a way nobody notices until someone navigates with a keyboard.
  *
- * It brings the focus trap, the Escape key and the inert background for free —
- * all of which a hand-rolled overlay gets wrong in a way nobody notices until
- * someone navigates with a keyboard.
+ * Wider than a confirmation, because it shows a room: the width is stated here
+ * rather than defaulted by the shell.
  */
-const dialog = useTemplateRef<HTMLDialogElement>('dialog')
+const dialog = useTemplateRef<{ open: () => void, close: () => void }>('dialog')
 
 defineExpose({
-  open: () => dialog.value?.showModal(),
+  open: () => dialog.value?.open(),
+  close: () => dialog.value?.close(),
 })
 </script>
 
 <template>
-  <dialog
+  <BaseDialog
     ref="dialog"
-    class="m-auto w-full max-w-3xl rounded-2xl bg-panel p-0 text-text backdrop:bg-night/80 open:flex open:flex-col open:gap-5"
+    class="max-w-3xl p-0 backdrop:bg-night/80 open:gap-5"
     :aria-label="t('myRoom.previewTitle')"
   >
     <!--
@@ -90,5 +92,5 @@ defineExpose({
         >
       </li>
     </ul>
-  </dialog>
+  </BaseDialog>
 </template>

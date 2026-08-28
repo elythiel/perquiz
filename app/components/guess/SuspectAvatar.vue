@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { accentOf, initialsOf } from '#shared/utils/identity'
-
-const props = defineProps<{ displayName: string }>()
-
-// Same initials and same colour as the header chip — see shared/utils/identity.
-const initials = computed(() => initialsOf(props.displayName))
-const accent = computed(() => accentOf(props.displayName))
+/**
+ * The badge as the guess sheet wears it, at one size for the four screens that
+ * draw a suspect: the sheet, the picker, the participation list and the
+ * results. Kept as a name rather than dissolved into four copies of
+ * `size-10 shrink-0 text-sm`, which is the duplication `<AvatarBadge>` exists
+ * to end.
+ */
+defineProps<{ displayName: string }>()
 </script>
 
 <template>
-  <span
-    class="grid size-10 shrink-0 place-items-center rounded-full text-sm font-bold"
-    :class="accent"
-    aria-hidden="true"
-  >{{ initials }}</span>
+  <AvatarBadge
+    :name="displayName"
+    class="size-10 shrink-0 text-sm"
+  />
 </template>

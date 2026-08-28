@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { PodiumStep } from '~~/server/utils/scoring'
-import { accentOf, initialsOf } from '#shared/utils/identity'
 import { ordinal } from '#shared/utils/show'
 
 const props = defineProps<{
@@ -44,13 +43,13 @@ const HEIGHTS: Record<number, string> = { 1: 'h-56 sm:h-72', 2: 'h-40 sm:h-52', 
       <template v-if="step">
         <!-- Overlapping avatars when a rank is shared, as the mockup shows. -->
         <span class="flex animate-step-up items-center motion-reduce:animate-soft-fade">
-          <span
+          <AvatarBadge
             v-for="(player, seat) in step.players"
             :key="player.id"
-            class="grid size-16 place-items-center rounded-full text-lg font-bold sm:size-20 sm:text-xl"
-            :class="[accentOf(player.displayName), seat > 0 && '-ml-5']"
-            aria-hidden="true"
-          >{{ initialsOf(player.displayName) }}</span>
+            :name="player.displayName"
+            class="size-16 text-lg sm:size-20 sm:text-xl"
+            :class="seat > 0 && '-ml-5'"
+          />
         </span>
 
         <span class="flex animate-step-up flex-col items-center gap-1 motion-reduce:animate-soft-fade">

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { accentOf, initialsOf } from '#shared/utils/identity'
-
 const props = defineProps<{
   owner: { displayName: string }
   votes: readonly { displayName: string, count: number, isOwner: boolean }[]
@@ -23,9 +21,6 @@ const leadIn = computed(() => {
   if (second && second.count === first.count) return t('reveal.tieVote')
   return t('reveal.majority', { name: first.displayName })
 })
-
-const initials = computed(() => initialsOf(props.owner.displayName))
-const accent = computed(() => accentOf(props.owner.displayName))
 </script>
 
 <template>
@@ -45,11 +40,11 @@ const accent = computed(() => accentOf(props.owner.displayName))
 
     <div class="flex items-center gap-6">
       <!-- The halo of animation-rules.png: it widens once, then holds. -->
-      <span
-        class="grid size-20 shrink-0 place-items-center rounded-full text-2xl font-bold transition-transform duration-[900ms] ease-deck motion-reduce:transition-none sm:size-28 sm:text-3xl"
-        :class="[accent, shown ? 'scale-100' : 'scale-40']"
-        aria-hidden="true"
-      >{{ initials }}</span>
+      <AvatarBadge
+        :name="owner.displayName"
+        class="size-20 shrink-0 text-2xl transition-transform duration-[900ms] ease-deck motion-reduce:transition-none sm:size-28 sm:text-3xl"
+        :class="shown ? 'scale-100' : 'scale-40'"
+      />
 
       <span class="flex min-w-0 flex-col">
         <span class="font-mono text-label tracking-eyebrow text-torch-ink uppercase">
