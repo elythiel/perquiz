@@ -57,6 +57,26 @@ const CHIPS = [
 /** The neutral text tokens that can land inside the header's glow. */
 const TEXT_OVER_GLOW = ['text', 'text-soft', 'text-muted'] as const
 
+/**
+ * The pixel frames, by the token each one's SVG is filled with.
+ *
+ * These became BORDERS THAT CARRY MEANING with the HD-2D skin, and that is the
+ * whole reason they are enumerated here. The frame is not decoration any more:
+ * it is what tells a field at rest from a field in error, the phase the game is
+ * in, the tab you are on. WCAG 1.4.11 puts every one of them at 3:1.
+ *
+ * Enumerated by token name and not by hex, so a tint whose ink moves is
+ * remeasured without anyone remembering to come back here.
+ */
+const FRAME_TINTS = [
+  'torch-ink',
+  'clue-ink',
+  'alert-ink',
+  'amber-ink',
+  'azure-ink',
+  'edge-strong',
+] as const
+
 const pairs = <A extends readonly string[], B extends readonly string[]>(a: A, b: B) =>
   a.flatMap(x => b.map(y => [x, y] as const))
 
@@ -98,13 +118,42 @@ describe.each(THEMES)('%s theme', (_name, palette) => {
     )
   })
 
-  describe(`text inside the torchlight glow (>= ${TEXT}:1)`, () => {
-    // The glow is decorative and `aria-hidden`, but the header and the desktop
-    // nav live inside it: what counts is the rendered contrast, at the centre
-    // of the gradient where the glow is at its most opaque.
-    it.each(TEXT_OVER_GLOW)('%s on the glow', (token) => {
-      const glow = composite(palette.torch!, ds.glowAlpha, palette.night!)
-      expect(contrast(palette[token]!, glow)).toBeGreaterThanOrEqual(TEXT)
+  describe(`frame tint on a background (>= ${CONTROL}:1)`, () => {
+    it.each(pairs(FRAME_TINTS, BACKGROUNDS))('%s frame on %s', (tint, background) => {
+      expect(contrast(palette[tint]!, palette[background]!)).toBeGreaterThanOrEqual(CONTROL)
+    })
+
+    // The one frame that does not sit on a background: `on-torch` is the line
+    // around a torch flat — the primary button, the tab you are on — so what it
+    // has to be legible against is the flat it encloses.
+    it('on-torch frame on the torch flat', () => {
+      expect(contrast(palette['on-torch']!, palette.torch!)).toBeGreaterThanOrEqual(CONTROL)
+    })
+  })
+
+  describe(`text over the two decorative layers (>= ${TEXT}:1)`, () => {
+    /*
+     * The glow and the grain are both decorative and both `aria-hidden`, and
+     * the header and the desktop nav live on top of BOTH: the scanline lifts
+     * the night, the glow washes over that, and the nav's links are written on
+     * what comes out. So the pair is composited in the order the browser paints
+     * it, and measured at the centre of the gradient — the grain's own line
+     * rather than the gap beside it, and the glow at its peak.
+     *
+     * Which is to say: the worst case, twice over. The alphas that pass here
+     * are what caps how strong either layer is allowed to get, and lifting one
+     * without measuring is how the desktop nav quietly drops below AA.
+     */
+    const grained = composite(palette.text!, ds.grainAlpha[_name], palette.night!)
+    const lit = composite(palette.torch!, ds.glowAlpha, grained)
+
+    it.each(TEXT_OVER_GLOW)('%s on the grain under the glow', (token) => {
+      expect(contrast(palette[token]!, lit)).toBeGreaterThanOrEqual(TEXT)
+    })
+
+    // And on the grain alone, which is every other screenful of the app.
+    it.each(TEXT_TOKENS)('%s on the grain', (token) => {
+      expect(contrast(palette[token]!, grained)).toBeGreaterThanOrEqual(TEXT)
     })
   })
 })
@@ -116,6 +165,13 @@ describe('consistency between the two themes', () => {
   // this is where it breaks.
   it('the .light class and the media query declare the same palette', () => {
     expect(ds.mediaOverrides).toStrictEqual(ds.classOverrides)
+  })
+
+  it('the two light blocks agree on everything, frame tints included', () => {
+    // The colour comparison above only sees `--color-*`. The frame tints are a
+    // data URI each, redeclared in both blocks, and a hex mistyped in one of
+    // the two copies is exactly the drift nobody would spot by reading.
+    expect(ds.mediaProps).toStrictEqual(ds.classProps)
   })
 
   it('no light override invents a token the dark theme lacks', () => {

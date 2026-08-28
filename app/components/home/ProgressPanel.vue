@@ -17,13 +17,17 @@ const share = computed(() => props.total === 0 ? 0 : (props.answered / props.tot
     <!--
       The bar is decoration on top of the count beside it, so it is hidden from
       assistive tech rather than announced twice.
+
+      A segmented game gauge now, framed and dug into the night, rather than a
+      smooth torch-to-clue ribbon: the cells count, which is the same thing the
+      number beside it does.
     -->
     <div
-      class="h-2 overflow-hidden rounded-full bg-edge"
+      class="frame frame-sm frame-edge frame-fill h-9 overflow-hidden bg-night p-1"
       aria-hidden="true"
     >
       <div
-        class="h-full rounded-full bg-gradient-to-r from-torch to-clue transition-[width] duration-240 ease-deck"
+        class="gauge-fill h-full transition-[width] duration-240 ease-deck"
         :style="{ width: `${share}%` }"
       />
     </div>

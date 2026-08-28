@@ -28,6 +28,24 @@ const { t } = useI18n()
  * first step at height zero and grow when `shown` turns true, each 60 ms after
  * the last (screens/animation-rules.png). Driving it from state rather than
  * from mounting is what lets the whole room live on one page.
+ *
+ * Each bar sits in a TRACK of its own — the space the column has left once the
+ * count and the name have taken theirs — and its percentage is a percentage of
+ * that track. Two reasons, and the second is the one that matters.
+ *
+ * The visible one: the bars used to be siblings of the two labels inside a
+ * `h-full` column, so a bar at 100% asked for the whole column on its own.
+ * Flexbox then shrank all three, and the name carries `truncate` — so the text
+ * was clipped from below, which is how this was found.
+ *
+ * The one that would have survived the obvious fix: pinning the labels with
+ * `shrink-0` and letting the bar give way instead makes the SHRINKING
+ * proportional to the overflow rather than to the votes. A 100% bar would lose
+ * the labels' height while a 50% bar lost nothing, so two bars in the ratio 2:1
+ * would have been drawn at about 1.5:1. The chart would have stopped telling
+ * the truth about the counts, quietly, and nothing would have looked wrong.
+ * A track measures every bar against the same height, which is the only version
+ * where the percentages mean what they say.
  */
 const bars = computed(() => {
   const all = [
@@ -47,7 +65,7 @@ const bars = computed(() => {
       class="flex h-full max-w-32 min-w-0 flex-1 flex-col justify-end gap-3"
     >
       <p
-        class="text-center font-mono text-lg tabular-nums transition-[color,opacity] duration-240 ease-deck"
+        class="shrink-0 text-center font-mono text-lg tabular-nums transition-[color,opacity] duration-240 ease-deck"
         :class="[revealed && bar.owner ? 'text-torch-ink' : 'text-text-muted', !shown && 'opacity-0']"
         :style="{ transitionDelay: `${index * 60}ms` }"
       >
@@ -60,20 +78,28 @@ const bars = computed(() => {
         same rules prescribe, which is why it is a second animation rather
         than a disabled transform.
       -->
-      <div
-        class="origin-bottom rounded-t-2xl transition-[height,opacity,background-color] duration-[700ms] ease-deck motion-reduce:transition-[opacity] motion-reduce:duration-120"
-        :class="revealed && bar.owner
-          ? 'bg-gradient-to-t from-torch/30 to-torch'
-          : bar.blank ? 'bg-sunken' : 'bg-panel'"
-        :style="{
-          height: shown ? `${bar.share}%` : '0%',
-          opacity: shown ? 1 : 0,
-          transitionDelay: `${index * 60}ms`,
-        }"
-      />
+      <!-- The track: what the column has left, and the height every bar's
+           percentage is measured against. The bar is absolutely positioned in
+           it rather than laid out as a flex item, so the percentage resolves
+           against a box that is definitely there — a flex item's percentage
+           height against a `flex-1` parent is the kind of thing engines have
+           disagreed about. -->
+      <div class="relative min-h-0 flex-1">
+        <div
+          class="absolute inset-x-0 bottom-0 origin-bottom transition-[height,opacity,background-color] duration-[700ms] ease-deck motion-reduce:transition-[opacity] motion-reduce:duration-120"
+          :class="revealed && bar.owner
+            ? 'bg-gradient-to-t from-torch/30 to-torch'
+            : bar.blank ? 'bg-sunken' : 'bg-panel'"
+          :style="{
+            height: shown ? `${bar.share}%` : '0%',
+            opacity: shown ? 1 : 0,
+            transitionDelay: `${index * 60}ms`,
+          }"
+        />
+      </div>
 
       <p
-        class="truncate text-center text-base transition-[color,opacity] duration-240 ease-deck sm:text-lg"
+        class="shrink-0 truncate text-center text-base transition-[color,opacity] duration-240 ease-deck sm:text-lg"
         :class="[revealed && bar.owner ? 'text-torch-ink' : 'text-text-muted', !shown && 'opacity-0']"
         :style="{ transitionDelay: `${index * 60}ms` }"
       >

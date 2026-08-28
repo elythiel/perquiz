@@ -15,6 +15,13 @@
  * (`#title`), and a value shown opposite it (`#aside`). All three land in the
  * same baseline-aligned row, so the eyebrow is styled once here rather than
  * copied onto every `<h2>`.
+ *
+ * Hollow since the HD-2D skin, and framed by the same question that decides the
+ * element. The `panel` flat is gone — it was barely a shade above the night, and
+ * dropping it lets the glow pass through the cards it used to sit under. What
+ * replaces it is the pixel frame: azure for a titled region, edge for the
+ * untitled one-sentence cards, which is the pair the guide draws. A tint prop
+ * would be a second way to ask a question `titled` already answers.
  */
 /**
  * `align` exists for one reason and covers both of its cases: an `#aside` that
@@ -33,7 +40,8 @@ const titled = computed(() => Boolean(title) || Boolean(slots.title))
 <template>
   <component
     :is="titled ? 'section' : 'div'"
-    class="flex flex-col gap-3 rounded-2xl bg-panel px-5 py-4"
+    class="frame frame-sm flex flex-col gap-3 px-3.5 py-2.5"
+    :class="titled ? 'frame-azure' : 'frame-edge'"
   >
     <div
       v-if="titled"

@@ -11,7 +11,7 @@ defineProps<Props>()
     <span class="sr-only text-sm font-medium text-text-soft sm:not-sr-only">{{ displayName }}</span>
     <AvatarBadge
       :name="displayName"
-      class="size-8 text-xs"
+      class="frame-none text-xs"
     />
   </span>
 </template>

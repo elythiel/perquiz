@@ -6,13 +6,20 @@
  * "the blue one" stops meaning anything.
  */
 
-/** The design system's five identity accents, as flat-plus-ink pairs. */
+/**
+ * The design system's five identity accents, as flat, ink and frame.
+ *
+ * Three classes and not two since the HD-2D skin: the badge is a framed block,
+ * and its frame is the same colour as its ink. Named here rather than derived
+ * in the component, because "which accent is this person" is this file's job
+ * and « the blue one » has to mean one thing in every place it is drawn.
+ */
 const ACCENTS = [
-  'bg-torch/20 text-torch-ink',
-  'bg-clue/20 text-clue-ink',
-  'bg-alert/20 text-alert-ink',
-  'bg-amber/20 text-amber-ink',
-  'bg-azure/20 text-azure-ink',
+  'bg-torch/20 text-torch-ink frame-torch',
+  'bg-clue/20 text-clue-ink frame-clue',
+  'bg-alert/20 text-alert-ink frame-alert',
+  'bg-amber/20 text-amber-ink frame-amber',
+  'bg-azure/20 text-azure-ink frame-azure',
 ] as const
 
 /** Always two letters: "Claire Dupont" -> CD, "Sofia" -> SO. */

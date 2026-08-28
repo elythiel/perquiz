@@ -24,7 +24,7 @@ const lines = computed(() => props.failures.map(failure => ({
 
 <template>
   <section
-    class="flex flex-col gap-2 rounded-2xl bg-alert/15 px-5 py-4"
+    class="frame frame-alert frame-fill flex flex-col gap-2 bg-alert/15 px-3.5 py-2.5"
     :aria-label="t('myRoom.errorHeading')"
   >
     <ul class="flex flex-col gap-1.5">

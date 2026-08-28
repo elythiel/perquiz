@@ -24,7 +24,7 @@ const zoom = useTemplateRef<{ open: (index: number) => void }>('zoom')
         -->
         <button
           type="button"
-          class="block w-full overflow-hidden rounded-xl bg-sunken transition-opacity duration-100 ease-micro hover:opacity-90"
+          class="press relative block w-full overflow-hidden bg-sunken transition-opacity duration-100 ease-micro hover:opacity-90"
           :aria-label="t('guess.zoomOpen', { position: index + 1 })"
           @click="zoom?.open(index)"
         >

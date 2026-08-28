@@ -26,7 +26,7 @@ const SHOWN = 4
       >
         <NuxtLink
           to="/my-room"
-          class="block overflow-hidden rounded-xl bg-sunken"
+          class="frame-flush frame-azure frame-fill relative block overflow-hidden bg-sunken"
         >
           <!-- Named, not decorative: the link takes its accessible name from
                this alt, and without one a screen reader announces four links
@@ -43,11 +43,11 @@ const SHOWN = 4
       <li v-if="!readOnly && photos.length <= SHOWN">
         <NuxtLink
           to="/my-room"
-          class="grid aspect-square w-full place-items-center rounded-xl border border-dashed border-edge-strong text-2xl text-torch-ink transition-colors duration-100 ease-micro hover:border-torch-ink"
+          class="frame frame-torch press grid aspect-square w-full place-items-center text-2xl text-torch-ink"
           :aria-label="t('home.addPhotos')"
         >
           <Icon
-            name="mingcute:add-line"
+            name="pixelarticons:plus"
             class="block size-6"
             aria-hidden="true"
           />

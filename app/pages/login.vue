@@ -33,17 +33,18 @@ const signedOut = computed(() => route.query.bye !== undefined)
 </script>
 
 <template>
-  <div class="relative flex min-h-dvh flex-col overflow-x-hidden">
-    <!-- The same torchlight wash as the shell: decoration, never announced. -->
+  <div class="grain relative flex min-h-dvh flex-col overflow-x-hidden">
+    <!-- The same torchlight wash and the same grain as the shell: decoration,
+         never announced. -->
     <div
-      class="torch-glow pointer-events-none absolute -top-40 -left-24 size-96 rounded-full"
+      class="torch-glow pointer-events-none absolute -top-48 -left-32 size-128 rounded-full"
       aria-hidden="true"
     />
 
     <main class="relative mx-auto flex w-full max-w-lg flex-1 flex-col justify-center gap-8 px-5 py-16 sm:px-8">
       <!-- Barely lit, like the rest of the art direction — but `text-muted`,
            which the contrast audit holds above 4.5:1 in both themes. -->
-      <h1 class="text-6xl leading-none font-bold tracking-tight text-text-muted sm:text-7xl">
+      <h1 class="text-center text-6xl leading-none font-bold tracking-tight text-text-muted sm:text-7xl">
         {{ $t('app.name') }}
       </h1>
 
@@ -53,7 +54,7 @@ const signedOut = computed(() => route.query.bye !== undefined)
 
       <section
         v-if="problem"
-        class="flex flex-col gap-2 rounded-2xl bg-alert/15 px-5 py-4"
+        class="frame frame-alert frame-fill flex flex-col gap-2 bg-alert/15 px-3.5 py-2.5"
       >
         <h2 class="font-mono text-label tracking-label text-alert-ink uppercase">
           {{ $t(problem.title) }}
@@ -66,7 +67,7 @@ const signedOut = computed(() => route.query.bye !== undefined)
       <!-- `clue` and not `alert`: nothing went wrong here, a state changed. -->
       <section
         v-else-if="signedOut"
-        class="flex flex-col gap-2 rounded-2xl bg-clue/15 px-5 py-4"
+        class="frame frame-clue frame-fill flex flex-col gap-2 bg-clue/15 px-3.5 py-2.5"
       >
         <h2 class="font-mono text-label tracking-label text-clue-ink uppercase">
           {{ $t('login.signedOutTitle') }}
@@ -79,7 +80,7 @@ const signedOut = computed(() => route.query.bye !== undefined)
       <!-- A full page navigation, not a fetch: the next stop is the provider. -->
       <a
         href="/api/auth/login"
-        class="rounded-2xl bg-torch px-6 py-4 text-center text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90"
+        class="frame frame-on-torch frame-fill press bg-torch px-4.5 py-2.5 text-center text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90"
       >
         {{ problem ? $t('login.retry') : $t('login.signIn') }}
       </a>

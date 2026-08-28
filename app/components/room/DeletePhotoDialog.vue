@@ -33,7 +33,7 @@ function confirm() {
 <template>
   <BaseDialog
     ref="dialog"
-    class="max-w-md p-5 backdrop:bg-night/80 open:gap-4"
+    class="max-w-md p-3.5 backdrop:bg-night/80 open:gap-4"
   >
     <h2 class="text-xl leading-tight">
       {{ t('myRoom.confirmDelete') }}
@@ -41,7 +41,7 @@ function confirm() {
 
     <p
       v-if="consequence"
-      class="rounded-xl bg-alert/15 px-4 py-3 text-base leading-relaxed text-alert-ink"
+      class="bg-alert/15 px-4 py-3 text-base leading-relaxed text-alert-ink"
     >
       {{ consequence }}
     </p>
@@ -52,7 +52,7 @@ function confirm() {
       </ButtonSecondary>
       <button
         type="button"
-        class="rounded-xl bg-alert px-4 py-2.5 text-base font-bold text-night transition-opacity duration-100 ease-micro hover:opacity-90 focus-ring-alert"
+        class="frame frame-alert frame-fill press bg-alert px-2.5 py-1 text-base font-bold text-night transition-opacity duration-100 ease-micro hover:opacity-90 focus-ring-alert"
         @click="confirm"
       >
         {{ t('myRoom.confirm') }}

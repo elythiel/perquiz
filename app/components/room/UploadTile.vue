@@ -18,13 +18,13 @@ const label = computed(() => props.upload.status === 'processing'
 </script>
 
 <template>
-  <div class="flex aspect-4/3 flex-col justify-center gap-3 rounded-2xl bg-sunken px-5">
+  <div class="frame frame-torch frame-fill flex aspect-4/3 flex-col justify-center gap-3 bg-sunken px-3.5">
     <p class="font-mono text-label tracking-label text-torch-ink uppercase">
       {{ label }}
     </p>
 
     <div
-      class="h-1.5 overflow-hidden rounded-full bg-edge"
+      class="h-1.5 overflow-hidden bg-edge"
       role="progressbar"
       :aria-valuenow="upload.status === 'sending' ? upload.percent : undefined"
       :aria-valuemin="0"
@@ -32,7 +32,7 @@ const label = computed(() => props.upload.status === 'processing'
       :aria-label="upload.fileName"
     >
       <div
-        class="h-full rounded-full bg-torch transition-[width] duration-200 ease-micro"
+        class="h-full bg-torch transition-[width] duration-200 ease-micro"
         :class="upload.status === 'processing' && 'animate-standby'"
         :style="{ width: upload.status === 'processing' ? '100%' : `${upload.percent}%` }"
       />

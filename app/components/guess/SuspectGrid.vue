@@ -41,6 +41,11 @@ function usedIn(id: number): string | undefined {
 
 <template>
   <!--
+    Framed tiles rather than the segmented control's filled block: each one
+    carries an avatar and two lines, and a torch flat under all of that would
+    bury the accent the badge is there to show. The tint moves, the flat does
+    not.
+
     Native radios, the pattern `ThemePicker` settled: one tab stop for the
     whole group, arrow keys between the names, and « 2 sur 6 » announced by
     the browser rather than by us — which is also why the selected tile needs
@@ -58,10 +63,8 @@ function usedIn(id: number): string | undefined {
       <label
         v-for="person in suspects"
         :key="person.id"
-        class="flex cursor-pointer items-center gap-2.5 rounded-2xl px-3 py-2.5 transition-colors duration-100 ease-micro focus-ring-within"
-        :class="person.id === selected
-          ? 'bg-torch/10 text-torch-ink'
-          : 'bg-panel text-text hover:bg-sunken'"
+        class="frame frame-sm frame-fill flex cursor-pointer items-center gap-2.5 px-1.5 py-1 transition-colors duration-100 ease-micro focus-ring-within"
+        :class="person.id === selected ? 'frame-torch bg-torch/10 text-torch-ink' : 'frame-edge text-text hover:bg-sunken'"
       >
         <input
           type="radio"
@@ -104,7 +107,7 @@ function usedIn(id: number): string | undefined {
     >
       <Icon
         v-if="state === 'saved'"
-        name="mingcute:check-line"
+        name="pixelarticons:check"
         class="block size-3.5"
         aria-hidden="true"
       />

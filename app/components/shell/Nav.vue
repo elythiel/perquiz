@@ -58,10 +58,15 @@ const items = computed<NavItem[]>(() => [
         v-for="item in items"
         :key="item.to"
       >
+        <!-- The tab you are on is a FILLED torch block, and the phase chip
+             beside it is hollow: « where I am » and « what the game is doing »
+             are two different facts and must not wear one shape. `frame-none`
+             on the others spends the same three pixels on nothing, so walking
+             between tabs never moves the row. -->
         <NuxtLink
           :to="item.to"
-          class="tap-target relative block rounded-lg py-1.5 font-mono text-label tracking-widest whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text-soft sm:px-2"
-          :class="isCurrent(item.to) && 'text-torch-ink'"
+          class="frame frame-sm press tap-target relative block font-mono text-label tracking-widest whitespace-nowrap uppercase transition-colors duration-100 ease-micro sm:px-0.5"
+          :class="isCurrent(item.to) ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch' : 'frame-none text-text-muted hover:text-text-soft'"
           :aria-current="isCurrent(item.to) ? 'page' : undefined"
         >
           {{ item.label }}

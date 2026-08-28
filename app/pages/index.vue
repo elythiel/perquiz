@@ -50,14 +50,14 @@ const tally = computed(() => {
  */
 const action = computed(() => {
   if (phase.value === 'revealed') {
-    return { to: '/results', label: t('home.seeResults'), icon: 'mingcute:trophy-line' }
+    return { to: '/results', label: t('home.seeResults'), icon: 'pixelarticons:trophy' }
   }
   if (phase.value === 'locked') return undefined
   if (photos.value.length === 0) {
-    return { to: '/my-room', label: t('home.addPhotos'), icon: 'mingcute:pic-line' }
+    return { to: '/my-room', label: t('home.addPhotos'), icon: 'pixelarticons:image' }
   }
   if (phase.value === 'preparation') {
-    return { to: '/my-room', label: t('home.fillRoom'), icon: 'mingcute:box-line' }
+    return { to: '/my-room', label: t('home.fillRoom'), icon: 'pixelarticons:archive' }
   }
   if (remaining.value > 0) {
     return {
@@ -65,10 +65,10 @@ const action = computed(() => {
       label: answered.value === 0 ? t('home.startGuessing') : t('home.keepGuessing'),
       // A person with a question mark, which is the game's whole question —
       // not "what is this?" but "who is this?".
-      icon: 'mingcute:user-question-line',
+      icon: 'pixelarticons:circle-question',
     }
   }
-  return { to: '/guess', label: t('home.reviewAnswers'), icon: 'mingcute:list-check-line' }
+  return { to: '/guess', label: t('home.reviewAnswers'), icon: 'pixelarticons:checklist' }
 })
 
 const headline = computed(() => {
@@ -97,9 +97,9 @@ const note = computed(() => {
 
 <template>
   <section class="flex flex-col gap-5">
-    <h1 class="max-w-measure text-3xl leading-tight font-bold sm:text-4xl">
+    <ShellPageTitle>
       {{ headline }}
-    </h1>
+    </ShellPageTitle>
 
     <p
       v-if="note"

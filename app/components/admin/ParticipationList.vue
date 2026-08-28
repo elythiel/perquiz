@@ -50,7 +50,7 @@ function when(seconds: number | null): string {
       <li
         v-for="person in participants"
         :key="person.id"
-        class="flex items-center gap-3 rounded-2xl bg-panel px-4 py-3"
+        class="frame frame-edge flex items-center gap-3 px-2.5 py-1.5"
       >
         <GuessSuspectAvatar :display-name="person.displayName" />
 
@@ -89,15 +89,15 @@ function when(seconds: number | null): string {
         -->
         <button
           type="button"
-          class="grid size-8 shrink-0 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro enabled:hover:text-alert-ink disabled:opacity-25 focus-ring-alert"
+          class="grid py-1.5 px-1.5 shrink-0 place-items-center text-text-muted transition-colors duration-100 ease-micro enabled:hover:text-alert-ink disabled:opacity-25 focus-ring-alert"
           :disabled="person.id === me"
           :title="person.id === me ? t('admin.cannotRemoveYourself') : undefined"
           :aria-label="t('admin.removeParticipant', { name: person.displayName })"
           @click="emit('remove', person.id)"
         >
           <Icon
-            name="mingcute:close-line"
-            class="block size-4"
+            name="pixelarticons:trash"
+            class="block size-6"
             aria-hidden="true"
           />
         </button>

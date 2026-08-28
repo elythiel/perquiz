@@ -97,10 +97,10 @@ async function removePerson() {
     class="flex flex-col gap-6"
   >
     <header class="flex items-center justify-between gap-4">
-      <h1 class="text-3xl leading-tight sm:text-4xl">
+      <ShellPageTitle>
         {{ t('admin.title') }}
-      </h1>
-      <p class="rounded-lg bg-clue/15 px-3 py-1.5 font-mono text-label tracking-label text-clue-ink uppercase">
+      </ShellPageTitle>
+      <p class="frame frame-xs frame-clue px-1.5 font-mono text-label tracking-label text-clue-ink uppercase">
         {{ t('admin.badge') }}
       </p>
     </header>
@@ -119,7 +119,7 @@ async function removePerson() {
     <NuxtLink
       v-if="!isBeforeLock(data.phase)"
       to="/reveal"
-      class="rounded-2xl bg-clue/15 px-5 py-4 text-center text-lg font-bold text-clue-ink transition-opacity duration-100 ease-micro hover:opacity-90"
+      class="frame frame-clue frame-fill press bg-clue/15 px-3.5 py-2.5 text-center text-lg font-bold text-clue-ink transition-opacity duration-100 ease-micro hover:opacity-90"
     >
       {{ t('reveal.open') }}
     </NuxtLink>

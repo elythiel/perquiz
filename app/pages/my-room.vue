@@ -118,9 +118,9 @@ async function rename(displayName: string) {
 <template>
   <section class="flex flex-col gap-6">
     <header class="flex flex-wrap items-center justify-between gap-3">
-      <h1 class="text-3xl leading-tight sm:text-4xl">
+      <ShellPageTitle>
         {{ t('myRoom.title') }}
-      </h1>
+      </ShellPageTitle>
       <RoomStatusChip :in-play="inPlay" />
     </header>
 
@@ -176,7 +176,7 @@ async function rename(displayName: string) {
       >
         <template #icon>
           <Icon
-            name="mingcute:eye-line"
+            name="pixelarticons:eye"
             class="block size-5 shrink-0"
             aria-hidden="true"
           />
@@ -191,7 +191,7 @@ async function rename(displayName: string) {
       >
         <template #icon>
           <Icon
-            name="mingcute:pic-line"
+            name="pixelarticons:image"
             class="block size-5 shrink-0"
             aria-hidden="true"
           />

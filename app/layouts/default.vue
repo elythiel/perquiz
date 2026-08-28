@@ -7,10 +7,14 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
 </script>
 
 <template>
-  <div class="relative flex min-h-dvh flex-col overflow-x-hidden">
-    <!-- The torchlight glow: decoration, never announced. -->
+  <div class="grain relative flex min-h-dvh flex-col overflow-x-hidden">
+    <!-- The scanline grain rides on the shell above: one line in three over
+         the whole page, static, under everything else on it. -->
+    <!-- The torchlight glow: decoration, never announced. Round, and the one
+         round thing left in the skin — a light source has no corners, and this
+         one is deliberately the smoothest edge on the page. -->
     <div
-      class="torch-glow pointer-events-none absolute -top-40 -left-24 size-96 rounded-full"
+      class="torch-glow pointer-events-none absolute -top-48 -left-32 size-128 rounded-full"
       aria-hidden="true"
     />
 
@@ -35,7 +39,7 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
         <ShellNav
           :phase="phase"
           :is-admin="isAdmin"
-          class="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 rounded-2xl bg-panel p-3 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0"
+          class="frame frame-edge max-sm:frame-fill fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 bg-panel p-1.5 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:unframed sm:bg-transparent sm:px-0 sm:py-0"
         />
 
         <ShellUserMenu :display-name="displayName" />

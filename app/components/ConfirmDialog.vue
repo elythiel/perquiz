@@ -37,7 +37,7 @@ function confirm() {
        picker has neither, and the width is nobody's default. -->
   <BaseDialog
     ref="dialog"
-    class="max-w-md p-5 backdrop:bg-night/80 open:gap-4"
+    class="max-w-md p-3.5 backdrop:bg-night/80 open:gap-4"
   >
     <h2 class="text-xl leading-tight">
       {{ title }}
@@ -45,7 +45,7 @@ function confirm() {
 
     <p
       v-if="body"
-      class="rounded-xl px-4 py-3 text-base leading-relaxed"
+      class="px-4 py-3 text-base leading-relaxed"
       :class="tone === 'clue' ? 'bg-clue/15 text-clue-ink' : 'bg-alert/15 text-alert-ink'"
     >
       {{ body }}
@@ -64,8 +64,8 @@ function confirm() {
       </ButtonSecondary>
       <button
         type="button"
-        class="rounded-xl px-4 py-2.5 text-base font-bold text-night transition-opacity duration-100 ease-micro hover:opacity-90"
-        :class="tone === 'clue' ? 'bg-clue' : 'bg-alert'"
+        class="frame frame-fill press px-2.5 py-1 text-base font-bold text-night transition-opacity duration-100 ease-micro hover:opacity-90"
+        :class="tone === 'clue' ? 'frame-clue bg-clue' : 'frame-alert bg-alert'"
         @click="confirm"
       >
         {{ confirmLabel }}

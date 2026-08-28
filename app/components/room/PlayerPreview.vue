@@ -34,12 +34,12 @@ defineExpose({
     <header class="flex flex-col gap-3 px-5 pt-5">
       <button
         type="button"
-        class="self-end grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text"
+        class="self-end grid size-11 place-items-center text-text-muted transition-colors duration-100 ease-micro hover:text-text"
         :aria-label="t('myRoom.closePreview')"
         @click="dialog?.close()"
       >
         <Icon
-          name="mingcute:close-line"
+          name="pixelarticons:close"
           class="block size-5"
           aria-hidden="true"
         />
@@ -67,14 +67,14 @@ defineExpose({
       cannot focus is a scroll container a keyboard cannot scroll.
     -->
     <ul
-      class="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-5 pb-5"
+      class="flex snap-x snap-mandatory gap-12 overflow-x-auto overscroll-x-contain px-5 pb-5"
       tabindex="0"
       :aria-label="t('myRoom.previewGallery')"
     >
       <li
         v-for="(photo, index) in photos"
         :key="photo.name"
-        class="flex shrink-0 snap-center"
+        class="flex shrink-0 items-center snap-center max-w-2/3"
       >
         <!--
           The photo and nothing else: no frame, no rounding, no plate behind
@@ -83,13 +83,15 @@ defineExpose({
           preview exists to show. Each slide is now exactly the size of its
           photo, capped so a landscape one still fits a phone.
         -->
-        <img
-          :src="`/api/photos/${photo.name}/web`"
-          :alt="t('myRoom.photoLabel', { position: index + 1 })"
-          loading="lazy"
-          decoding="async"
-          class="max-h-[65dvh] w-auto max-w-[86vw] object-contain"
-        >
+        <div class="frame-fill">
+          <img
+            :src="`/api/photos/${photo.name}/web`"
+            :alt="t('myRoom.photoLabel', { position: index + 1 })"
+            loading="lazy"
+            decoding="async"
+            class="max-h-[65dvh] w-auto max-w-full object-contain"
+          >
+        </div>
       </li>
     </ul>
   </BaseDialog>

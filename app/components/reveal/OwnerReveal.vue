@@ -30,7 +30,7 @@ const leadIn = computed(() => {
     block moving rather than a screen being replaced.
   -->
   <div
-    class="flex flex-col gap-8 transition-[opacity,transform] duration-[600ms] ease-deck motion-reduce:transition-opacity motion-reduce:duration-120"
+    class="flex flex-col gap-8 transition-[opacity,transform] duration-600 ease-deck motion-reduce:transition-opacity motion-reduce:duration-120"
     :class="shown ? 'opacity-100' : 'translate-y-4 opacity-0'"
     :aria-hidden="!shown"
   >
@@ -42,7 +42,7 @@ const leadIn = computed(() => {
       <!-- The halo of animation-rules.png: it widens once, then holds. -->
       <AvatarBadge
         :name="owner.displayName"
-        class="size-20 shrink-0 text-2xl transition-transform duration-[900ms] ease-deck motion-reduce:transition-none sm:size-28 sm:text-3xl"
+        class="size-20 shrink-0 text-2xl transition-transform duration-900 ease-deck motion-reduce:transition-none sm:size-28 sm:text-3xl"
         :class="shown ? 'scale-100' : 'scale-40'"
       />
 

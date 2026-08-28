@@ -14,16 +14,23 @@
  * `:focus-visible` element, and both `<button>` and `<a>` are among them.
  */
 
-/** The four geometries in use, each named for where it earns its keep. */
+/**
+ * The four geometries in use, each named for where it earns its keep.
+ *
+ * No radius any more: the corners are cut by the frame, three pixels at a
+ * time, and a `rounded-*` underneath one would only fight it. The paddings are
+ * unchanged, so each button keeps the size it was tuned to next to whatever it
+ * stands beside — the frame eats into it from the inside, equally everywhere.
+ */
 export const BUTTON_SIZES = {
   /** Dialog actions, side by side under a short question. */
-  sm: 'rounded-xl px-4 py-2.5 text-base',
+  sm: 'px-3 py-1.5 text-base',
   /** Beside a text input, whose height it has to match. */
-  md: 'rounded-xl px-4 py-3 text-base',
+  md: 'px-3 py-2 text-base',
   /** A page's actions, thumb-sized. */
-  lg: 'rounded-2xl px-5 py-4 text-base',
+  lg: 'px-5 py-4 text-base',
   /** The one call to action of a screen: the same box, a bigger voice. */
-  xl: 'rounded-2xl px-5 py-4 text-lg',
+  xl: 'px-5 py-4 text-lg',
 } as const
 
 export type ButtonSize = keyof typeof BUTTON_SIZES

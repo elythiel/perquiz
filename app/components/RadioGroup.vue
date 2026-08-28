@@ -50,13 +50,18 @@ const choice = defineModel<T>({ required: true })
       class="segment-group"
       :class="layout === 'grid' ? 'grid grid-cols-2' : 'flex'"
     >
+      <!-- Chosen: a filled torch block, framed in `on-torch` and cut to it.
+           Not chosen: a bare label — `frame-none` keeps the three pixels and
+           spends them on nothing, so choosing an option never resizes it. -->
       <label
         v-for="option in options"
         :key="option.value"
         class="segment cursor-pointer focus-ring-within"
         :class="[
           layout === 'row' && 'flex-1',
-          choice === option.value ? 'bg-torch/10 text-torch-ink' : 'text-text-muted hover:text-text-soft',
+          choice === option.value
+            ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch'
+            : 'frame-none text-text-muted hover:text-text-soft',
         ]"
       >
         <input
@@ -69,7 +74,7 @@ const choice = defineModel<T>({ required: true })
         <Icon
           v-if="option.icon"
           :name="option.icon"
-          class="block size-4 shrink-0"
+          class="block size-6 shrink-0"
           aria-hidden="true"
         />
         {{ option.label }}
