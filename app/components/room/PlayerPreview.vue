@@ -84,7 +84,9 @@ defineExpose({
         <img
           :src="`/api/photos/${photo.name}/web`"
           :alt="t('myRoom.photoLabel', { position: index + 1 })"
-          class="max-h-[65vh] w-auto max-w-[86vw] object-contain"
+          loading="lazy"
+          decoding="async"
+          class="max-h-[65dvh] w-auto max-w-[86vw] object-contain"
         >
       </li>
     </ul>

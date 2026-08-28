@@ -50,6 +50,37 @@ describe('the French locale', () => {
     expect(keys.filter(key => !te(key))).toEqual([])
   })
 
+  /**
+   * Scaffolding copy is a thing that ships.
+   *
+   * `myRoom.milestone` read "M3 — Ma pièce" and fed a placeholder screen that
+   * no page rendered any more; the harvest above cannot see it, because it only
+   * checks that the keys the app ASKS for exist. This looks the other way.
+   */
+  it('names no milestone', () => {
+    const milestoneLabels = (node: Messages, path = ''): string[] =>
+      Object.entries(node).flatMap(([key, value]) => {
+        const here = path ? `${path}.${key}` : key
+        if (typeof value !== 'string') return milestoneLabels(value, here)
+        return /\bM\d+\b/.test(value) ? [`${here}: ${value}`] : []
+      })
+
+    expect(milestoneLabels(messages)).toEqual([])
+  })
+
+  it('uses typographic apostrophes', () => {
+    const straight = (node: Messages, path = ''): string[] =>
+      Object.entries(node).flatMap(([key, value]) => {
+        const here = path ? `${path}.${key}` : key
+        if (typeof value !== 'string') return straight(value, here)
+        return value.includes('\'') ? [`${here}: ${value}`] : []
+      })
+
+    // French copy set with a typewriter apostrophe is the tell of a string
+    // nobody proofread; it is also the one that breaks the type of the rest.
+    expect(straight(messages)).toEqual([])
+  })
+
   it('has no empty string', () => {
     const empty = (node: Messages, path = ''): string[] =>
       Object.entries(node).flatMap(([key, value]) => {
@@ -78,5 +109,61 @@ describe('the message format', () => {
   it('pluralises tied ranks (docs/SPEC.md §5)', () => {
     expect(t('results.tie', { count: 1 }, 1)).toBe('1 joueur ex æquo')
     expect(t('results.tie', { count: 3 }, 3)).toBe('3 joueurs ex æquo')
+  })
+})
+
+/**
+ * Sentences carrying two numbers.
+ *
+ * vue-i18n pluralises a message on ONE count, so a second number in the same
+ * sentence never agrees: a two-player party read "1 participants", a room with
+ * one photo read "Ses 1 photos". The fix is one message per number, composed
+ * through a carrier that keeps the word order here rather than in a component —
+ * and the boundary worth pinning is 1, which is where every one of them broke.
+ */
+describe('two numbers in one sentence', () => {
+  /** The same composition the pages do, kept next to what it asserts. */
+  const fragment = (key: string, count: number) => t(key, { count }, count)
+
+  it('agrees on both halves of the dashboard tally', () => {
+    const tally = (rooms: number, players: number) => t('home.tally', {
+      rooms: fragment('home.tallyRooms', rooms),
+      players: fragment('home.tallyPlayers', players),
+    })
+
+    expect(tally(1, 2)).toBe('1 pièce en jeu, 2 participants')
+    expect(tally(9, 10)).toBe('9 pièces en jeu, 10 participants')
+    // The party of two, which is what this test exists for.
+    expect(tally(1, 1)).toBe('1 pièce en jeu, 1 participant')
+  })
+
+  it('names the audience of one as a person, not as a count', () => {
+    const summary = (photos: number, others: number) => t('myRoom.summary', {
+      count: photos,
+      others: fragment('myRoom.summaryOthers', others),
+    }, photos)
+
+    expect(summary(1, 1)).toBe('Votre photo apparaît sur la grille de l’autre joueur. Aucun nom n’est attaché.')
+    expect(summary(3, 9)).toBe('Vos 3 photos apparaissent sur la grille des 9 autres joueurs. Aucun nom n’est attaché.')
+  })
+
+  it('counts a removal without saying "1 photos"', () => {
+    const body = (photos: number, made: number) => t('admin.confirmRemoveBody', {
+      photos: fragment('admin.removalPhotos', photos),
+      made: fragment('admin.removalMade', made),
+    })
+
+    expect(body(1, 1)).toBe('Sa photo, sa pièce et sa réponse seront supprimées.')
+    expect(body(4, 8)).toBe('Ses 4 photos, sa pièce et ses 8 réponses seront supprimées.')
+    // No photos is a real state — a participant who never uploaded.
+    expect(body(0, 2)).toBe('Ses photos, sa pièce et ses 2 réponses seront supprimées.')
+  })
+
+  it('agrees on a podium score of one', () => {
+    const score = (found: number, total: number) =>
+      t('reveal.roomsOutOf', { score: found, total }, found)
+
+    expect(score(1, 9)).toBe('1 pièce sur 9')
+    expect(score(7, 9)).toBe('7 pièces sur 9')
   })
 })

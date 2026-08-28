@@ -127,8 +127,11 @@ describe('consistency between the two themes', () => {
   })
 
   // In mono caps with 0.12em of tracking, 10px sat below the comfortable floor
-  // of legibility.
-  it('mono labels are 11px', () => {
-    expect(ds.labelSize).toBe('0.6875rem')
+  // of legibility. 11px cleared that one and not Lighthouse's: measured on
+  // 2026-08-28, `.text-label` was 45–48 % of the text on the three participant
+  // pages, and its mobile audit calls anything under 12px illegible. 12px is
+  // the first size that satisfies both.
+  it('mono labels are 12px', () => {
+    expect(ds.labelSize).toBe('0.75rem')
   })
 })

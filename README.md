@@ -35,13 +35,35 @@ The app boots on http://localhost:3000.
 Identity requires an OIDC provider able to **assert roles** in the token, with
 two roles granted per user (`player` / `admin` by default) and a Web+PKCE
 application. Everything about the provider is configuration — see
-[.env.example](.env.example). The manual setup steps live in the "Prerequisite"
-section of [docs/PLAN.md](docs/PLAN.md); the full guide lands with M9.
+[.env.example](.env.example), and the four steps below.
 
-Register the app with the redirect URI `<base>/api/auth/callback` and the
-post-logout URI `<base>/login`. **Nothing is public but `/login`**: with no
-working provider configured, that is the only page the app will serve — a
-contributor without access to the instance cannot browse the rest.
+**Nothing is public but `/login`**: with no working provider configured, that is
+the only page the app will serve — a contributor without access to the instance
+cannot browse the rest.
+
+### Declaring Perquiz at the provider
+
+The names below are Zitadel's, the reference setup and the only provider this
+has been run against. Another provider follows the same four steps under
+different names.
+
+1. Create a **project** "Perquiz". Add the **roles** `player` and `admin`, and
+   enable **"Assert Roles on Authentication"** — without it the token carries no
+   roles and everybody lands on the "not on the guest list" screen.
+2. Create an **application** in that project: type Web, **PKCE** (no secret).
+   Redirect URI `<base>/api/auth/callback`, post-logout URI `<base>/login`,
+   where `<base>` is exactly the `NUXT_BASE_URL` the app runs under.
+3. **Grant the roles**: `admin` to whoever runs the game, `player` to everyone
+   else. Grants can be handed out before anyone signs in — an account is created
+   on first login (SPEC §1), not in advance.
+4. Fill in `.env`: `NUXT_OIDC_ISSUER` and `NUXT_OIDC_CLIENT_ID`. Zitadel's claim
+   name and role names are already the defaults; another provider needs
+   `NUXT_OIDC_ROLES_CLAIM` pointed at wherever it puts roles — the three shapes
+   understood are documented in [.env.example](.env.example).
+
+Access is managed at the provider from then on: there is no invite, no
+registration and no user list to maintain here. Revoking someone's roles stops
+them signing in; their data stays until an admin removes it (SPEC §11).
 
 **Tested with Zitadel**, whose claim and role names ship as the defaults. Other
 providers are wired from their documented claim shapes (an array of strings, an
@@ -147,6 +169,23 @@ needs. It is git-ignored except for the `.gitkeep` files that keep the layout
 present on a fresh clone. The app creates the tree itself at boot, so a fresh
 clone, a bind mount and an empty volume all behave the same.
 
+**Backing it up.** Copying `app.db` while the app is running is the one thing
+not to do: the database runs in WAL mode, so the recent writes live in
+`app.db-wal` and a bare copy of the main file can land mid-transaction. Either
+stop the container and copy the whole directory, or, with it running, let SQLite
+write the snapshot itself:
+
+```bash
+sqlite3 data/app.db ".backup 'backup/app.db'"   # consistent, no downtime
+cp -r data/photos backup/photos                 # plain files, copy any time
+```
+
+A restore is the reverse, with the app stopped: put `app.db` and `photos/` back
+and start it. Migrations replay at boot, so a backup from an older version comes
+up on the current schema without a step to remember. What a backup cannot
+restore is the identity provider — accounts live there (SPEC §1), and a restored
+database expects the same `sub` claims to come back.
+
 ## Database
 
 Drizzle over `better-sqlite3`, one file, one connection, synchronous calls —
@@ -188,8 +227,22 @@ docker build -t perquiz .
 docker run --rm -p 3000:3000 --env-file .env -v perquiz-data:/app/data perquiz
 ```
 
-The image is a skeleton for now (M0); M9 finalizes it — non-root user,
-healthcheck, native dependencies on musl.
+Two stages: the build compiles nothing (both native dependencies — sharp and
+better-sqlite3 — ship musl binaries, and the lockfile carries every platform
+variant), and the runtime carries the built server, the migrations it replays at
+boot, and no package manager.
+
+The container runs as **`node`, uid 1000**, and that has one consequence worth
+knowing before it bites: a *named* volume inherits the image's ownership and
+just works, while a **bind mount keeps the host's** — if `./data` on the host is
+not writable by uid 1000, the app exits at boot with `EACCES` on
+`/app/data/photos`. Either `chown 1000:1000 ./data` first, or use a named volume
+as [compose.example.yml](compose.example.yml) does.
+
+The `HEALTHCHECK` fetches `/login`, the one page that needs no session. It
+answers "is the server serving?" and deliberately not "is the database happy":
+a probe that read SQLite could take a healthy game down over a lock it should
+have waited on.
 
 ## Publishing
 

@@ -119,7 +119,7 @@ async function pick(participantId: number) {
         v-for="option in [false, true]"
         :key="String(option)"
         type="button"
-        class="rounded-lg px-3 py-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="tap-target relative rounded-lg px-3 py-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
         :class="onlyUnanswered === option
           ? 'bg-torch/10 text-torch-ink'
           : 'border border-edge-strong text-text-muted hover:text-text-soft'"
@@ -132,7 +132,7 @@ async function pick(participantId: number) {
 
     <GuessPhotoGallery :photos="room.photos" />
 
-    <h2 class="text-3xl leading-tight font-bold text-text/25 sm:text-4xl">
+    <h2 class="text-3xl leading-tight font-bold text-text/60 sm:text-4xl">
       {{ t('guess.question') }}
     </h2>
 

@@ -63,7 +63,7 @@
   /* Mono labels (counters, states, phases): 11px expressed in rem, so they
      follow the root font size. In mono caps with 0.12em of tracking, 10px sat
      below the comfortable floor. */
-  --text-label: 0.6875rem;
+  --text-label: 0.75rem;
   --text-label--line-height: 1.4;
   --tracking-label: 0.12em;
   --tracking-eyebrow: 0.18em;
@@ -129,6 +129,31 @@
     color-mix(in oklab, var(--color-torch) 13%, transparent),
     transparent 70%
   );
+}
+
+/* Growing a control's hit area without growing the control.
+   44px is the floor a finger needs — Apple's HIG, Lighthouse's tap-target
+   audit, and this codebase's own `size-11` buttons in PhotoZoom all agree on
+   it. Several controls are deliberately smaller: a 28px chip laid over a
+   photograph, a line of uppercase mono. Making those bigger is a design change;
+   what a mobile pass owes them is a target a thumb can hit, so the target
+   grows and the pixels do not.
+
+   A transparent pseudo-element, centred, never smaller than the control it
+   sits on. It IS the target — `pointer-events` stays default, and the control
+   must already be positioned (`relative` or `absolute`), which is why this
+   utility does not set `position` itself: it would fight the `absolute` on the
+   buttons that need it most. */
+@utility tap-target {
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+  }
 }
 
 @layer base {

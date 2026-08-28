@@ -18,6 +18,25 @@ const total = computed(() => data.value?.total ?? 0)
 const remaining = computed(() => Math.max(0, total.value - answered.value))
 
 /**
+ * Two numbers, two agreements, one sentence.
+ *
+ * vue-i18n pluralises a message on ONE count, so "{rooms} pièces, {players}
+ * participants" could only ever agree with one of them — a two-player party
+ * read "1 participants". Each half is its own message, pluralised on its own
+ * number, and the carrier keeps the word order in the locale file rather than
+ * in this component.
+ */
+const tally = computed(() => {
+  const rooms = data.value?.roomsInPlay ?? 0
+  const players = data.value?.participants ?? 0
+
+  return t('home.tally', {
+    rooms: t('home.tallyRooms', { count: rooms }, rooms),
+    players: t('home.tallyPlayers', { count: players }, players),
+  })
+})
+
+/**
  * One call to action, picked by what is missing.
  *
  * An empty room comes first: it costs the owner nothing to fix and it is the
@@ -96,7 +115,7 @@ const headline = computed(() => {
       v-if="phase === 'open'"
       class="font-mono text-label tracking-label text-text-muted uppercase"
     >
-      {{ t('home.tally', { rooms: data?.roomsInPlay ?? 0, players: data?.participants ?? 0 }, data?.roomsInPlay ?? 0) }}
+      {{ tally }}
     </p>
   </section>
 </template>

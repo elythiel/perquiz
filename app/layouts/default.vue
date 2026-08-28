@@ -23,11 +23,19 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
           {{ $t('app.name') }}
         </NuxtLink>
 
-        <!-- Bottom bar on mobile, a row of tabs in the header above that. -->
+        <!--
+          Bottom bar on mobile, a row of tabs in the header above that.
+
+          The offset is `1rem + env(safe-area-inset-bottom)` and not `1rem`:
+          nuxt.config declares `viewport-fit=cover`, which is what lets the
+          page paint edge to edge, and which also puts a fixed bar under the
+          home indicator on a notched iPhone. On everything else the inset is
+          0 and the bar sits exactly where it did.
+        -->
         <ShellNav
           :phase="phase"
           :is-admin="isAdmin"
-          class="fixed inset-x-4 bottom-4 z-10 rounded-2xl bg-panel p-3 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0"
+          class="fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 rounded-2xl bg-panel p-3 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0"
         />
 
         <ShellUserMenu :display-name="displayName" />
@@ -37,7 +45,9 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
         <ShellPhaseChip :phase="phase" />
       </div>
 
-      <main class="flex-1 pt-5 pb-28 sm:pb-16">
+      <!-- The bottom padding clears the floating bar, inset included: the last
+           line of a page must not end up behind it. -->
+      <main class="flex-1 pt-5 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:pb-16">
         <slot />
       </main>
     </div>

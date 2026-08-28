@@ -36,5 +36,30 @@ export async function usePerquizSession(event: H3Event) {
   const password = useRuntimeConfig().sessionPassword
   if (password.length < MINIMUM_PASSWORD_LENGTH) return undefined
 
-  return useH3Session<PerquizSession>(event, { name: SESSION_NAME, password })
+  return useH3Session<PerquizSession>(event, {
+    name: SESSION_NAME,
+    password,
+    /*
+     * `httpOnly` and `secure` are h3's defaults; `sameSite` is not, and it is
+     * the one that matters here.
+     *
+     * Every route is authenticated by this cookie and by nothing else — there
+     * is no CSRF token anywhere in the app. Without an explicit SameSite, that
+     * defence is whatever the visitor's browser happens to default to, which
+     * is Lax in most of them and not a promise in any of them. Written down,
+     * a form on someone else's page cannot lock the game, delete a
+     * participant, or empty a room.
+     *
+     * `secure` is kept in development too: browsers treat http://localhost as
+     * a secure context, so the cookie is set there all the same.
+     */
+    cookie: { sameSite: 'lax' },
+    /*
+     * By default h3 also accepts a sealed session in an `x-perquiz-session`
+     * request header, and prefers it over the cookie. Nothing in this app ever
+     * sends one: it is a second way in, exercised by nobody, audited by
+     * nobody. Closed.
+     */
+    sessionHeader: false,
+  })
 }

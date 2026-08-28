@@ -19,6 +19,27 @@ const photos = computed(() => room.value?.photos ?? [])
 const inPlay = computed(() => photos.value.length > 0)
 const full = computed(() => photos.value.length >= MAX_PHOTOS_PER_ROOM)
 
+/**
+ * "Vos 3 photos apparaissent sur la grille des 9 autres joueurs."
+ *
+ * Two numbers, and vue-i18n only agrees with one — so the audience half is its
+ * own message, carrying its own preposition and article. That is what makes
+ * "de l’autre joueur" possible at one, where a bare count would have said
+ * "des 1 autres joueurs".
+ */
+const summary = computed(() => {
+  const others = room.value?.otherPlayers ?? 0
+
+  return t(
+    'myRoom.summary',
+    {
+      count: photos.value.length,
+      others: t('myRoom.summaryOthers', { count: others }, others),
+    },
+    photos.value.length,
+  )
+})
+
 const uploads = useRoomUploads(refresh)
 
 const picker = useTemplateRef<HTMLInputElement>('picker')
@@ -99,9 +120,7 @@ async function rename(displayName: string) {
     </header>
 
     <p class="max-w-measure text-base leading-relaxed text-text-soft">
-      {{ inPlay
-        ? t('myRoom.summary', { count: photos.length, others: room?.otherPlayers ?? 0 }, photos.length)
-        : t('myRoom.summaryEmpty') }}
+      {{ inPlay ? summary : t('myRoom.summaryEmpty') }}
     </p>
 
     <p
@@ -182,6 +201,7 @@ async function rename(displayName: string) {
       multiple
       class="sr-only"
       tabindex="-1"
+      aria-hidden="true"
       @change="onPicked"
     >
 

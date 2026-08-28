@@ -7,6 +7,7 @@
  */
 export default defineEventHandler(async (event) => {
   const session = await usePerquizSession(event)
+
   if (!session) return sendRedirect(event, '/login?error=provider')
   if (session.data.userId) return sendRedirect(event, '/')
 

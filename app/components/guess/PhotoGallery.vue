@@ -28,10 +28,14 @@ const zoom = useTemplateRef<{ open: (index: number) => void }>('zoom')
           :aria-label="t('guess.zoomOpen', { position: index + 1 })"
           @click="zoom?.open(index)"
         >
+          <!-- Same as the room grid: the first thumbnail is this page's LCP
+               element, the others are below the fold. -->
           <img
             :src="`/api/photos/${photo}/thumb`"
             :alt="t('guess.photoOf', { position: index + 1, total: photos.length })"
-            loading="lazy"
+            :loading="index === 0 ? 'eager' : 'lazy'"
+            :fetchpriority="index === 0 ? 'high' : undefined"
+            decoding="async"
             class="aspect-4/3 w-full object-cover"
           >
         </button>

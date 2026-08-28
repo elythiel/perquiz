@@ -81,7 +81,7 @@ const HEIGHTS: Record<number, string> = { 1: 'h-56 sm:h-72', 2: 'h-40 sm:h-52', 
           <span
             v-if="step.rank === 1"
             class="text-base text-text-soft"
-          >{{ t('reveal.roomsOutOf', { score: step.players[0]!.score, total }) }}</span>
+          >{{ t('reveal.roomsOutOf', { score: step.players[0]!.score, total }, step.players[0]!.score) }}</span>
         </div>
       </template>
     </div>

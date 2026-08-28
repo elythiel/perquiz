@@ -20,6 +20,30 @@ if (!user.value?.isAdmin) {
 const { data, refresh } = await useFetch('/api/admin')
 
 const pendingPhoto = ref<string>()
+
+/**
+ * What a removal destroys, in numbers that agree.
+ *
+ * Three counts in one paragraph, and vue-i18n pluralises on one: at a single
+ * photo the old copy read "Ses 1 photos". Each count is now its own message,
+ * and the collateral sentence — the answers OTHER people wrote — is skipped
+ * rather than printed as "0 réponses", because a confirmation that lists
+ * nothing is noise in front of a destructive button.
+ */
+const removalBody = computed(() => {
+  const photos = pendingPerson.value?.photos ?? 0
+  const made = pendingPerson.value?.guessesMade ?? 0
+  const lost = pendingPerson.value?.guessesLost ?? 0
+
+  const mine = t('admin.confirmRemoveBody', {
+    photos: t('admin.removalPhotos', { count: photos }, photos),
+    made: t('admin.removalMade', { count: made }, made),
+  })
+
+  return lost > 0
+    ? `${mine} ${t('admin.confirmRemoveLost', { count: lost }, lost)}`
+    : mine
+})
 /**
  * Nitro types a route that can throw as partially optional, so the shape is
  * declared the way it actually arrives and the template supplies the floors.
@@ -124,11 +148,7 @@ async function removePerson() {
     <ConfirmDialog
       ref="personDialog"
       :title="t('admin.confirmRemoveTitle', { name: pendingPerson?.displayName ?? '' })"
-      :body="t('admin.confirmRemoveBody', {
-        photos: pendingPerson?.photos ?? 0,
-        made: pendingPerson?.guessesMade ?? 0,
-        lost: pendingPerson?.guessesLost ?? 0,
-      })"
+      :body="removalBody"
       :note="t('admin.confirmRemoveAccess')"
       :confirm-label="t('admin.remove')"
       @confirm="removePerson"

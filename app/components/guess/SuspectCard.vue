@@ -51,7 +51,7 @@ const { t } = useI18n()
       <button
         v-if="!readOnly"
         type="button"
-        class="shrink-0 rounded-lg px-2 py-1 font-mono text-label tracking-label whitespace-nowrap text-clue-ink uppercase transition-opacity duration-100 ease-micro hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="tap-target relative shrink-0 rounded-lg px-2 py-1 font-mono text-label tracking-label whitespace-nowrap text-clue-ink uppercase transition-opacity duration-100 ease-micro hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
         @click="$emit('choose')"
       >
         {{ name ? t('guess.change') : t('guess.choose') }}

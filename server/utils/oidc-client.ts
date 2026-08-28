@@ -29,7 +29,7 @@ export function oidcSettings(): OidcSettings {
     ...config.oidc,
     // Built from the public base URL, so the value registered at the provider
     // and the value sent in the request cannot drift apart.
-    redirectUri: new URL('/api/auth/callback', config.public.baseUrl).toString(),
+    redirectUri: new URL('/api/auth/callback', config.baseUrl).toString(),
   }
 }
 

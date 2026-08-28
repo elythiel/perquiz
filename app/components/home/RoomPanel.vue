@@ -21,16 +21,19 @@ const SHOWN = 4
       class="grid grid-cols-4 gap-2"
     >
       <li
-        v-for="photo in photos.slice(0, SHOWN)"
+        v-for="(photo, index) in photos.slice(0, SHOWN)"
         :key="photo"
       >
         <NuxtLink
           to="/my-room"
           class="block overflow-hidden rounded-xl bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
         >
+          <!-- Named, not decorative: the link takes its accessible name from
+               this alt, and without one a screen reader announces four links
+               called nothing at all. -->
           <img
             :src="`/api/photos/${photo}/thumb`"
-            alt=""
+            :alt="t('home.photoAlt', { position: index + 1 })"
             loading="lazy"
             class="aspect-square w-full object-cover"
           >

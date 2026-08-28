@@ -34,7 +34,7 @@ const items = computed<NavItem[]>(() => [
       >
         <NuxtLink
           :to="item.to"
-          class="block rounded-lg py-1.5 font-mono text-label tracking-widest whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text-soft sm:px-2"
+          class="tap-target relative block rounded-lg py-1.5 font-mono text-label tracking-widest whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text-soft sm:px-2"
           exact-active-class="text-torch-ink"
         >
           {{ item.label }}

@@ -79,9 +79,18 @@ defineExpose({
           :key="photo"
           class="flex w-full shrink-0 snap-center items-center justify-center px-5"
         >
+          <!--
+            Lazy, though nothing here is below the fold: the dialog is closed,
+            so none of these is displayed, and a lazy image inside a closed
+            `<dialog>` is not fetched at all. They load on open instead — which
+            costs the first zoom a moment, and saves every visit that never
+            zooms the 35 KiB Lighthouse measured (2026-08-28).
+          -->
           <img
             :src="`/api/photos/${photo}/web`"
             :alt="t('photoZoom.photoOf', { position: position + 1, total: photos.length })"
+            loading="lazy"
+            decoding="async"
             class="max-h-[70dvh] w-auto max-w-full object-contain"
           >
         </li>
