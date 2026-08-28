@@ -23,6 +23,23 @@ import { createError } from 'h3'
  * is never read twice.
  */
 
+/**
+ * The ceiling for the routes whose body is a small JSON object.
+ *
+ * MEASURED rather than picked round: the widest legitimate payload any of them
+ * accepts is the photo order at **361 bytes** — ten filenames of 32 hex
+ * characters, quoted and comma-separated. Renaming yourself is 78 bytes with
+ * thirty accented characters, one answer is 64, a phase is 23. Four kilobytes
+ * is eleven times the largest of them, which is generous enough that no honest
+ * client will ever meet it and small enough that meeting it on purpose buys an
+ * attacker nothing.
+ *
+ * One value for the four rather than one each: the spread between 23 and 361
+ * bytes is not worth four constants to keep in step, and a ceiling nobody can
+ * name is a ceiling that drifts.
+ */
+export const JSON_BODY_CEILING = 4096
+
 interface BodySource {
   chunks: AsyncIterable<Uint8Array>
   /** Stops the SENDER, not merely our reading of it. */
