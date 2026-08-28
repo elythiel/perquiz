@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { GamePhase } from '#shared/types/game'
+import { isBeforeLock } from '#shared/utils/game'
 
 /**
  * The control room — and the screen that must never become the answer key.
@@ -115,10 +116,11 @@ async function removePerson() {
     <!--
       Nothing else in the app links to the show, and a screen nobody can reach
       is not delivered. Offered only once the game is frozen, which is also the
-      only phase the reveal API will answer in.
+      only phase the reveal API will answer in — the same predicate as the
+      guard, so the link cannot outlive the door it opens.
     -->
     <NuxtLink
-      v-if="data.phase !== 'open'"
+      v-if="!isBeforeLock(data.phase)"
       to="/reveal"
       class="rounded-2xl bg-clue/15 px-5 py-4 text-center text-lg font-bold text-clue-ink transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
     >

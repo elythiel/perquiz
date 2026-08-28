@@ -95,12 +95,12 @@ export const guesses = sqliteTable('guesses', {
   index('guesses_room_idx').on(table.roomUserId),
 ])
 
-const PHASES = ['open', 'locked', 'revealed'] as const satisfies readonly GamePhase[]
+const PHASES = ['preparation', 'open', 'locked', 'revealed'] as const satisfies readonly GamePhase[]
 
 export const appState = sqliteTable('app_state', {
   /** Singleton: there is one game, and the CHECK below keeps it that way. */
   id: integer('id').primaryKey(),
-  phase: text('phase', { enum: PHASES }).notNull().default('open'),
+  phase: text('phase', { enum: PHASES }).notNull().default('preparation'),
   lockedAt: integer('locked_at', { mode: 'timestamp' }),
   /**
    * The shuffle the reveal show walks the rooms in.

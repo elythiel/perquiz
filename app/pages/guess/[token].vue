@@ -8,6 +8,8 @@
  * The handle is per-viewer, so a shared link is useless to anybody else —
  * which is a property, not a side effect.
  */
+definePageMeta({ middleware: 'sheet' })
+
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()

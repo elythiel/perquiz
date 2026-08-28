@@ -8,6 +8,7 @@ const emit = defineEmits<{ change: [phase: GamePhase] }>()
 const { t } = useI18n()
 
 const LABELS: Record<GamePhase, string> = {
+  preparation: 'admin.phasePreparation',
   open: 'admin.phaseOpen',
   locked: 'admin.phaseLocked',
   revealed: 'admin.phaseRevealed',
@@ -20,8 +21,13 @@ const LABELS: Record<GamePhase, string> = {
  * room as others see it" elsewhere, and one shape meaning two things is the
  * drift an icon set exists to prevent. A trophy also says what `revealed`
  * actually is — the scores are out.
+ *
+ * A crate for `preparation`, for the same reason in reverse: the obvious pick
+ * would be a picture, and a picture already means "add a photo". A crate is
+ * what the phase is for — filling something before it goes out.
  */
 const ICONS: Record<GamePhase, string> = {
+  preparation: 'mingcute:box-line',
   open: 'mingcute:play-line',
   locked: 'mingcute:lock-line',
   revealed: 'mingcute:trophy-line',
@@ -29,6 +35,7 @@ const ICONS: Record<GamePhase, string> = {
 
 /** What the button under the cursor would actually do, in one sentence. */
 const CONSEQUENCES: Record<GamePhase, string> = {
+  preparation: 'admin.toPreparation',
   open: 'admin.toOpen',
   locked: 'admin.toLocked',
   revealed: 'admin.toRevealed',
@@ -58,8 +65,11 @@ const nextAlong = computed<GamePhase>(() =>
       {{ t('admin.phaseLabel') }}
     </h2>
 
+    <!-- Two by two on a phone, four across from `sm`: four labels of this
+         length in one row would either overflow or have to be abbreviated,
+         and « Préparation » abbreviated is a word nobody reads. -->
     <div
-      class="flex gap-1 rounded-xl bg-night p-1"
+      class="grid grid-cols-2 gap-1 rounded-xl bg-night p-1 sm:grid-cols-4"
       role="group"
       :aria-label="t('admin.phaseLabel')"
     >
@@ -67,7 +77,7 @@ const nextAlong = computed<GamePhase>(() =>
         v-for="option in GAME_PHASES"
         :key="option"
         type="button"
-        class="flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
         :class="option === phase ? 'bg-torch/15 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
         :aria-pressed="option === phase"
         @click="ask(option)"

@@ -34,17 +34,20 @@ A single global phase, controlled by the admin:
 
 | Phase | Participants can… | Notes |
 |---|---|---|
-| `open` | upload/manage their room photos, fill and revise their guess sheet | Default phase. Guessing and uploading happen concurrently: the guess sheet grows as new rooms appear. |
+| `preparation` | upload/manage their room photos — there is no guess sheet yet | Default phase. The room-filling airlock: the admin lets everyone furnish their room, then opens the game for all at once. |
+| `open` | upload/manage their room photos, fill and revise their guess sheet | Guessing and uploading happen concurrently: the guess sheet grows as new rooms appear. |
 | `locked` | nothing — everything read-only | Admin locks shortly before the reveal event. Scores are computable from this point but **not shown** to participants. |
 | `revealed` | see their personal results and the final leaderboard | Flipped by the admin at the end of the live reveal show. |
 
-Phase transitions are manual (admin panel), reversible (an admin can reopen if locked by mistake), and take effect immediately.
+Two rights, two boundaries, and they are not the same: a room is editable in `preparation` **and** `open`; guessing is `open` only. Opening the game is therefore an addition, never a removal — nothing a player could do in `preparation` stops working at `open`.
+
+Phase transitions are manual (admin panel), reversible (an admin can reopen if locked by mistake, or fall back to `preparation`), and take effect immediately. There is no timer: every transition is a deliberate act.
 
 ## 3. Rooms & photos
 
 - Each participant owns **exactly one room** and uploads **up to 10 photos** of it. The cap is a product choice, not a storage one — a stored photo costs ~76 Ko across both variants — and it exists so the guess sheet and the reveal show can present a room one screen at a time. A room already holding more keeps them: the cap refuses additions, it never deletes.
 - A room is "in play" once it has at least one photo.
-- Owners can reorder and delete their own photos while the phase is `open`.
+- Owners can reorder and delete their own photos while the phase is `preparation` or `open`.
 - Upload constraints: JPEG/PNG/WebP input, 15 Mo max per file, 10 per room. HEIC was in this list until M3 measured that sharp's prebuilt binaries cannot decode it (no HEVC decoder); it is detected and refused with an explanatory message. iOS transcodes to JPEG on upload, so the common path is unaffected — see the README.
 - Server-side processing on upload:
   - **strip all EXIF metadata** (GPS coordinates especially — privacy),
@@ -57,6 +60,7 @@ Phase transitions are manual (admin panel), reversible (an admin can reopen if l
 
 - Each participant has **one guess sheet** covering every in-play room **except their own**.
 - For each room: pick one participant from the **full participant list** (searchable select). The guesser's own name is excluded from their options.
+- The sheet comes into existence with the `open` phase: during `preparation` there is no sheet at all — `/guess` is not reachable and the route that feeds it refuses.
 - Guesses are **auto-saved** individually and revisable at will until the phase is `locked`.
 - The same name **may** be assigned to several rooms (no hard uniqueness constraint), but the UI shows a discreet warning on duplicates, since each person owns exactly one room.
 - Unanswered rooms simply score 0 — a partial sheet is valid.

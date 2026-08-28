@@ -16,7 +16,7 @@ import { sniffImageType, storePhoto } from '../../../utils/photos'
  * then inserting cannot interleave with another request doing the same.
  */
 export default defineEventHandler(async (event) => {
-  assertPhaseIsOpen()
+  assertRoomsEditable()
   const userId = event.context.user!.id
 
   // Refuse before reading: the body is buffered to hash and decode it, so the

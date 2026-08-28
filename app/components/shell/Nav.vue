@@ -18,7 +18,9 @@ const { t } = useI18n()
 const items = computed<NavItem[]>(() => [
   { to: '/', label: t('nav.home') },
   { to: '/my-room', label: t('nav.myRoom') },
-  { to: '/guess', label: t('nav.guess') },
+  // « Deviner » appears when the sheet does — never in `preparation`, where the
+  // page redirects home and a tab pointing at it would be a promise it breaks.
+  ...(props.phase === 'preparation' ? [] : [{ to: '/guess', label: t('nav.guess') }]),
   // "Résultats" only exists once the answers are revealed (docs/PAGES.md).
   ...(props.phase === 'revealed' ? [{ to: '/results', label: t('nav.results') }] : []),
   ...(props.isAdmin ? [{ to: '/admin', label: t('nav.admin') }] : []),

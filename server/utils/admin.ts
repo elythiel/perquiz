@@ -1,5 +1,6 @@
 import type { H3Event } from 'h3'
 import type { GamePhase } from '#shared/types/game'
+import { isBeforeLock } from '#shared/utils/game'
 import { createHmac } from 'node:crypto'
 import { asc, eq, sql } from 'drizzle-orm'
 import { APP_STATE_ID, appState, guesses, photos, users } from '../database/schema'
@@ -126,13 +127,14 @@ export function adminPanel(viewerId: number): AdminPanel {
  *
  * Every transition is allowed, reversals included: SPEC §2 says an admin who
  * locked by mistake must be able to reopen. `locked_at` marks when the answers
- * were frozen, so it is stamped on the way in and cleared only by a return to
- * `open` — going on to `revealed` keeps it, because the freeze still happened.
+ * were frozen, so it is stamped on the way in and cleared by any return to a
+ * phase where nothing is frozen — `preparation` as much as `open` — while
+ * going on to `revealed` keeps it, because the freeze still happened.
  */
 export function setPhase(phase: GamePhase) {
   useDatabase()
     .update(appState)
-    .set({ phase, lockedAt: phase === 'open' ? null : (useGameState().lockedAt ?? new Date()) })
+    .set({ phase, lockedAt: isBeforeLock(phase) ? null : (useGameState().lockedAt ?? new Date()) })
     .where(eq(appState.id, APP_STATE_ID))
     .run()
 

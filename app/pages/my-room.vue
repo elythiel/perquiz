@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isBeforeLock } from '#shared/utils/game'
 import { MAX_PHOTOS_PER_ROOM } from '#shared/utils/photos'
 
 /**
@@ -6,15 +7,19 @@ import { MAX_PHOTOS_PER_ROOM } from '#shared/utils/photos'
  *
  * A composition surface — the page owns the requests and the phase, each
  * section owns its own behaviour. Every mutation is refused server-side once
- * the game leaves `open`; `readOnly` here only stops us offering what would be
+ * the game is locked; `readOnly` here only stops us offering what would be
  * refused (SPEC §2).
+ *
+ * `preparation` is not read-only, and that is the whole point of the phase:
+ * this is the screen it exists for. The test mirrors the server's own guard
+ * (`assertRoomsEditable`), which is why both read the same predicate.
  */
 const { t } = useI18n()
 const { phase } = useGamePhase()
 
 const { data: room, refresh } = await useFetch('/api/my-room')
 
-const readOnly = computed(() => phase.value !== 'open')
+const readOnly = computed(() => !isBeforeLock(phase.value))
 const photos = computed(() => room.value?.photos ?? [])
 const inPlay = computed(() => photos.value.length > 0)
 const full = computed(() => photos.value.length >= MAX_PHOTOS_PER_ROOM)

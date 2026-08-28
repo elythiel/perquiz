@@ -51,7 +51,25 @@ export function answerableRooms(viewerId: number): number[] {
     .map(row => row.id)
 }
 
+/**
+ * Before the game opens there is no sheet — not a closed one, none at all.
+ *
+ * `/guess` follows `/results` here: a screen that has nothing to show is not
+ * shown, and the route that feeds it says so rather than answering with an
+ * empty-looking page. From `locked` onwards the sheet is back, read-only: what
+ * is being refused is the phase before it existed, not the phases after it
+ * froze.
+ */
+function assertSheetIsOut(): void {
+  const { phase } = useGameState()
+  if (phase === 'preparation') {
+    throw createError({ statusCode: 409, statusMessage: 'not-open-yet', data: { phase } })
+  }
+}
+
 export function guessSheet(viewerId: number): GuessSheet {
+  assertSheetIsOut()
+
   const db = useDatabase()
   const rooms = deckOrder(answerableRooms(viewerId), viewerId, secret())
 
@@ -99,6 +117,26 @@ export function guessSheet(viewerId: number): GuessSheet {
 }
 
 /**
+ * The other half of the phase gate, and the narrow one.
+ *
+ * Guessing is `open` and nothing else: `preparation` has not opened the sheet
+ * yet, `locked` has closed it. It sits here, next to its only caller, rather
+ * than beside the room guard it used to share — the two rights are no longer
+ * the same right, and the failure to prevent is a room guard widening and
+ * quietly taking guessing with it.
+ */
+function assertGuessingIsOpen(): void {
+  const { phase } = useGameState()
+  if (phase !== 'open') {
+    throw createError({
+      statusCode: 409,
+      statusMessage: 'The guess sheet is not open',
+      data: { phase },
+    })
+  }
+}
+
+/**
  * Writes one answer, or replaces it.
  *
  * Every rule is checked here even though the database also holds two of them
@@ -106,7 +144,7 @@ export function guessSheet(viewerId: number): GuessSheet {
  * name deserves a sentence instead.
  */
 export function recordGuess(viewerId: number, token: unknown, participantId: unknown) {
-  assertPhaseIsOpen()
+  assertGuessingIsOpen()
 
   const roomUserId = resolveRoomToken(token, viewerId, answerableRooms(viewerId), secret())
   if (roomUserId === undefined) {

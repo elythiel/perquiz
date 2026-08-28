@@ -32,6 +32,15 @@ export async function useGuessSheet() {
 
   const rooms = computed(() => data.value?.rooms ?? [])
   const participants = computed(() => data.value?.participants ?? [])
+
+  /**
+   * Answering is `open` and nothing else — the same narrow gate the server
+   * keeps (`recordGuess`).
+   *
+   * Only two phases ever reach this line read-only, `locked` and `revealed`,
+   * and both are "no longer". `preparation` never gets here: the sheet does
+   * not exist yet and the route middleware has already sent the reader home.
+   */
   const readOnly = computed(() => (data.value?.phase ?? 'open') !== 'open')
 
   const states = ref(new Map<string, SaveState>())

@@ -90,6 +90,8 @@ db.delete(guesses).run()
 db.delete(photos).run()
 db.delete(identities).run()
 db.delete(users).run()
+// `open`, not the fresh-database default: the seed writes guesses, and a
+// sheet shown closed over pre-filled answers is a screen that cannot happen.
 db.update(appState).set({ phase: 'open', lockedAt: null }).run()
 clearPhotos()
 
@@ -146,7 +148,7 @@ for (const guess of plan.guesses) {
 
 console.log(`seed: ${plan.people.length} players, ${plan.roomsInPlay.length} rooms in play, `
   + `${written} photos, ${plan.guesses.length} guesses`)
-console.log(`seed: phase is "open" — until M6 lands, ?phase=locked and ?phase=revealed switch it in dev\n`)
+console.log(`seed: phase is "open" — a seeded game is one already being played, not one being set up\n`)
 
 const plural = (count: number, one: string, many = `${one}s`) => count === 1 ? one : many
 

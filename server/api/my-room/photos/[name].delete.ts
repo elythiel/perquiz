@@ -1,7 +1,7 @@
 import { removePhotoFiles } from '../../../utils/photos'
 
 export default defineEventHandler(async (event) => {
-  assertPhaseIsOpen()
+  assertRoomsEditable()
 
   const name = getRouterParam(event, 'name')
   if (!isPhotoName(name)) {

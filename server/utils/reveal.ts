@@ -1,4 +1,5 @@
 import type { Standing } from './scoring'
+import { isBeforeLock } from '#shared/utils/game'
 import { createHmac, randomBytes } from 'node:crypto'
 import { asc, eq } from 'drizzle-orm'
 import { APP_STATE_ID, appState, guesses, photos, users } from '../database/schema'
@@ -67,14 +68,17 @@ function dealt(roomIds: readonly number[], seed: string): number[] {
 /**
  * Refuses to hand out the answers while people can still change theirs.
  *
- * `open` is not a rehearsal mode: results would not be final, and the screen
- * would be showing live answers to a room full of players (PAGES `/reveal`).
+ * Neither phase before the lock is a rehearsal mode: in `open` the results
+ * would not be final and the screen would be showing live answers to a room
+ * full of players (PAGES `/reveal`), and in `preparation` there is nothing to
+ * reveal at all. The test is "has anything been frozen", not "is it `open`" —
+ * naming one phase is what would let a new one through.
  */
 export function assertShowIsReady(event: Parameters<typeof assertAdmin>[0]) {
   assertAdmin(event)
 
   const { phase } = useGameState()
-  if (phase === 'open') {
+  if (isBeforeLock(phase)) {
     throw createError({ statusCode: 409, statusMessage: 'not-locked' })
   }
 }

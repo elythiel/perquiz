@@ -1,6 +1,6 @@
 # Perquiz — Page specifications
 
-Functional spec of every page, for UX/UI design. Features, states and edge cases only — no layout or visual decisions. Companion to [SPEC.md](./SPEC.md); phases (`open` / `locked` / `revealed`) and rules are defined there.
+Functional spec of every page, for UX/UI design. Features, states and edge cases only — no layout or visual decisions. Companion to [SPEC.md](./SPEC.md); phases (`preparation` / `open` / `locked` / `revealed`) and rules are defined there.
 
 ## Global shell (all authenticated pages)
 
@@ -35,6 +35,11 @@ States & edge cases:
 Purpose: know where I stand, and where to go next.
 
 Features, by phase:
+- `preparation`:
+  - "The game is being set up" headline: guessing is not open yet, and the sentence has to say *not yet* rather than *no longer*.
+  - My room status, and a single call to action pointing at « Ma pièce ». « Deviner » is not offered here and not in the navigation either: the page does not exist in this phase.
+  - Number of rooms in play / number of participants: watching it climb is how you see the party filling up.
+  - No guessing progress: a "0 / N" against a sheet nobody can open is a score for a game that has not started.
 - `open`:
   - My room status: number of photos uploaded; explicit warning when 0 ("your room is not in play yet").
   - My guessing progress: "X pièces devinées sur N".
@@ -55,7 +60,7 @@ Edge cases:
 
 Purpose: manage the photos of my room and my display name.
 
-Features (`open` phase):
+Features (`preparation` and `open` phases — the room is editable in both):
 - Upload photos: multiple files, from camera or gallery. Accepted: JPEG/PNG/WebP, ≤ 15 Mo each, 10 per room — the picker sends what fits and lists the rest as refused. HEIC is detected and refused with an explanatory message — see §3 of SPEC.md and the README.
 - Upload feedback: per-file progress/processing state, per-file errors (too big, unsupported, failed) without blocking the other files.
 - List my photos; reorder them; delete any (with confirmation).
@@ -64,10 +69,11 @@ Features (`open` phase):
 - Edit my display name (same rules as registration; uniqueness re-checked).
 
 States:
+- `preparation`: fully editable — this is the phase the screen exists for.
 - `locked` / `revealed`: everything read-only (photos still viewable, no actions).
 
 Edge cases:
-- Deleting the last photo while others have already guessed my room: allowed during `open`; the room leaves everyone's sheet (existing guesses on it are discarded). The UI must warn about this consequence.
+- Deleting the last photo while others have already guessed my room: allowed during `preparation` and `open`; the room leaves everyone's sheet (existing guesses on it are discarded). The UI must warn about this consequence.
 
 ---
 
@@ -86,6 +92,7 @@ Features (`open` phase):
 - Rooms appear/disappear as participants upload/remove photos; the sheet reflects the current state on each visit.
 
 States:
+- `preparation`: the page does not exist — accessing it redirects to `/`, and « Deviner » is absent from the navigation. Not a closed sheet: no sheet. The dashboard is where "guessing is not open yet" is said.
 - `locked`: read-only — my picks visible, no correctness shown.
 - `revealed`: read-only; points to « Résultats » for correctness.
 
@@ -116,7 +123,7 @@ States & edge cases:
 Purpose: the projected live show. Admin-driven, step by step. Designed for an audience.
 
 Features:
-- Available to admins during `locked` (a guard warns if the phase is still `open`: results would not be final).
+- Available to admins from `locked` onwards (a guard refuses while the phase is `preparation` or `open`: there would be nothing to reveal, or results that are not final).
 - One room at a time, in a stable shuffled order. For each room, three admin-advanced steps:
   1. the room's photos,
   2. the guess distribution: how many votes each guessed participant received (including a "no answer" count),
@@ -137,7 +144,7 @@ Edge cases:
 Purpose: run the game without ever seeing the answer key.
 
 Features:
-- **Phase control**: current phase + transitions (`open` → `locked` → `revealed`, and reversals). Each transition confirmed, with its consequences stated (lock = players can no longer change anything; reveal = everyone sees results).
+- **Phase control**: current phase + transitions (`preparation` → `open` → `locked` → `revealed`, and reversals). Each transition confirmed, with its consequences stated (lock = players can no longer change anything; reveal = everyone sees results).
 - **Participation dashboard** (per participant): photo count, guess progress (X/N), last activity. Never the content of their guesses.
 - **User management**: remove a participant's data (confirmation with consequences: their photos, room and guesses are removed; guesses others made about their room are discarded). A note makes clear this does not revoke their access — accounts and roles are managed at the identity provider.
 - **Photo moderation**: browse all photos without owner names, delete any (confirmation).

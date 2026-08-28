@@ -9,8 +9,19 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 
-/** The design system's phase chip: one colour per phase, a dot pulsing on `open`. */
+/**
+ * The design system's phase chip: one colour per phase, a dot pulsing on `open`.
+ *
+ * Amber for `preparation` and not another neutral: it is a phase where
+ * something is expected of you, and reading it as a duller `locked` would say
+ * the opposite. The pulse stays exclusive to `open` — it means "live".
+ */
 const PRESENTATION = {
+  preparation: {
+    labelKey: 'phase.preparation',
+    chip: 'bg-amber/15 text-amber-ink',
+    pulse: false,
+  },
   open: {
     labelKey: 'phase.open',
     chip: 'bg-torch/10 text-torch-ink',

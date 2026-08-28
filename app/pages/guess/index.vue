@@ -6,6 +6,8 @@
  * and delete photos (PAGES `/guess`) — and then hands over to the first room
  * still unanswered, which is where anyone opening « Deviner » wants to be.
  */
+definePageMeta({ middleware: 'sheet' })
+
 const { t } = useI18n()
 const sheet = await useGuessSheet()
 const route = useRoute()

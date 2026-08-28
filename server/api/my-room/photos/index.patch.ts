@@ -1,6 +1,6 @@
 /** The new order, as the full list of names the owner now wants, in order. */
 export default defineEventHandler(async (event) => {
-  assertPhaseIsOpen()
+  assertRoomsEditable()
 
   const body = await readBody<{ order?: unknown }>(event)
   const order = body?.order

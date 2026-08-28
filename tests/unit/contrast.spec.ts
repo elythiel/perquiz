@@ -45,6 +45,8 @@ const CHIPS = [
   // it here either confirms it or finds a real defect.
   { flat: 'torch', alpha: 0.15, ink: 'torch-ink' },
   { flat: 'clue', alpha: 0.15, ink: 'clue-ink' },
+  // 15% amber: the `preparation` phase chip.
+  { flat: 'amber', alpha: 0.15, ink: 'amber-ink' },
   { flat: 'torch', alpha: 0.20, ink: 'torch-ink' },
   { flat: 'clue', alpha: 0.20, ink: 'clue-ink' },
   { flat: 'alert', alpha: 0.20, ink: 'alert-ink' },

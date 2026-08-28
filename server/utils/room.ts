@@ -1,22 +1,30 @@
 import type { GamePhase } from '#shared/types/game'
+import { isBeforeLock } from '#shared/utils/game'
 import { and, asc, eq, sql } from 'drizzle-orm'
 import { guesses, photos, users } from '../database/schema'
 
 /**
  * Everything the owner of a room may do to it, and the one condition on all of
- * it: the game has to be `open`.
+ * it: nothing has been frozen yet.
+ *
+ * Two phases qualify, and not the same two as guessing. A room is built during
+ * `preparation` and stays editable through `open`, because photos and answers
+ * are concurrent (SPEC §2); the sheet, meanwhile, only opens at `open`. That is
+ * why this is no longer the same guard as the one in `recordGuess()` — one
+ * function holding two rights that have started to diverge is a right granted
+ * by accident.
  *
  * The phase check lives here rather than in each route, because "everything is
  * read-only once locked" (SPEC §2) is an invariant, and an invariant repeated
  * in five handlers is one that will be missing from the sixth.
  */
 
-export function assertPhaseIsOpen(): void {
+export function assertRoomsEditable(): void {
   const { phase } = useGameState()
-  if (phase !== 'open') {
+  if (!isBeforeLock(phase)) {
     throw createError({
       statusCode: 409,
-      statusMessage: 'The game is no longer open',
+      statusMessage: 'The rooms are no longer editable',
       data: { phase },
     })
   }

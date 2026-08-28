@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { isBeforeLock } from '#shared/utils/game'
+
 /**
  * The dashboard: where you stand, and the one thing to do next.
  *
@@ -41,6 +43,10 @@ const tally = computed(() => {
  *
  * An empty room comes first: it costs the owner nothing to fix and it is the
  * only thing blocking everyone else's sheet from growing (PAGES `/`).
+ *
+ * In `preparation` it is also the last one. The sheet is closed, so every
+ * road to `/guess` is a road to a read-only screen — the button has to stop
+ * at the room, whether that room is empty or already three photos deep.
  */
 const action = computed(() => {
   if (phase.value === 'revealed') {
@@ -49,6 +55,9 @@ const action = computed(() => {
   if (phase.value === 'locked') return undefined
   if (photos.value.length === 0) {
     return { to: '/my-room', label: t('home.addPhotos'), icon: 'mingcute:pic-line' }
+  }
+  if (phase.value === 'preparation') {
+    return { to: '/my-room', label: t('home.fillRoom'), icon: 'mingcute:box-line' }
   }
   if (remaining.value > 0) {
     return {
@@ -65,9 +74,24 @@ const action = computed(() => {
 const headline = computed(() => {
   if (phase.value === 'revealed') return t('home.revealedTitle')
   if (phase.value === 'locked') return t('home.lockedTitle')
+  if (phase.value === 'preparation') return t('home.preparationTitle')
   if (total.value === 0) return t('home.nothingYet')
   if (remaining.value === 0) return t('home.allAnswered')
   return t('home.awaiting', { count: remaining.value }, remaining.value)
+})
+
+/**
+ * The sentence under the headline, for the three phases that need explaining.
+ *
+ * `preparation` gets its own rather than borrowing the locked one: "not yet"
+ * and "no longer" are opposite pieces of news, and the second would read as
+ * "you missed it" to someone who has missed nothing.
+ */
+const note = computed(() => {
+  if (phase.value === 'preparation') return t('home.preparationBody')
+  if (phase.value === 'locked') return t('home.lockedBody')
+  if (phase.value === 'revealed') return t('home.revealedBody')
+  return undefined
 })
 </script>
 
@@ -78,13 +102,16 @@ const headline = computed(() => {
     </h1>
 
     <p
-      v-if="phase !== 'open'"
+      v-if="note"
       class="max-w-measure text-base leading-relaxed text-text-soft"
     >
-      {{ phase === 'locked' ? t('home.lockedBody') : t('home.revealedBody') }}
+      {{ note }}
     </p>
 
+    <!-- No answer count in `preparation`: the sheet is not open, so "0 / 3"
+         would be a score against something nobody could have played yet. -->
     <HomeProgressPanel
+      v-if="phase !== 'preparation'"
       :answered="answered"
       :total="total"
       :new-rooms="phase === 'open' ? (data?.newRooms ?? 0) : 0"
@@ -92,7 +119,7 @@ const headline = computed(() => {
 
     <HomeRoomPanel
       :photos="photos"
-      :read-only="phase !== 'open'"
+      :read-only="!isBeforeLock(phase)"
     />
 
     <!-- One button, one icon slot: both follow the same decision, so the icon
@@ -110,9 +137,11 @@ const headline = computed(() => {
       {{ action.label }}
     </NuxtLink>
 
-    <!-- The state of the game, small: it is context, not a call to anything. -->
+    <!-- The state of the game, small: it is context, not a call to anything.
+         Shown in `preparation` too, where watching the room count climb is
+         precisely what tells you the party is filling up. -->
     <p
-      v-if="phase === 'open'"
+      v-if="isBeforeLock(phase)"
       class="font-mono text-label tracking-label text-text-muted uppercase"
     >
       {{ tally }}

@@ -16,6 +16,7 @@
     "signOut": "Se déconnecter"
   },
   "phase": {
+    "preparation": "Préparation",
     "open": "Partie en cours",
     "locked": "Partie verrouillée",
     "revealed": "Résultats révélés"
@@ -62,6 +63,9 @@
     "lockedBody": "Plus rien ne bouge jusqu’à la révélation. Voici où vous en étiez.",
     "revealedTitle": "Les résultats sont là.",
     "revealedBody": "Votre score, votre rang et le détail pièce par pièce vous attendent.",
+    "preparationTitle": "La partie se prépare.",
+    "preparationBody": "Les devinettes ne sont pas encore ouvertes. C’est le moment de garnir votre pièce : l’organisateur ouvrira le jeu quand tout le monde aura déposé ses photos.",
+    "fillRoom": "Garnir ma pièce",
     "seeResults": "Voir les résultats",
     "photosCount": "{count} photo | {count} photo | {count} photos"
   },
@@ -171,12 +175,14 @@
     "title": "Régie",
     "badge": "Admin",
     "phaseLabel": "Phase",
+    "phasePreparation": "Préparation",
     "phaseOpen": "En cours",
     "phaseLocked": "Verrouillé",
     "phaseRevealed": "Révélé",
-    "toOpen": "Rouvrir rend la main aux joueurs : photos et réponses redeviennent modifiables.",
+    "toOpen": "Ouvrir lance les devinettes : chacun peut répondre, et les photos restent modifiables.",
     "toLocked": "Verrouiller fige photos et réponses. Réversible.",
     "toRevealed": "Révéler montre à chacun son score et le classement. Réversible.",
+    "toPreparation": "Revenir à la préparation retire la feuille de devinettes : les réponses déjà écrites sont conservées, mais plus personne ne peut deviner. Les pièces restent modifiables.",
     "currentPhase": "C’est la phase en cours.",
     "confirmPhase": "Changer de phase ?",
     "confirm": "Confirmer",

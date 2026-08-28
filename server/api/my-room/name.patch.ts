@@ -10,7 +10,7 @@ import { DISPLAY_NAME_MAX, DISPLAY_NAME_MIN, tidyDisplayName } from '#shared/uti
  * good error message, the index is the guarantee.
  */
 export default defineEventHandler(async (event) => {
-  assertPhaseIsOpen()
+  assertRoomsEditable()
   const userId = event.context.user!.id
 
   const body = await readBody<{ displayName?: unknown }>(event)

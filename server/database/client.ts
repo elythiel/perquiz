@@ -55,12 +55,18 @@ export function openDatabase(dataDir: string): PerquizDatabase {
   return drizzle(connection, { schema })
 }
 
-/** Brings the file up to date, then guarantees the singleton game row exists. */
+/**
+ * Brings the file up to date, then guarantees the singleton game row exists.
+ *
+ * A brand-new game starts in `preparation`, which is where a game starts: the
+ * rooms get filled before the guessing opens. Only the first boot ever writes
+ * this row, so an existing game is never moved backwards.
+ */
 export function migrateDatabase(db: PerquizDatabase): PerquizDatabase {
   migrate(db, { migrationsFolder: MIGRATIONS_FOLDER })
 
   db.insert(appState)
-    .values({ id: APP_STATE_ID, phase: 'open' })
+    .values({ id: APP_STATE_ID, phase: 'preparation' })
     .onConflictDoNothing()
     .run()
 
