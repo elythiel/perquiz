@@ -31,6 +31,23 @@ describe('the version everything is derived from', () => {
   })
 })
 
+describe('the example nobody would notice going stale', () => {
+  it('names the version being released', () => {
+    /*
+     * `compose.example.yml` is what a reader copies to deploy, and its own
+     * comment says this line tracks the published versions — there is no
+     * `latest` to fall back on, by design. Left behind at a bump it does not
+     * break anything: it just quietly starts a fresh deployment on the previous
+     * image, which is the kind of defect that is only ever found in production.
+     *
+     * Pinned to `package.json` so the bump stays one decision. If the example
+     * should ever lag the release on purpose, this is the test to delete and
+     * the comment above the image line to rewrite.
+     */
+    expect(read('compose.example.yml')).toContain(`perquiz:v${version}`)
+  })
+})
+
 describe('what the registry receives', () => {
   it('is one tag, and it is the version', () => {
     expect(workflow).toContain('tags: type=raw,value=v${{ needs.version.outputs.value }}')
