@@ -188,3 +188,76 @@ describe('the avatar badge', () => {
     }
   })
 })
+
+describe('the segmented control', () => {
+  it('is chrome in a utility, not a shell component', () => {
+    // The two surfaces wear the same box and the same items; the layout —
+    // three across, or two by two wrapping to four — stays each one's own.
+    expect(css).toContain('@utility segment-group {')
+    expect(css).toContain('@utility segment {')
+  })
+
+  it('leaves the selected accent to each caller', () => {
+    /*
+     * Not folded into the utility, and the reason is not style: the accent is
+     * driven by a checked radio on one side and by `aria-pressed` on the other,
+     * so a single `:has(input:checked)` would light one and never the other.
+     */
+    const segment = css.slice(css.indexOf('@utility segment {'), css.indexOf('@utility tap-target'))
+    expect(segment).not.toContain(':checked')
+    expect(segment).not.toContain('bg-torch')
+  })
+
+  it('is no longer spelled out in either surface', () => {
+    for (const path of ['app/components/RadioGroup.vue', 'app/components/admin/PhaseControl.vue']) {
+      const source = markup(files.find(file => file.path === path)!.source)
+      expect(source, path).toContain('segment')
+      expect(source, path).not.toContain('rounded-xl bg-night p-1')
+      expect(source, path).not.toMatch(/tracking-label uppercase transition-colors/)
+    }
+  })
+})
+
+describe('the single choice, and the one that is confirmed first', () => {
+  // Markup, not prose: every one of these files explains in a comment what it
+  // deliberately does NOT use, and a grep that counted those would never pass.
+  const source = (path: string) => markup(files.find(file => file.path === path)!.source)
+
+  it('gives the radio group the browser\'s own keyboard', () => {
+    /*
+     * A `<fieldset>` for the accessible name, native radios for the arrow keys,
+     * the single tab stop and the « 2 sur 3 ». Every hand-rolled radio group
+     * has to reimplement those three, and gets one of them wrong.
+     */
+    const group = source('app/components/RadioGroup.vue')
+
+    expect(group).toContain('<fieldset')
+    expect(group).toContain('type="radio"')
+    expect(group).toContain('class="sr-only"')
+    expect(group).not.toContain('role="radiogroup"')
+    expect(group).not.toMatch(/@keydown|ArrowRight|ArrowDown/)
+  })
+
+  it('keeps the phase control on buttons, because a phase is confirmed first', () => {
+    /*
+     * The one thing this card must not do. A radio that can be refused
+     * announces `aria-checked` on a state nothing has reached, and flickers
+     * back when the dialog is dismissed. Shared look, separate control.
+     */
+    const phase = source('app/components/admin/PhaseControl.vue')
+
+    expect(phase).toMatch(/<button/)
+    expect(phase).toContain('aria-pressed')
+    expect(phase).toContain('<ConfirmDialog')
+    expect(phase).not.toContain('type="radio"')
+    expect(phase).not.toContain('<RadioGroup')
+  })
+
+  it('left the theme picker with nothing but the setting', () => {
+    const picker = source('app/components/ThemePicker.vue')
+
+    expect(picker).toContain('<RadioGroup')
+    expect(picker).not.toContain('type="radio"')
+    expect(picker).not.toContain('<fieldset')
+  })
+})

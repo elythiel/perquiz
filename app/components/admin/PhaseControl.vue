@@ -63,18 +63,26 @@ const nextAlong = computed<GamePhase>(() =>
   <BaseCard :title="t('admin.phaseLabel')">
     <!-- Two by two on a phone, four across from `sm`: four labels of this
          length in one row would either overflow or have to be abbreviated,
-         and « Préparation » abbreviated is a word nobody reads. -->
+         and « Préparation » abbreviated is a word nobody reads. The layout is
+         the caller's; `segment-group` is only the box it sits in. -->
     <div
-      class="grid grid-cols-2 gap-1 rounded-xl bg-night p-1 sm:grid-cols-4"
+      class="segment-group grid grid-cols-2 sm:grid-cols-4"
       role="group"
       :aria-label="t('admin.phaseLabel')"
     >
+      <!--
+        The theme picker's chrome, and not its controls. These stay buttons
+        with `aria-pressed` because a phase is confirmed before it applies: a
+        radio would announce `aria-checked` on a state nothing has reached, and
+        flicker back when the dialog is dismissed. Shared look, separate
+        control — see `@utility segment` in main.css.
+      -->
       <button
         v-for="option in GAME_PHASES"
         :key="option"
         type="button"
-        class="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-ring-inset"
-        :class="option === phase ? 'bg-torch/15 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
+        class="segment focus-ring-inset"
+        :class="option === phase ? 'bg-torch/10 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
         :aria-pressed="option === phase"
         @click="ask(option)"
       >

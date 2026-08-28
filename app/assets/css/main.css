@@ -176,6 +176,32 @@
   }
 }
 
+/* The segmented control, as two surfaces wear it.
+
+   The theme picker and the phase control are the same object to the eye and
+   two different objects to a keyboard: one applies immediately and is built
+   from native radios, the other asks for confirmation and is built from
+   buttons with `aria-pressed`. What they legitimately share is the look, so
+   the look is what is shared — and the interactive element stays each one's
+   own, which is why this is a utility and not a shell component.
+
+   `@apply` rather than the equivalent CSS written out: every value here is a
+   design-system token, and spelling `0.375rem` instead of `gap-1.5` is how a
+   copy drifts off the scale the day the scale moves.
+
+   Two things are deliberately NOT here. The layout — flex for three options
+   across, grid for four that wrap on a phone — belongs to the caller. And the
+   selected accent, which is identical on both sides but driven by two
+   different facts: a checked radio here, `aria-pressed` there. A single
+   selector (`:has(input:checked)`) would only ever catch the first. */
+@utility segment-group {
+  @apply gap-1 rounded-xl bg-night p-1;
+}
+
+@utility segment {
+  @apply flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro;
+}
+
 /* Growing a control's hit area without growing the control.
    44px is the floor a finger needs — Apple's HIG, Lighthouse's tap-target
    audit, and this codebase's own `size-11` buttons in PhotoZoom all agree on
