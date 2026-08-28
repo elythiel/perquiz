@@ -32,7 +32,7 @@ defineExpose({
     <header class="flex flex-col gap-3 px-5 pt-5">
       <button
         type="button"
-        class="self-end grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="self-end grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text"
         :aria-label="t('myRoom.closePreview')"
         @click="dialog?.close()"
       >
@@ -65,7 +65,7 @@ defineExpose({
       cannot focus is a scroll container a keyboard cannot scroll.
     -->
     <ul
-      class="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-5 pb-5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      class="flex snap-x snap-mandatory gap-4 overflow-x-auto overscroll-x-contain px-5 pb-5"
       tabindex="0"
       :aria-label="t('myRoom.previewGallery')"
     >

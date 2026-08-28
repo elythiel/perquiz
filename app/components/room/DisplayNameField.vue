@@ -47,10 +47,10 @@ defineExpose({
 </script>
 
 <template>
-  <section class="flex flex-col gap-3 rounded-2xl bg-panel px-5 py-4">
-    <h2 class="font-mono text-label tracking-eyebrow text-text-muted uppercase">
+  <BaseCard>
+    <template #title>
       <label for="display-name">{{ t('myRoom.nameLabel') }}</label>
-    </h2>
+    </template>
 
     <form
       class="flex items-center gap-3"
@@ -62,18 +62,19 @@ defineExpose({
         :readonly="readOnly"
         maxlength="30"
         autocomplete="off"
-        class="min-w-0 flex-1 rounded-xl border border-edge-strong bg-night px-4 py-3 text-lg text-text read-only:border-transparent read-only:bg-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="min-w-0 flex-1 rounded-xl border border-edge-strong bg-night px-4 py-3 text-lg text-text read-only:border-transparent read-only:bg-transparent"
         :aria-describedby="error ? 'display-name-error' : 'display-name-hint'"
       >
 
-      <button
+      <ButtonSecondary
         v-if="!readOnly"
+        class="shrink-0"
+        size="md"
         type="submit"
         :disabled="!changed"
-        class="shrink-0 rounded-xl border border-edge-strong px-4 py-3 text-base text-text-soft transition-colors duration-100 ease-micro enabled:hover:text-text disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
       >
         {{ t('myRoom.nameSave') }}
-      </button>
+      </ButtonSecondary>
     </form>
 
     <p
@@ -98,5 +99,5 @@ defineExpose({
     >
       {{ t('myRoom.nameHint') }}
     </p>
-  </section>
+  </BaseCard>
 </template>

@@ -124,18 +124,20 @@ const note = computed(() => {
 
     <!-- One button, one icon slot: both follow the same decision, so the icon
          cannot go missing when the label changes. -->
-    <NuxtLink
+    <ButtonPrimary
       v-if="action"
       :to="action.to"
-      class="flex items-center justify-center gap-2 rounded-2xl bg-torch px-5 py-4 text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      size="xl"
     >
-      <Icon
-        :name="action.icon"
-        class="block size-5 shrink-0"
-        aria-hidden="true"
-      />
+      <template #icon>
+        <Icon
+          :name="action.icon"
+          class="block size-5 shrink-0"
+          aria-hidden="true"
+        />
+      </template>
       {{ action.label }}
-    </NuxtLink>
+    </ButtonPrimary>
 
     <!-- The state of the game, small: it is context, not a call to anything.
          Shown in `preparation` too, where watching the room count climb is

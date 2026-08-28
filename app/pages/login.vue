@@ -79,7 +79,7 @@ const signedOut = computed(() => route.query.bye !== undefined)
       <!-- A full page navigation, not a fetch: the next stop is the provider. -->
       <a
         href="/api/auth/login"
-        class="rounded-2xl bg-torch px-6 py-4 text-center text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="rounded-2xl bg-torch px-6 py-4 text-center text-lg font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90"
       >
         {{ problem ? $t('login.retry') : $t('login.signIn') }}
       </a>

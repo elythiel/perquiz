@@ -46,7 +46,7 @@ const lines = computed(() => props.failures.map(failure => ({
 
     <button
       type="button"
-      class="self-start font-mono text-label tracking-label text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      class="self-start font-mono text-label tracking-label text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text-soft"
       @click="$emit('dismiss')"
     >
       {{ t('myRoom.cancel') }}

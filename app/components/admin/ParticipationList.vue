@@ -89,7 +89,7 @@ function when(seconds: number | null): string {
         -->
         <button
           type="button"
-          class="grid size-8 shrink-0 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro enabled:hover:text-alert-ink disabled:opacity-25 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
+          class="grid size-8 shrink-0 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro enabled:hover:text-alert-ink disabled:opacity-25 focus-ring-alert"
           :disabled="person.id === me"
           :title="person.id === me ? t('admin.cannotRemoveYourself') : undefined"
           :aria-label="t('admin.removeParticipant', { name: person.displayName })"

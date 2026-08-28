@@ -92,7 +92,7 @@ const stepName = computed(() => {
         </p>
         <NuxtLink
           to="/admin"
-          class="self-center rounded-2xl bg-torch px-5 py-3 text-base font-bold text-on-torch focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="self-center rounded-2xl bg-torch px-5 py-3 text-base font-bold text-on-torch"
         >
           {{ t('reveal.toAdmin') }}
         </NuxtLink>

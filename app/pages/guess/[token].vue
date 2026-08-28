@@ -121,12 +121,11 @@ async function pick(participantId: number) {
       :total="sheet.rooms.value.length"
     />
 
-    <p
-      v-if="sheet.readOnly.value"
-      class="rounded-2xl bg-panel px-5 py-4 text-base leading-relaxed text-text-soft"
-    >
-      {{ t('guess.readOnly') }}
-    </p>
+    <BaseCard v-if="sheet.readOnly.value">
+      <p class="text-base leading-relaxed text-text-soft">
+        {{ t('guess.readOnly') }}
+      </p>
+    </BaseCard>
 
     <div
       v-else
@@ -138,7 +137,7 @@ async function pick(participantId: number) {
         v-for="option in [false, true]"
         :key="String(option)"
         type="button"
-        class="tap-target relative rounded-lg px-3 py-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="tap-target relative rounded-lg px-3 py-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro"
         :class="onlyUnanswered === option
           ? 'bg-torch/10 text-torch-ink'
           : 'border border-edge-strong text-text-muted hover:text-text-soft'"
@@ -166,7 +165,7 @@ async function pick(participantId: number) {
     <div class="flex items-center gap-3">
       <button
         type="button"
-        class="grid size-14 shrink-0 place-items-center rounded-2xl bg-panel text-text transition-opacity duration-100 ease-micro disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="grid size-14 shrink-0 place-items-center rounded-2xl bg-panel text-text transition-opacity duration-100 ease-micro disabled:opacity-30"
         :disabled="position <= 0"
         :aria-label="t('guess.previous')"
         @click="step(-1)"
@@ -179,7 +178,7 @@ async function pick(participantId: number) {
       </button>
       <button
         type="button"
-        class="flex-1 rounded-2xl bg-text px-5 py-4 text-lg font-bold text-night transition-opacity duration-100 ease-micro disabled:opacity-30 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex-1 rounded-2xl bg-text px-5 py-4 text-lg font-bold text-night transition-opacity duration-100 ease-micro disabled:opacity-30"
         :disabled="position >= walk.length - 1"
         @click="step(1)"
       >

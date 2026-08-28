@@ -54,7 +54,7 @@ defineExpose({
       </p>
       <button
         type="button"
-        class="grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text"
         :aria-label="t('photoZoom.close')"
         @click="dialog?.close()"
       >
@@ -69,7 +69,7 @@ defineExpose({
     <div class="relative min-h-0 flex-1 pb-5">
       <ul
         ref="strip"
-        class="flex h-full snap-x snap-mandatory scroll-smooth overflow-x-auto overscroll-x-contain motion-reduce:scroll-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex h-full snap-x snap-mandatory scroll-smooth overflow-x-auto overscroll-x-contain motion-reduce:scroll-auto focus-ring-inset"
         tabindex="0"
         :aria-label="t('photoZoom.gallery')"
         @scroll.passive="onScroll"
@@ -99,7 +99,7 @@ defineExpose({
       <template v-if="photos.length > 1">
         <button
           type="button"
-          class="absolute top-1/2 left-2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="absolute top-1/2 left-2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
           :disabled="index === 0"
           :aria-label="t('photoZoom.previous')"
           @click="step(-1)"
@@ -112,7 +112,7 @@ defineExpose({
         </button>
         <button
           type="button"
-          class="absolute top-1/2 right-2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="absolute top-1/2 right-2 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-night/70 text-2xl text-text transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
           :disabled="index >= photos.length - 1"
           :aria-label="t('photoZoom.next')"
           @click="step(1)"

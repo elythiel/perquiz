@@ -31,11 +31,11 @@ if (first.value) {
     <p class="max-w-measure text-base leading-relaxed text-text-soft">
       {{ t('guess.emptyBody') }}
     </p>
-    <NuxtLink
+    <ButtonPrimary
       to="/my-room"
-      class="self-start rounded-2xl bg-torch px-5 py-3 text-base font-bold text-on-torch transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      class="self-start"
     >
       {{ t('guess.emptyAction') }}
-    </NuxtLink>
+    </ButtonPrimary>
   </section>
 </template>

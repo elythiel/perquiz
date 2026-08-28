@@ -131,6 +131,51 @@
   );
 }
 
+/* The focus ring, only where it has to differ from the base rule.
+
+   `@layer base` already gives every `:focus-visible` element the default ring
+   — 2px of `torch-ink`, offset 2px — so a control that wants exactly that
+   declares nothing at all, and one added tomorrow is covered without anyone
+   remembering to cover it. Thirty-three controls used to restate it anyway,
+   in three classes each, saying what was already true.
+
+   What is left here are the three cases the base rule cannot serve, and each
+   is a real difference rather than a preference:
+
+   - `inset`: the ring is drawn INSIDE the control, for the ones sitting flush
+     in a group or on a photograph, where 2px of outward offset would be
+     clipped or would collide with the neighbour.
+   - `alert`: destructive actions take the ring in `alert-ink`, so the colour
+     that means "this deletes something" is the colour the keyboard follows.
+   - `within`: the ring lands on a visible label whose radio is `sr-only`.
+     The base rule would decorate the input, which is exactly the element
+     nobody can see.
+
+   Written as utilities that carry their own `:focus-visible`, not as bare
+   declarations to be prefixed at the call site: `focus:` instead of
+   `focus-visible:` is the mistake this forecloses, and a ring that shows on a
+   mouse click is the one thing these must never do. */
+@utility focus-ring-inset {
+  &:focus-visible {
+    outline: 2px solid var(--color-torch-ink);
+    outline-offset: -2px;
+  }
+}
+
+@utility focus-ring-alert {
+  &:focus-visible {
+    outline: 2px solid var(--color-alert-ink);
+    outline-offset: 2px;
+  }
+}
+
+@utility focus-ring-within {
+  &:has(:focus-visible) {
+    outline: 2px solid var(--color-torch-ink);
+    outline-offset: 2px;
+  }
+}
+
 /* Growing a control's hit area without growing the control.
    44px is the floor a finger needs — Apple's HIG, Lighthouse's tap-target
    audit, and this codebase's own `size-11` buttons in PhotoZoom all agree on

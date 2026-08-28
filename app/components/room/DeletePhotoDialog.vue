@@ -44,16 +44,12 @@ function confirm() {
     </p>
 
     <div class="flex justify-end gap-3">
-      <button
-        type="button"
-        class="rounded-xl border border-edge-strong px-4 py-2.5 text-base text-text-soft transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
-        @click="dialog?.close()"
-      >
+      <ButtonSecondary @click="dialog?.close()">
         {{ t('myRoom.cancel') }}
-      </button>
+      </ButtonSecondary>
       <button
         type="button"
-        class="rounded-xl bg-alert px-4 py-2.5 text-base font-bold text-night transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
+        class="rounded-xl bg-alert px-4 py-2.5 text-base font-bold text-night transition-opacity duration-100 ease-micro hover:opacity-90 focus-ring-alert"
         @click="confirm"
       >
         {{ t('myRoom.confirm') }}

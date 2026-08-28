@@ -30,7 +30,7 @@ const route = useRoute()
       >
         <NuxtLink
           :to="{ path: `/guess/${room.token}`, query: route.query }"
-          class="-my-3 block py-3 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="-my-3 block py-3"
           :aria-label="t(room.answered ? 'guess.roomAnswered' : 'guess.roomUnanswered', { position: index + 1 })"
           :aria-current="index === current ? 'page' : undefined"
         >

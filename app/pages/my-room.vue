@@ -128,12 +128,11 @@ async function rename(displayName: string) {
       {{ inPlay ? summary : t('myRoom.summaryEmpty') }}
     </p>
 
-    <p
-      v-if="readOnly"
-      class="rounded-2xl bg-panel px-5 py-4 text-base leading-relaxed text-text-soft"
-    >
-      {{ t('myRoom.readOnly') }}
-    </p>
+    <BaseCard v-if="readOnly">
+      <p class="text-base leading-relaxed text-text-soft">
+        {{ t('myRoom.readOnly') }}
+      </p>
+    </BaseCard>
 
     <RoomPhotoGrid
       :photos="photos"
@@ -169,33 +168,36 @@ async function rename(displayName: string) {
     <div class="flex flex-wrap gap-3">
       <!-- Icon beside the label, never instead of it: these two buttons sit
            side by side and do very different things. -->
-      <button
-        type="button"
-        class="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-edge-strong px-5 py-4 text-base text-text transition-colors duration-100 ease-micro hover:border-text-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      <ButtonSecondary
+        class="flex-1"
+        size="lg"
         :disabled="!inPlay"
         @click="preview?.open()"
       >
-        <Icon
-          name="mingcute:eye-line"
-          class="block size-5 shrink-0"
-          aria-hidden="true"
-        />
+        <template #icon>
+          <Icon
+            name="mingcute:eye-line"
+            class="block size-5 shrink-0"
+            aria-hidden="true"
+          />
+        </template>
         {{ t('myRoom.playerPreview') }}
-      </button>
-      <button
+      </ButtonSecondary>
+      <ButtonPrimary
         v-if="!readOnly"
-        type="button"
-        class="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-torch px-5 py-4 text-base font-bold text-on-torch transition-opacity duration-100 ease-micro enabled:hover:opacity-90 disabled:opacity-40 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex-1"
         :disabled="full"
         @click="pick"
       >
-        <Icon
-          name="mingcute:pic-line"
-          class="block size-5 shrink-0"
-          aria-hidden="true"
-        />
+        <template #icon>
+          <Icon
+            name="mingcute:pic-line"
+            class="block size-5 shrink-0"
+            aria-hidden="true"
+          />
+        </template>
         {{ t('myRoom.addPhotos') }}
-      </button>
+      </ButtonPrimary>
     </div>
 
     <!-- HEIC is absent on purpose: sharp cannot decode it (server/utils/photos.ts). -->

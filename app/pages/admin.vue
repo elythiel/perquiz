@@ -119,7 +119,7 @@ async function removePerson() {
     <NuxtLink
       v-if="!isBeforeLock(data.phase)"
       to="/reveal"
-      class="rounded-2xl bg-clue/15 px-5 py-4 text-center text-lg font-bold text-clue-ink transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+      class="rounded-2xl bg-clue/15 px-5 py-4 text-center text-lg font-bold text-clue-ink transition-opacity duration-100 ease-micro hover:opacity-90"
     >
       {{ t('reveal.open') }}
     </NuxtLink>

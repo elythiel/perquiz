@@ -90,7 +90,7 @@ onBeforeUnmount(() => {
     <summary
       ref="trigger"
       :aria-label="t('userMenu.trigger', { name: displayName })"
-      class="flex cursor-pointer list-none items-center gap-1.5 rounded-full transition-opacity duration-100 ease-micro hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink [&::-webkit-details-marker]:hidden"
+      class="flex cursor-pointer list-none items-center gap-1.5 rounded-full transition-opacity duration-100 ease-micro hover:opacity-80 [&::-webkit-details-marker]:hidden"
     >
       <ShellUserChip :display-name="displayName" />
       <Icon
@@ -123,7 +123,7 @@ onBeforeUnmount(() => {
       >
         <button
           type="submit"
-          class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-base text-text-soft transition-colors duration-100 ease-micro hover:bg-sunken hover:text-text focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
+          class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-base text-text-soft transition-colors duration-100 ease-micro hover:bg-sunken hover:text-text focus-ring-inset"
         >
           <Icon
             name="mingcute:exit-door-line"

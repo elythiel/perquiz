@@ -41,7 +41,7 @@ const OPTIONS: readonly { value: ThemeChoice, icon: string }[] = [
       <label
         v-for="option in OPTIONS"
         :key="option.value"
-        class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-torch-ink"
+        class="flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-ring-within"
         :class="choice === option.value ? 'bg-torch/10 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
       >
         <input

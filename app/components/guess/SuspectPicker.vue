@@ -60,7 +60,7 @@ function choose(id: number) {
     <header class="flex flex-col gap-3 px-5 pt-5">
       <button
         type="button"
-        class="self-end grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="self-end grid size-11 place-items-center rounded-lg text-text-muted transition-colors duration-100 ease-micro hover:text-text"
         :aria-label="t('guess.pickerClose')"
         @click="dialog?.close()"
       >
@@ -82,7 +82,7 @@ function choose(id: number) {
         autocomplete="off"
         :placeholder="t('guess.pickerSearch')"
         :aria-label="t('guess.pickerSearch')"
-        class="rounded-xl border border-edge-strong bg-night px-4 py-3 text-base text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="rounded-xl border border-edge-strong bg-night px-4 py-3 text-base text-text"
       >
     </header>
 
@@ -101,7 +101,7 @@ function choose(id: number) {
         -->
         <button
           type="button"
-          class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
+          class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors duration-100 ease-micro focus-ring-inset"
           :class="person.id === selected ? 'bg-torch/10' : 'hover:bg-sunken'"
           :aria-current="person.id === selected ? 'true' : undefined"
           @click="choose(person.id)"

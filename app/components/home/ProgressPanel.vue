@@ -7,15 +7,12 @@ const share = computed(() => props.total === 0 ? 0 : (props.answered / props.tot
 </script>
 
 <template>
-  <section class="flex flex-col gap-3 rounded-2xl bg-panel px-5 py-4">
-    <div class="flex items-baseline justify-between gap-4">
-      <h2 class="font-mono text-label tracking-eyebrow text-text-muted uppercase">
-        {{ t('home.answersLabel') }}
-      </h2>
+  <BaseCard :title="t('home.answersLabel')">
+    <template #aside>
       <p class="text-xl font-bold tabular-nums">
         {{ t('guess.counter', { done: answered, total }) }}
       </p>
-    </div>
+    </template>
 
     <!--
       The bar is decoration on top of the count beside it, so it is hidden from
@@ -37,5 +34,5 @@ const share = computed(() => props.total === 0 ? 0 : (props.answered / props.tot
     >
       {{ t('home.newRooms', { count: newRooms }, newRooms) }}
     </p>
-  </section>
+  </BaseCard>
 </template>

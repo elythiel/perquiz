@@ -37,7 +37,7 @@ const label = computed(() => props.position + 1)
     <template v-if="!readOnly">
       <button
         type="button"
-        class="absolute top-2 right-2 tap-target grid size-7 place-items-center rounded-lg bg-night/70 text-alert-ink transition-opacity duration-100 ease-micro hover:bg-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
+        class="absolute top-2 right-2 tap-target grid size-7 place-items-center rounded-lg bg-night/70 text-alert-ink transition-opacity duration-100 ease-micro hover:bg-night focus-ring-alert"
         :aria-label="t('myRoom.deletePhoto', { position: label })"
         @click="$emit('remove')"
       >
@@ -53,7 +53,7 @@ const label = computed(() => props.position + 1)
       <div class="absolute inset-x-2 bottom-2 flex justify-between gap-2">
         <button
           type="button"
-          class="tap-target grid size-7 place-items-center rounded-lg bg-night/70 text-text-soft transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="tap-target grid size-7 place-items-center rounded-lg bg-night/70 text-text-soft transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
           :disabled="position === 0"
           :aria-label="t('myRoom.moveEarlier', { position: label })"
           @click="$emit('move', -1)"
@@ -66,7 +66,7 @@ const label = computed(() => props.position + 1)
         </button>
         <button
           type="button"
-          class="tap-target grid size-7 place-items-center rounded-lg bg-night/70 text-text-soft transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="tap-target grid size-7 place-items-center rounded-lg bg-night/70 text-text-soft transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
           :disabled="position === count - 1"
           :aria-label="t('myRoom.moveLater', { position: label })"
           @click="$emit('move', 1)"

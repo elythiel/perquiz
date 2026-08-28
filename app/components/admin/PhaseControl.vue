@@ -60,11 +60,7 @@ const nextAlong = computed<GamePhase>(() =>
 </script>
 
 <template>
-  <section class="flex flex-col gap-3 rounded-2xl bg-panel px-5 py-4">
-    <h2 class="font-mono text-label tracking-eyebrow text-text-muted uppercase">
-      {{ t('admin.phaseLabel') }}
-    </h2>
-
+  <BaseCard :title="t('admin.phaseLabel')">
     <!-- Two by two on a phone, four across from `sm`: four labels of this
          length in one row would either overflow or have to be abbreviated,
          and « Préparation » abbreviated is a word nobody reads. -->
@@ -77,7 +73,7 @@ const nextAlong = computed<GamePhase>(() =>
         v-for="option in GAME_PHASES"
         :key="option"
         type="button"
-        class="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex items-center justify-center gap-1.5 rounded-lg px-2 py-2.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro focus-ring-inset"
         :class="option === phase ? 'bg-torch/15 text-torch-ink' : 'text-text-muted hover:text-text-soft'"
         :aria-pressed="option === phase"
         @click="ask(option)"
@@ -103,5 +99,5 @@ const nextAlong = computed<GamePhase>(() =>
       tone="clue"
       @confirm="pending && emit('change', pending)"
     />
-  </section>
+  </BaseCard>
 </template>

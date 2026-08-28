@@ -98,7 +98,7 @@ function openRoom(photos: readonly string[]) {
       >
         <button
           type="button"
-          class="size-20 shrink-0 overflow-hidden rounded-xl bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="size-20 shrink-0 overflow-hidden rounded-xl bg-sunken"
           :aria-label="t('photoZoom.gallery')"
           @click="openRoom(room.photos)"
         >
@@ -149,12 +149,11 @@ function openRoom(photos: readonly string[]) {
       </li>
     </ul>
 
-    <p
-      v-else
-      class="rounded-2xl bg-panel px-5 py-4 text-base text-text-muted"
-    >
-      {{ t('results.noRooms') }}
-    </p>
+    <BaseCard v-else>
+      <p class="text-base text-text-muted">
+        {{ t('results.noRooms') }}
+      </p>
+    </BaseCard>
 
     <PhotoZoom
       ref="zoom"

@@ -56,7 +56,7 @@ const { t } = useI18n()
       <button
         v-else
         type="button"
-        class="flex aspect-4/3 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-edge-strong text-text-soft transition-colors duration-100 ease-micro hover:border-torch-ink hover:text-text focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+        class="flex aspect-4/3 w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-edge-strong text-text-soft transition-colors duration-100 ease-micro hover:border-torch-ink hover:text-text"
         @click="$emit('pick')"
       >
         <Icon

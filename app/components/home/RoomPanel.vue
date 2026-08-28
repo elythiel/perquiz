@@ -8,13 +8,13 @@ const SHOWN = 4
 </script>
 
 <template>
-  <section class="flex flex-col gap-3 rounded-2xl bg-panel px-5 py-4">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="font-mono text-label tracking-eyebrow text-text-muted uppercase">
-        {{ t('home.roomLabel') }}
-      </h2>
+  <BaseCard
+    :title="t('home.roomLabel')"
+    align="center"
+  >
+    <template #aside>
       <RoomStatusChip :in-play="photos.length > 0" />
-    </div>
+    </template>
 
     <ul
       v-if="photos.length"
@@ -26,7 +26,7 @@ const SHOWN = 4
       >
         <NuxtLink
           to="/my-room"
-          class="block overflow-hidden rounded-xl bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="block overflow-hidden rounded-xl bg-sunken"
         >
           <!-- Named, not decorative: the link takes its accessible name from
                this alt, and without one a screen reader announces four links
@@ -43,7 +43,7 @@ const SHOWN = 4
       <li v-if="!readOnly && photos.length <= SHOWN">
         <NuxtLink
           to="/my-room"
-          class="grid aspect-square w-full place-items-center rounded-xl border border-dashed border-edge-strong text-2xl text-torch-ink transition-colors duration-100 ease-micro hover:border-torch-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="grid aspect-square w-full place-items-center rounded-xl border border-dashed border-edge-strong text-2xl text-torch-ink transition-colors duration-100 ease-micro hover:border-torch-ink"
           :aria-label="t('home.addPhotos')"
         >
           <Icon
@@ -61,5 +61,5 @@ const SHOWN = 4
     >
       {{ t('home.roomEmpty') }}
     </p>
-  </section>
+  </BaseCard>
 </template>

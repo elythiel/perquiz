@@ -31,7 +31,7 @@ const { t } = useI18n()
         >
         <button
           type="button"
-          class="absolute top-1.5 right-1.5 grid size-7 place-items-center rounded-lg bg-night/70 text-alert-ink transition-colors duration-100 ease-micro hover:bg-night focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-alert-ink"
+          class="absolute top-1.5 right-1.5 grid size-7 place-items-center rounded-lg bg-night/70 text-alert-ink transition-colors duration-100 ease-micro hover:bg-night focus-ring-alert"
           :aria-label="t('admin.deletePhoto')"
           @click="emit('remove', photo)"
         >
@@ -44,11 +44,10 @@ const { t } = useI18n()
       </li>
     </ul>
 
-    <p
-      v-else
-      class="rounded-2xl bg-panel px-5 py-4 text-base text-text-muted"
-    >
-      {{ t('admin.moderationEmpty') }}
-    </p>
+    <BaseCard v-else>
+      <p class="text-base text-text-muted">
+        {{ t('admin.moderationEmpty') }}
+      </p>
+    </BaseCard>
   </section>
 </template>

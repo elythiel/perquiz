@@ -24,7 +24,7 @@ const zoom = useTemplateRef<{ open: (index: number) => void }>('zoom')
         -->
         <button
           type="button"
-          class="block w-full overflow-hidden rounded-xl bg-sunken transition-opacity duration-100 ease-micro hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-torch-ink"
+          class="block w-full overflow-hidden rounded-xl bg-sunken transition-opacity duration-100 ease-micro hover:opacity-90"
           :aria-label="t('guess.zoomOpen', { position: index + 1 })"
           @click="zoom?.open(index)"
         >
@@ -42,12 +42,11 @@ const zoom = useTemplateRef<{ open: (index: number) => void }>('zoom')
       </li>
     </ul>
 
-    <p
-      v-else
-      class="rounded-2xl bg-panel px-5 py-4 text-base text-text-muted"
-    >
-      {{ t('guess.noPhotos') }}
-    </p>
+    <BaseCard v-else>
+      <p class="text-base text-text-muted">
+        {{ t('guess.noPhotos') }}
+      </p>
+    </BaseCard>
 
     <PhotoZoom
       ref="zoom"
