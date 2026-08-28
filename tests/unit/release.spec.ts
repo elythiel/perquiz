@@ -5,9 +5,10 @@ import { describe, expect, it } from 'vitest'
  * The version, and the tags that are no longer published.
  *
  * Nothing here runs the workflow — that only happens on GitHub. What it can do
- * is guard the two things that would break it silently from this side: a
- * version string the tag and the image name are derived from, and the moving
- * tags whose removal is the whole point of publishing per version.
+ * is guard the things that would break it silently from this side: a version
+ * string the tag and the image name are derived from, the moving tags whose
+ * removal is the whole point of publishing per version, and the pinning and
+ * permissions that a later edit would undo without anybody noticing.
  *
  * A `latest` or a `main` coming back would not fail anything. It would just
  * quietly give a deployment something else to point at.
@@ -85,5 +86,68 @@ describe('the guard that makes it once per version', () => {
     for (const script of ['yarn lint', 'yarn typecheck', 'yarn test']) {
       expect(workflow, script).toContain(script)
     }
+  })
+})
+
+/**
+ * The pinning, and the two halves that only work together.
+ *
+ * A tag is mutable: whoever owns an action can move `v4` onto other code, and
+ * this workflow may push a tag and an image. A digest cannot move. But a digest
+ * nobody updates is a version that will never receive a fix either — so pinning
+ * alone trades one risk for another, and what makes it a hardening is the bot
+ * that keeps the digests fresh.
+ *
+ * Neither half is taste, which is why both are pinned here while the durations
+ * and the easings elsewhere are not.
+ */
+describe('the actions the workflow runs', () => {
+  const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map(match => match[1]!)
+
+  it('has some to sweep', () => {
+    // Cheap guard against the regex quietly finding nothing and every
+    // assertion below passing over an empty list.
+    expect(uses.length).toBeGreaterThan(5)
+  })
+
+  it('pins every one to a digest, never to a tag', () => {
+    // The failure this catches is not a rewrite: it is the seventh action,
+    // added months from now, arriving as `@v1` because that is what the
+    // documentation shows.
+    expect(uses.filter(ref => !/@[0-9a-f]{40}$/.test(ref))).toEqual([])
+  })
+
+  it('says which version each digest is', () => {
+    // Not decoration: Dependabot reads that comment to know what it is
+    // upgrading from, and a reader needs it to know what is pinned at all —
+    // a bare digest says nothing a human can act on.
+    const commented = [...workflow.matchAll(/uses:\s*\S+@[0-9a-f]{40}\s*#\s*v\S+/g)]
+    expect(commented).toHaveLength(uses.length)
+  })
+
+  it('has something keeping those digests fresh', () => {
+    // Without this the pins are a freeze, and the trade stops being worth it.
+    const dependabot = read('.github/dependabot.yml')
+    expect(dependabot).toContain('package-ecosystem: github-actions')
+  })
+})
+
+describe('what the workflow is allowed to do', () => {
+  it('grants nothing at the root beyond reading', () => {
+    /*
+     * Least privilege where a job that says nothing lands. Without this block
+     * the read-only jobs inherit the repository default, which is a setting in
+     * a place nobody looks — and on a public repository, one that can be
+     * widened without touching this file.
+     */
+    expect(workflow).toMatch(/^permissions:\n {2}contents: read$/m)
+  })
+
+  it('leaves the publish job its own, wider block', () => {
+    // Job permissions REPLACE the root ones rather than adding to them, so the
+    // one job that pushes a tag and an image has to name both itself. If this
+    // and the assertion above ever disagree, the release stops at a 403.
+    expect(workflow).toContain('contents: write')
+    expect(workflow).toContain('packages: write')
   })
 })
