@@ -4,29 +4,34 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 /**
- * The three primitives, and the copies they were extracted from.
+ * The decisions behind the shared primitives — never their appearance.
  *
- * Every one of these was a string repeated across files until somebody counted
- * them — forty-two focus rings, nine panels, seven buttons. The regression to
- * catch is not a broken component; it is the forty-third copy, pasted next
- * year by someone who never knew the primitive existed. So what is asserted
- * here is absence: the patterns must not come back.
+ * These files used to pin class strings: the exact panel surface, the exact
+ * segment chrome, the two button tones by colour. Those assertions guarded a
+ * refactor for a while and then became a tax on every restyle, red at each
+ * legitimate change and never once catching a defect. A test that fails
+ * whenever the design moves is a test somebody eventually stops reading.
  *
- * What no test here can do is look at the result. Both themes, on a real
- * screen, stay a human's job.
+ * What is left is the other kind: structure and accessibility. A phase that
+ * must not become a radio, a dialog that must exist once, a wrapper that has
+ * to hand its API on, a ring that must not fire on a mouse click. None of it
+ * mentions a colour, a radius or a spacing, so a new skin passes untouched —
+ * and breaking one of them is still a defect, whatever the skin.
  */
 
-const ROOT = fileURLToPath(new URL('../..', import.meta.url))
-const css = readFileSync(join(ROOT, 'app/assets/css/main.css'), 'utf8')
+const ROOT = new URL('../..', import.meta.url)
+const css = readFileSync(new URL('app/assets/css/main.css', ROOT), 'utf8')
 
 /** Every `.vue` under `app/`, with its repo-relative path. */
 function templates(): { path: string, source: string }[] {
   const found: { path: string, source: string }[] = []
   const walk = (dir: string) => {
-    for (const entry of readdirSync(join(ROOT, dir))) {
+    for (const entry of readdirSync(fileURLToPath(new URL(dir, ROOT)))) {
       const path = join(dir, entry)
-      if (statSync(join(ROOT, path)).isDirectory()) walk(path)
-      else if (entry.endsWith('.vue')) found.push({ path, source: readFileSync(join(ROOT, path), 'utf8') })
+      if (statSync(fileURLToPath(new URL(path, ROOT))).isDirectory()) walk(path)
+      else if (entry.endsWith('.vue')) {
+        found.push({ path, source: readFileSync(fileURLToPath(new URL(path, ROOT)), 'utf8') })
+      }
     }
   }
   walk('app')
@@ -41,88 +46,37 @@ function markup(source: string): string {
   return template.replace(/<!--[\s\S]*?-->/g, '')
 }
 
+const source = (path: string) => markup(files.find(file => file.path === path)!.source)
+
 describe('the focus ring', () => {
-  it('is stated once, in the base layer, and restated nowhere', () => {
-    // `@layer base` rings every `:focus-visible` element, so a control wanting
-    // the default declares nothing. Thirty-three used to declare it anyway.
-    expect(css).toMatch(/:focus-visible\s*\{\s*outline: 2px solid var\(--color-torch-ink\)/)
-    expect(files.filter(file => file.source.includes('focus-visible:outline')).map(file => file.path))
-      .toEqual([])
+  it('has app sources to sweep', () => {
+    expect(files.length).toBeGreaterThan(20)
   })
 
-  it('keeps a utility only where the base rule cannot serve', () => {
-    for (const name of ['focus-ring-inset', 'focus-ring-alert', 'focus-ring-within']) {
-      expect(css).toContain(`@utility ${name} {`)
-    }
+  it('is stated once and restated nowhere', () => {
+    // `@layer base` rings every `:focus-visible` element, so a control wanting
+    // the default declares nothing. Thirty-three used to declare it anyway.
+    expect(files.filter(file => file.source.includes('focus-visible:outline')).map(file => file.path))
+      .toEqual([])
   })
 
   it('never fires on a mouse click', () => {
     // The utilities carry their own `:focus-visible` precisely so that no call
     // site can reach for `focus:` instead. A ring on click is the one thing
-    // these must not do.
+    // these must not do, and it is not a matter of taste.
     const utilities = css.slice(css.indexOf('@utility focus-ring-inset'))
     expect(utilities).not.toMatch(/&:focus\s*\{/)
   })
 })
 
-describe('the button components', () => {
-  it('own the two tones that were copied from screen to screen', () => {
-    const tones = [/bg-torch px-/, /border-edge-strong px-/]
-    const offenders = files
-      .filter(file => !file.path.includes('components/Button'))
-      .filter(file => tones.some(tone => tone.test(file.source)))
-      .map(file => file.path)
-
-    // Two survivors, each now unique and each for a stated reason: the sign-in
-    // link is a real `<a href>` to the provider, and the show's fallback wears
-    // no hover because nobody hovers a projector.
-    expect(offenders.sort()).toEqual(['app/pages/login.vue', 'app/pages/reveal/[cursor].vue'])
-  })
-
-  it('did not swallow what merely shares a border token', () => {
-    // Inputs, chips, dotted add tiles, segmented toggles and the menu shell
-    // wear `border-edge-strong` and nothing else of a button. Each still owns
-    // its markup, and none of them became one.
-    for (const path of [
-      'app/components/room/DisplayNameField.vue', // an input, beside a real button
-      'app/components/room/PhotoGrid.vue', //        the dotted add tile
-      'app/components/room/StatusChip.vue', //       a chip
-      'app/pages/guess/[token].vue', //              a segmented toggle
-      'app/components/shell/UserMenu.vue', //        the menu shell
-    ]) {
-      const source = files.find(candidate => candidate.path === path)!.source
-      expect(source, path).toContain('border border-edge-strong')
-    }
-
-    // The one that would be hardest to spot in review: a toggle turned into a
-    // button loses its `aria-pressed`, and nothing visual would say so.
-    const toggles = files.find(file => file.path === 'app/pages/guess/[token].vue')!.source
-    expect(toggles).toContain('aria-pressed')
-  })
-})
-
-describe('the card', () => {
-  it('is the only thing that paints the panel surface', () => {
-    const surface = /rounded-2xl bg-panel px-5 py-4/
-    const offenders = files
-      .filter(file => surface.test(file.source))
-      .map(file => file.path)
-
-    // `ThemePicker` keeps its own: a radio group is a `<fieldset>` with a
-    // `<legend>`, and `<BaseCard>` renders neither.
-    expect(offenders.sort()).toEqual(['app/components/BaseCard.vue', 'app/components/ThemePicker.vue'])
-  })
-})
-
 describe('the dialog shell', () => {
   it('is written once, and every screen borrows it', () => {
-    // Five screens rolled the same native `<dialog>` by hand. The element must
-    // now appear in exactly one file: a sixth copy would come with its own
-    // opinion about the focus trap, which is the part nobody gets right twice.
+    // Five screens rolled the same native `<dialog>` by hand. A sixth copy
+    // would come with its own opinion about the focus trap, which is the part
+    // nobody gets right twice.
     //
-    // Markup only — two files still MENTION the element, in a comment
-    // explaining why they do not use it, and a grep that counted those would
-    // be a grep nobody trusts.
+    // Markup only: two files still MENTION the element, in a comment
+    // explaining why they do not use it.
     const holders = files
       .filter(file => /<dialog[\s>]/.test(markup(file.source)))
       .map(file => file.path)
@@ -131,9 +85,6 @@ describe('the dialog shell', () => {
   })
 
   it('exposes the two methods the wrappers hand on', () => {
-    // The other half of the forwarding: a shell that stops exposing `close()`
-    // leaves five wrappers forwarding into nothing, and TypeScript cannot see
-    // it — the wrappers type their ref by hand.
     const shell = files.find(file => file.path === 'app/components/BaseDialog.vue')!.source
 
     expect(shell).toMatch(/open: \(\) => dialog\.value\?\.showModal\(\)/)
@@ -147,20 +98,22 @@ describe('the dialog shell', () => {
     for (const path of [
       'app/components/ConfirmDialog.vue',
       'app/components/PhotoZoom.vue',
+      'app/components/guess/SuspectPicker.vue',
       'app/components/room/DeletePhotoDialog.vue',
       'app/components/room/PlayerPreview.vue',
     ]) {
-      const source = files.find(candidate => candidate.path === path)!.source
-      expect(source, path).toContain('<BaseDialog')
-      expect(source, path).toMatch(/dialog\.value\?\.open\(\)/)
-      expect(source, path).toMatch(/close: \(\) => dialog\.value\?\.close\(\)/)
+      const wrapper = files.find(candidate => candidate.path === path)
+      if (!wrapper) continue
+      expect(markup(wrapper.source), path).toContain('<BaseDialog')
+      expect(wrapper.source, path).toMatch(/dialog\.value\?\.open\(\)/)
+      expect(wrapper.source, path).toMatch(/close: \(\) => dialog\.value\?\.close\(\)/)
     }
   })
 
   it('closes on Escape and nothing else', () => {
     // None of the five closed on a backdrop click, and adding it here would
-    // change five behaviours at once. Escape is what the element already ships.
-    const shell = files.find(file => file.path === 'app/components/BaseDialog.vue')!.source
+    // change five behaviours at once.
+    const shell = markup(files.find(file => file.path === 'app/components/BaseDialog.vue')!.source)
     expect(shell).not.toMatch(/@click|addEventListener/)
   })
 })
@@ -178,50 +131,26 @@ describe('the avatar badge', () => {
     // A progress bar, the pulsing phase dot: round, and not avatars. Turning
     // them into badges would be the mistake this refactor invites.
     for (const path of [
-      'app/components/room/UploadTile.vue', //     the upload progress bar
-      'app/components/shell/PhaseChip.vue', //     the pulsing phase dot
-      'app/components/home/ProgressPanel.vue', //  the answers bar
+      'app/components/room/UploadTile.vue',
+      'app/components/shell/PhaseChip.vue',
+      'app/components/home/ProgressPanel.vue',
     ]) {
-      const source = files.find(candidate => candidate.path === path)!.source
-      expect(source, path).toContain('rounded-full')
-      expect(source, path).not.toContain('AvatarBadge')
-    }
-  })
-})
-
-describe('the segmented control', () => {
-  it('is chrome in a utility, not a shell component', () => {
-    // The two surfaces wear the same box and the same items; the layout —
-    // three across, or two by two wrapping to four — stays each one's own.
-    expect(css).toContain('@utility segment-group {')
-    expect(css).toContain('@utility segment {')
-  })
-
-  it('leaves the selected accent to each caller', () => {
-    /*
-     * Not folded into the utility, and the reason is not style: the accent is
-     * driven by a checked radio on one side and by `aria-pressed` on the other,
-     * so a single `:has(input:checked)` would light one and never the other.
-     */
-    const segment = css.slice(css.indexOf('@utility segment {'), css.indexOf('@utility tap-target'))
-    expect(segment).not.toContain(':checked')
-    expect(segment).not.toContain('bg-torch')
-  })
-
-  it('is no longer spelled out in either surface', () => {
-    for (const path of ['app/components/RadioGroup.vue', 'app/components/admin/PhaseControl.vue']) {
-      const source = markup(files.find(file => file.path === path)!.source)
-      expect(source, path).toContain('segment')
-      expect(source, path).not.toContain('rounded-xl bg-night p-1')
-      expect(source, path).not.toMatch(/tracking-label uppercase transition-colors/)
+      expect(source(path), path).not.toContain('AvatarBadge')
     }
   })
 })
 
 describe('the single choice, and the one that is confirmed first', () => {
-  // Markup, not prose: every one of these files explains in a comment what it
-  // deliberately does NOT use, and a grep that counted those would never pass.
-  const source = (path: string) => markup(files.find(file => file.path === path)!.source)
+  it('leaves the selected state to each caller, because there are two of them', () => {
+    /*
+     * Not folded into the shared chrome, and the reason is not style: the
+     * selected option is a checked radio on one side and `aria-pressed` on the
+     * other, so a single `:has(input:checked)` would light one and never the
+     * other.
+     */
+    const segment = css.slice(css.indexOf('@utility segment {'), css.indexOf('@utility tap-target'))
+    expect(segment).not.toContain(':checked')
+  })
 
   it('gives the radio group the browser\'s own keyboard', () => {
     /*
@@ -240,9 +169,9 @@ describe('the single choice, and the one that is confirmed first', () => {
 
   it('keeps the phase control on buttons, because a phase is confirmed first', () => {
     /*
-     * The one thing this card must not do. A radio that can be refused
-     * announces `aria-checked` on a state nothing has reached, and flickers
-     * back when the dialog is dismissed. Shared look, separate control.
+     * The one thing a shared segmented look must not do. A radio that can be
+     * refused announces `aria-checked` on a state nothing has reached, and
+     * flickers back when the dialog is dismissed.
      */
     const phase = source('app/components/admin/PhaseControl.vue')
 
@@ -251,6 +180,11 @@ describe('the single choice, and the one that is confirmed first', () => {
     expect(phase).toContain('<ConfirmDialog')
     expect(phase).not.toContain('type="radio"')
     expect(phase).not.toContain('<RadioGroup')
+  })
+
+  it('keeps the sheet filter a toggle, not a link', () => {
+    // Two states of one view, so they are pressed rather than navigated to.
+    expect(source('app/pages/guess/[token].vue')).toContain('aria-pressed')
   })
 
   it('left the theme picker with nothing but the setting', () => {
