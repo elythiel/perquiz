@@ -105,13 +105,21 @@ describe('the routes that declare a rule', () => {
    */
   it.each([
     ['admin.vue', 'access: { role: \'admin\' }'],
-    ['reveal/index.vue', 'access: { role: \'admin\' }'],
     ['reveal/[cursor].vue', 'access: { role: \'admin\' }'],
     ['results.vue', 'access: { phase: \'revealed\' }'],
     ['guess/index.vue', 'access: { phase: SHEET_OUT_PHASES }'],
     ['guess/[token].vue', 'access: { phase: SHEET_OUT_PHASES }'],
   ])('%s declares %s', (path, declaration) => {
     expect(page(path)).toContain(declaration)
+  })
+
+  it('leaves `/reveal` to the route it redirects onto', () => {
+    // The one route with no rule of its own, and the only one that may have
+    // none: it renders nothing, ever. A guard there would be a line nobody
+    // executes, and the rule that matters is on the step it lands on.
+    expect(page('reveal/index.vue')).toContain('redirect: \'/reveal/0\'')
+    expect(page('reveal/index.vue')).not.toContain('access:')
+    expect(page('reveal/[cursor].vue')).toContain('access: { role: \'admin\' }')
   })
 
   it('leaves the phase set to the shared constant, on both pages that read it', () => {

@@ -15,6 +15,30 @@ const props = defineProps<Props>()
 
 const { t } = useI18n()
 
+const route = useRoute()
+
+/**
+ * Which tab you are on, which is not the same as which link you clicked.
+ *
+ * A tab stays lit inside its own subtree: the sheet lives at `/guess/<room>`,
+ * and « Deviner » is still where you are. `exact-active-class` alone said
+ * otherwise — it only ever lit the handful of routes that are their own leaf,
+ * so walking into a room turned the tab off.
+ *
+ * « Accueil » is the exception, and the reason the exact match was reached for
+ * in the first place: `/` is a prefix of every path in the app, so an inclusive
+ * match there would light it on every screen.
+ *
+ * Written here rather than left to `active-class` because the class is only
+ * half of it — `aria-current="page"` is set by the router on the exact match
+ * too, so a reader using a screen reader would have been told they were
+ * nowhere. One predicate now answers both.
+ */
+function isCurrent(to: string): boolean {
+  if (to === '/') return route.path === '/'
+  return route.path === to || route.path.startsWith(`${to}/`)
+}
+
 const items = computed<NavItem[]>(() => [
   { to: '/', label: t('nav.home') },
   { to: '/my-room', label: t('nav.myRoom') },
@@ -37,7 +61,8 @@ const items = computed<NavItem[]>(() => [
         <NuxtLink
           :to="item.to"
           class="tap-target relative block rounded-lg py-1.5 font-mono text-label tracking-widest whitespace-nowrap text-text-muted uppercase transition-colors duration-100 ease-micro hover:text-text-soft sm:px-2"
-          exact-active-class="text-torch-ink"
+          :class="isCurrent(item.to) && 'text-torch-ink'"
+          :aria-current="isCurrent(item.to) ? 'page' : undefined"
         >
           {{ item.label }}
         </NuxtLink>

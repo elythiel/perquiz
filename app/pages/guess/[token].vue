@@ -25,7 +25,7 @@ import { SHEET_OUT_PHASES } from '#shared/utils/game'
  * watcher rather than by a remount — so staying mounted is what this page was
  * written for anyway.
  */
-definePageMeta({ key: 'guess-deck', access: { phase: SHEET_OUT_PHASES } })
+definePageMeta({ middleware: 'deck', key: 'guess-deck', access: { phase: SHEET_OUT_PHASES } })
 
 const { t } = useI18n()
 const route = useRoute()
@@ -36,18 +36,15 @@ const token = computed(() => String(route.params.token ?? ''))
 const room = computed(() => sheet.rooms.value.find(candidate => candidate.token === token.value))
 
 /**
- * A handle for a room that has left play, or one from somebody else's link.
+ * The room that vanishes under the reader while they are standing on it.
  *
- * Checked twice on purpose. Once here, awaited, because a `navigateTo` whose
- * promise nobody awaits is ignored during server rendering — the page would
- * answer 200 on a URL that names nothing. And once as a watcher, for the room
- * that vanishes under the reader while they are standing on it.
+ * Only the watcher lives here now. A handle that named nothing on arrival is
+ * `middleware/deck.ts`'s business, checked before this component exists —
+ * redirecting from a setup body is what wedged the page transition. This one
+ * fires on an already-mounted page, outside any transition, which is why it
+ * stays.
  */
 const stranded = computed(() => sheet.rooms.value.length > 0 && !room.value)
-
-if (stranded.value) {
-  await navigateTo('/guess', { replace: true })
-}
 
 watch(stranded, async (lost) => {
   if (lost) await navigateTo('/guess', { replace: true })

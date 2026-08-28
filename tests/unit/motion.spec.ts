@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 /**
@@ -76,5 +78,79 @@ describe('the motion budget', () => {
     // and the one hard part — FLIP — is already in Vue's <TransitionGroup>.
     expect(installed.filter(name => /motion|gsap|anime|animejs|framer|popmotion|tween/i.test(name)))
       .toEqual([])
+  })
+})
+
+/**
+ * The rule the transition imposes on every page, learned the hard way.
+ *
+ * A `<script setup>` that awaits `navigateTo` is a `<Suspense>` that never
+ * resolves: the promise never settles, so Nuxt's `onResolve` never runs.
+ * Wrapped in the page transition that is fine right up until it is not — the
+ * enter class stays on a page nobody will take it off, and every navigation
+ * after it lands invisible too. One trip through `/guess` used to blank the
+ * whole app until a reload.
+ *
+ * Forwarding therefore belongs to a middleware or a route record, which the
+ * router resolves before a component exists. Callbacks are untouched: a
+ * watcher redirecting a reader who is already standing on the page runs
+ * outside any transition, and that is a different thing entirely.
+ */
+describe('redirects, and where they may live', () => {
+  const PAGES = fileURLToPath(new URL('app/pages', ROOT))
+
+  /** Every page's `<script setup>`, comments stripped. */
+  function scripts(): { path: string, code: string }[] {
+    const found: { path: string, code: string }[] = []
+    const walk = (dir: string, prefix: string) => {
+      for (const entry of readdirSync(dir)) {
+        const full = join(dir, entry)
+        if (statSync(full).isDirectory()) walk(full, `${prefix}${entry}/`)
+        else if (entry.endsWith('.vue')) {
+          const script = /<script setup[^>]*>([\s\S]*?)<\/script>/.exec(readFileSync(full, 'utf8'))?.[1] ?? ''
+          found.push({
+            path: prefix + entry,
+            code: script.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, ''),
+          })
+        }
+      }
+    }
+    walk(PAGES, '')
+    return found
+  }
+
+  /** Where `await navigateTo` sits, by how many parentheses are open around it. */
+  function awaitedRedirects(code: string): number[] {
+    const depths: number[] = []
+    let depth = 0
+    for (let i = 0; i < code.length; i++) {
+      if (code[i] === '(') depth++
+      else if (code[i] === ')') depth--
+      else if (code.startsWith('await navigateTo', i)) depths.push(depth)
+    }
+    return depths
+  }
+
+  it('has pages to sweep', () => {
+    expect(scripts().length).toBeGreaterThan(5)
+  })
+
+  it('never awaits one in a setup body', () => {
+    // Depth 0 is the setup body itself. Anything deeper is inside a call —
+    // `watch(...)`, an event handler — and is somebody else's moment.
+    const offenders = scripts()
+      .filter(page => awaitedRedirects(page.code).includes(0))
+      .map(page => page.path)
+
+    expect(offenders).toEqual([])
+  })
+
+  it('sends the two forwarding routes through the router instead', () => {
+    const page = (path: string) => scripts().find(candidate => candidate.path === path)!.code
+
+    // `/guess` holds no room of its own; `/reveal` no step of its own.
+    expect(page('guess/index.vue')).toContain('middleware: \'deck\'')
+    expect(page('guess/[token].vue')).toContain('middleware: \'deck\'')
+    expect(page('reveal/index.vue')).toContain('redirect: \'/reveal/0\'')
   })
 })

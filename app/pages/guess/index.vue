@@ -2,25 +2,22 @@
 import { SHEET_OUT_PHASES } from '#shared/utils/game'
 
 /**
- * The way in to the sheet: it holds no room of its own.
+ * The way in to the sheet, and what is left of it when there is nothing to
+ * guess: this page is the empty state.
  *
- * Landing here re-reads the sheet — rooms appear and vanish as people upload
- * and delete photos (PAGES `/guess`) — and then hands over to the first room
- * still unanswered, which is where anyone opening « Deviner » wants to be.
+ * It holds no room of its own. The hand-over to the first unanswered room —
+ * which is where anyone tapping « Deviner » wants to be, and the only thing the
+ * nav and the dashboard can link to, since a room's handle is per-reader and
+ * changes as rooms come and go — is `middleware/deck.ts`. It used to be an
+ * awaited `navigateTo` in this setup body, and that is what broke the page
+ * transition for the whole app.
+ *
+ * So the route stays and the redirect leaves. What renders here now renders
+ * only when the middleware found no room to send anyone to.
  */
-definePageMeta({ access: { phase: SHEET_OUT_PHASES } })
+definePageMeta({ middleware: 'deck', access: { phase: SHEET_OUT_PHASES } })
 
 const { t } = useI18n()
-const sheet = await useGuessSheet()
-const route = useRoute()
-
-await sheet.refresh()
-
-const first = computed(() => sheet.rooms.value.find(room => room.guess === null) ?? sheet.rooms.value[0])
-
-if (first.value) {
-  await navigateTo({ path: `/guess/${first.value.token}`, query: route.query }, { replace: true })
-}
 </script>
 
 <template>

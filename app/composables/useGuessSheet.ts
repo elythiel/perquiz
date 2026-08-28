@@ -1,6 +1,15 @@
 import type { SaveState } from '~/components/guess/SuspectCard.vue'
 
 /**
+ * The cache the whole deck reads through.
+ *
+ * Named here rather than typed out twice: `middleware/deck.ts` fills it before
+ * the page exists, and this composable reads it back. Two spellings of one key
+ * would be two caches, and the second fetch would be invisible.
+ */
+export const GUESS_SHEET_KEY = 'guess:sheet'
+
+/**
  * The guess sheet: what is on it, and keeping it saved.
  *
  * Auto-save is per room, not per sheet. Someone tapping through twenty rooms
@@ -26,7 +35,7 @@ export async function useGuessSheet() {
   // body — to decide whether the room in the URL exists at all — must not read
   // an empty one and conclude everything is fine.
   const { data, refresh } = await useFetch('/api/guess', {
-    key: 'guess:sheet',
+    key: GUESS_SHEET_KEY,
     getCachedData: (key, nuxtApp) => nuxtApp.payload.data[key] ?? nuxtApp.static.data[key],
   })
 
