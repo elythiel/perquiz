@@ -36,14 +36,15 @@ export default defineEventHandler(async (event) => {
       throw new Error('the token carries neither a usable name nor a subject')
     }
 
-    const user = provisionUser({
-      provider: settings.providerId,
-      subject: claims.sub,
-      displayName,
-      isAdmin: access.isAdmin,
-    })
+    const identity = { provider: settings.providerId, subject: claims.sub }
 
-    await session.update({ userId: user.id })
+    // Before the cookie is written, and not only for tidiness: the session
+    // names this identity, so the row it resolves through has to exist first.
+    provisionUser({ ...identity, displayName, isAdmin: access.isAdmin })
+
+    // The identity, not a `users.id`: the cookie has to name something the
+    // provider owns, so a rebuilt `users` table cannot re-point it (card 79).
+    await session.update(identity)
     return sendRedirect(event, '/')
   }
   catch (error) {

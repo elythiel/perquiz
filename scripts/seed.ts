@@ -95,11 +95,19 @@ db.delete(users).run()
 db.update(appState).set({ phase: 'open', lockedAt: null }).run()
 clearPhotos()
 
-// The tables are AUTOINCREMENT — ids are never reused, so a deleted player's
-// id can never be handed to someone else and make a stale link point at the
-// wrong person. That guarantee also means a re-seed would keep counting from
-// where the last one stopped; resetting the counters is what makes two runs
-// produce the same game down to the ids.
+/*
+ * The counters, back to zero — what makes two runs produce the same game down
+ * to the ids, and a deliberate cost rather than a free one.
+ *
+ * The tables are AUTOINCREMENT precisely so ids are never reused. This line
+ * suspends that: after it, the next `users` row is a DIFFERENT person at a
+ * number somebody else held a minute ago. So nothing may key on a row number
+ * to mean a person across a re-seed — a live session cookie included, which is
+ * why it names `identities.provider` + `identities.subject` instead (card 79).
+ * A cookie from a real provider stops resolving here; a seeded player's keeps
+ * working, because `seed:<name>` below rewrites the same identity, which is the
+ * same person.
+ */
 db.run(sql`delete from sqlite_sequence where name in ('users', 'identities', 'photos')`)
 
 const provider = process.env.NUXT_OIDC_PROVIDER_ID ?? 'zitadel'

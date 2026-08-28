@@ -6,9 +6,9 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import * as h3 from 'h3'
-import { sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { migrateDatabase, openDatabase } from '../../server/database/client'
-import { guesses, photos, users } from '../../server/database/schema'
+import { guesses, identities, photos, users } from '../../server/database/schema'
 // Every server/utils module: Nitro auto-imports their exports, so the tests
 // have to put them where the handlers expect to find them — see `expose()`.
 import * as adminUtils from '../../server/utils/admin'
@@ -145,7 +145,15 @@ function expose(config: Record<string, unknown>) {
 export interface TestApi {
   /** A request against the app, through the real middleware chain. */
   fetch: (path: string, options?: RequestInit & { cookie?: string }) => Promise<Response>
-  /** The sealed session cookie for a user id — minted by h3, like a real login. */
+  /**
+   * The sealed session cookie for a user — minted by h3, like a real login.
+   *
+   * Takes the id for the caller's convenience, but seals the IDENTITY behind
+   * it, exactly as the callback does: a cookie holding a row number is not
+   * something this app issues any more (card 79), and a helper that minted one
+   * would let a session-shaped test pass against a session shape that no
+   * longer exists.
+   */
   signIn: (userId: number) => Promise<string>
   /** The same, as the whole `set-cookie` header: attributes included. */
   signInHeader: (userId: number) => Promise<string>
@@ -155,7 +163,16 @@ export interface TestApi {
   routes: ApiRoute[]
   /** Empties the game tables between tests; the schema stays. */
   reset: () => void
+  /** A player and the identity they sign in with, since one is no use without the other. */
   createUser: (displayName: string, options?: { isAdmin?: boolean }) => number
+  /**
+   * Puts `users` back to handing out ids from 1, the way `yarn seed` does.
+   *
+   * AUTOINCREMENT keeps counting past deleted rows, so `reset()` alone never
+   * reuses an id — which is exactly the case card 79 is about, and therefore
+   * the one a test has to be able to stage.
+   */
+  renumberUsers: () => void
   /** Adds a photo row AND the two files behind it, so it can also be served. */
   addPhoto: (userId: number, options?: { name?: string, bytes?: Uint8Array }) => string
   addGuess: (guesserId: number, roomUserId: number, guessedUserId: number) => void
@@ -205,7 +222,19 @@ async function boot(): Promise<TestApi> {
    */
   app.use('/test/sign-in', h3.defineEventHandler(async (event) => {
     const session = await sessionUtils.usePerquizSession(event)
-    await session!.update({ userId: Number(h3.getQuery(event).user) })
+    const userId = Number(h3.getQuery(event).user)
+
+    // The identity, looked up rather than invented: the session names one, and
+    // a door that made up a pair would hand out cookies resolving to nobody.
+    const identity = db
+      .select({ provider: identities.provider, subject: identities.subject })
+      .from(identities)
+      .where(eq(identities.userId, userId))
+      .get()
+
+    if (!identity) throw new Error(`the test door has no identity for user ${userId}`)
+
+    await session!.update(identity)
     return { ok: true }
   }))
 
@@ -270,10 +299,23 @@ async function boot(): Promise<TestApi> {
     },
 
     createUser(displayName, options = {}) {
-      return db.insert(users)
+      const id = db.insert(users)
         .values({ displayName, isAdmin: options.isAdmin ?? false })
         .returning({ id: users.id })
         .get().id
+
+      // `provider` is the one the test config declares, and the subject is
+      // derived from the name because the name is already unique — so two
+      // players never share an identity, and `signIn` always finds one.
+      db.insert(identities)
+        .values({ userId: id, provider: 'test', subject: `test:${displayName.toLowerCase()}` })
+        .run()
+
+      return id
+    },
+
+    renumberUsers() {
+      db.run(sql`delete from sqlite_sequence where name = 'users'`)
     },
 
     addPhoto(userId, options = {}) {

@@ -49,10 +49,17 @@ export default defineEventHandler(async (event) => {
   if (isFrameworkRoute(path)) return
 
   const session = await usePerquizSession(event)
-  const userId = session?.data.userId
-  // A session can outlive the row it points at — an admin removing a
-  // participant, a reseeded database. Treat it as signed out.
-  const user = userId ? findUserById(userId) : undefined
+  const identity = resolveSessionIdentity(session?.data)
+  /*
+   * A session can outlive the account it names — an admin removing a
+   * participant, a reseeded database. Treat it as signed out.
+   *
+   * It names an identity, not a row (`PerquizSession`), and that is what makes
+   * the sentence above true rather than nearly true: an account whose row
+   * number was handed to somebody else resolves to nobody here, not to that
+   * somebody. Nothing short of a trip through the provider signs anybody in.
+   */
+  const user = identity ? findUserByIdentity(identity) : undefined
   if (user) {
     event.context.user = user
     // The phase decides what every screen may offer, so it travels with the

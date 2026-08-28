@@ -5,7 +5,7 @@ import type { H3Event } from 'h3'
 import { useSession as useH3Session } from 'h3'
 
 /**
- * The app's own session: an encrypted, httpOnly cookie holding a user id.
+ * The app's own session: an encrypted, httpOnly cookie naming an identity.
  *
  * The provider's tokens are used once, at the callback, and dropped. Roles
  * live in the database (`users.is_admin`), refreshed at every login — so a
@@ -19,10 +19,45 @@ const SESSION_NAME = 'perquiz'
 const MINIMUM_PASSWORD_LENGTH = 32
 
 export interface PerquizSession {
-  userId?: number
+  /**
+   * Who the cookie belongs to: `identities.provider` + `identities.subject`,
+   * the pair the provider itself owns — and NOT `users.id`.
+   *
+   * A row number is not an identity. `users.id` is local, mutable, and handed
+   * out again the moment the table is rebuilt with its counter reset: a
+   * restored backup, a hand-repaired table, `yarn seed`. A cookie holding one
+   * does not stop resolving when that happens — it resolves to whoever now
+   * sits at that number, privileges included, without a trip through the
+   * provider. Naming the identity instead means a rebuilt `users` can make a
+   * session resolve to nobody, never to somebody else.
+   *
+   * Both or neither: a session carrying one half of the pair names no
+   * identity, so `resolveSessionIdentity` treats it as signed out.
+   */
+  provider?: string
+  subject?: string
   /** Only alive between /api/auth/login and /api/auth/callback. */
   codeVerifier?: string
   state?: string
+}
+
+/** The pair, when the session carries a whole one. */
+export interface SessionIdentity {
+  provider: string
+  subject: string
+}
+
+/**
+ * The identity a session names, or `undefined` when it names none.
+ *
+ * Next to the shape it reads, rather than spelled out at the one call site:
+ * "a session names somebody" is the question a second reader would answer
+ * again, slightly differently — which is how `/api/auth/login` came to read
+ * the cookie itself and disagree with the middleware (card 71).
+ */
+export function resolveSessionIdentity(session: PerquizSession | undefined): SessionIdentity | undefined {
+  const { provider, subject } = session ?? {}
+  return provider && subject ? { provider, subject } : undefined
 }
 
 /**
