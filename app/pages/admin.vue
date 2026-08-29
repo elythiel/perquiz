@@ -116,14 +116,33 @@ async function removePerson() {
       is not delivered. Offered only once the game is frozen, which is also the
       only phase the reveal API will answer in — the same predicate as the
       guard, so the link cannot outlive the door it opens.
+
+      `<ButtonPrimary>` and not a link with its own skin. It used to wear
+      `frame-clue frame-fill bg-clue/15 text-clue-ink`, which is word for word
+      the `clue` tint of `<BaseMessage>` — so a control looked exactly like a
+      block of text you cannot press, on the one screen that also shows a `clue`
+      message when the moderation grid is empty. Two identical blocks, one
+      clickable. This button is what the screen is asking for once the game is
+      frozen, which is the one thing `<ButtonPrimary>` is for, and it is the
+      only one on the page.
     -->
-    <NuxtLink
+    <ButtonPrimary
       v-if="!isBeforeLock(data.phase)"
       to="/reveal"
-      class="frame frame-clue frame-fill press bg-clue/15 px-3.5 py-2.5 text-center text-lg font-bold text-clue-ink transition-opacity duration-100 ease-micro hover:opacity-90"
+      size="xl"
     >
+      <!-- A projector, and not a play arrow: what this opens is a screen shown
+           to a room off a wall, which is the same word the reveal stage uses
+           about itself. A play arrow would promise a video. -->
+      <template #icon>
+        <Icon
+          name="pixelarticons:projector"
+          class="block size-5 shrink-0"
+          aria-hidden="true"
+        />
+      </template>
       {{ t('reveal.open') }}
-    </NuxtLink>
+    </ButtonPrimary>
 
     <AdminParticipationList
       :participants="data.participants"
