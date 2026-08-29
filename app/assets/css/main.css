@@ -322,11 +322,13 @@
    because it had no family and a rule with a hole in it is not a rule.
 
    PHOTOGRAPHS — `frame-fill` alone: the cut, and no line. A picture brings its
-   own edges. FOUR screens show photographs and only two of them are scoped:
-   vikunja-101 for « Ma pièce », vikunja-97 for the dashboard. Of the other two
-   the moderation grid on `/admin` already agrees with the rule, and the reveal
-   stage does not — it still draws an azure line around the one photograph this
-   game projects on a wall. It goes with the rest to vikunja-106.
+   own edges, and what tells it from the region holding it is that it has no
+   outline. FOUR screens show photographs. « Ma pièce » is done (vikunja-101,
+   where the rule was first needed: the grid moved inside an azure region and
+   the tiles were azure too) and the moderation grid on `/admin` already
+   agreed. The dashboard's thumbnails are vikunja-97; the reveal stage still
+   draws an azure line around the one photograph this game projects on a wall,
+   and goes to vikunja-106.
 
    WHAT IT COSTS TO MOVE ONE OF THESE. tests/unit/contrast.spec.ts enumerates
    the six frame inks BY TOKEN NAME and holds each at 3:1 against the three
@@ -346,12 +348,13 @@
    place before, every time.
 
    Applied so far: the sections, the messages, the dialogs, the interactive
-   family as it already stood, the moderation grid's photographs, and — since
-   vikunja-104 — the badges and the avatars. What is left is the monuments
-   (vikunja-105, which also decides whether the reveal standings are one) and
-   the nav bar, the three lists and the show's photograph (vikunja-106). The
-   count at the top of this comment is what tells you whether anything has been
-   left out of them. */
+   family as it already stood, the badges and the avatars (vikunja-104), and the
+   photographs on two of their four screens — the moderation grid, which already
+   agreed, and « Ma pièce » (vikunja-101). What is left is the dashboard's
+   thumbnails (vikunja-97), the monuments (vikunja-105, which also decides
+   whether the reveal standings are one), and the nav bar, the three lists and
+   the show's photograph (vikunja-106). The count at the top of this comment is
+   what tells you whether anything has been left out of them. */
 
 /* The pixel frame: `frame` draws the outline, `frame-<tint>` colours it, and
    `frame-fill` cuts the flat underneath to the same steps.
