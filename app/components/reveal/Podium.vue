@@ -62,13 +62,31 @@ const HEIGHTS: Record<number, string> = { 1: 'h-56 sm:h-72', 2: 'h-40 sm:h-52', 
           >{{ t('reveal.exAequo') }}</span>
         </span>
 
+        <!-- A SQUARE border, and the only right angles left in a skin that
+             methodically removed every one of them (vikunja-74). That is the
+             intent rather than an oversight: a podium is a monument, and a
+             monument reads as one because it is not shaped like the things
+             around it. Written down so nobody straightens it back into the
+             pixel frame in good faith.
+
+             Three pixels — one cell of the 24-over-8 raster — so the line is
+             square without being off the grid the rest of the skin is drawn on.
+
+             `frame-fill` goes with the frame, which is what squares the wash on
+             the winner's step. And the gradient no longer needs
+             `background-origin: border-box`, the declaration `@utility frame`
+             carries for exactly this block: a background image is laid out in
+             the padding box and painted across the border box, so the browser
+             tiles it into the band and shows both ends of the ramp on the wrong
+             sides. A solid opaque border paints over that strip, so the defect
+             has nowhere to appear. -->
         <div
-          class="frame frame-fill flex w-full animate-step-up flex-col items-center justify-center gap-1 motion-reduce:animate-soft-fade"
+          class="flex w-full animate-step-up flex-col items-center justify-center gap-1 border-3 motion-reduce:animate-soft-fade"
           :class="[
             HEIGHTS[COLUMNS[index]!],
             step.rank === 1
-              ? 'frame-torch bg-linear-to-t from-torch/10 to-torch/40'
-              : 'frame-edge bg-panel',
+              ? 'border-torch-ink bg-linear-to-t from-torch/10 to-torch/40'
+              : 'border-edge-strong bg-panel',
           ]"
         >
           <span

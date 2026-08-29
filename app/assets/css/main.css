@@ -246,9 +246,10 @@
    when this was written, thirty-seven elements under `app/` carried a frame and
    NINETEEN of them could not be pressed. The tints had drifted with that — the
    same colour saying different things from screen to screen. So the rule is by
-   FAMILY, and each family says what it wears and why. Applying the families has
-   since brought those two numbers to twenty-seven and eleven, and every one of
-   the eleven belongs to a paragraph below.
+   FAMILY, and each family says what it wears and why. Applying them all has
+   since brought those two numbers to twenty-four and EIGHT, and every one of
+   the eight belongs to a paragraph below — a badge, a card, two floating
+   surfaces, a message, a suspect, an upload in flight and the nav bar.
 
    Count those two numbers with a regex that respects class boundaries.
    `\bframe\b` matches the `frame` inside `frame-sm`, which is a band width
@@ -275,6 +276,16 @@
    destructive one, `torch` on the option you picked. This is the family the
    whole technique was built for, and the one that already agreed with itself.
 
+   With one exception worth keeping in mind, because it is the shape this whole
+   comment exists to prevent. The link to the show on `/admin` wore
+   `frame-clue frame-fill bg-clue/15 text-clue-ink` — word for word a `clue`
+   `<BaseMessage>` — on the one screen that also renders a `clue` message when
+   the moderation grid is empty: two identical blocks, one of them clickable.
+   A CONTROL MUST NOT WEAR A MESSAGE'S SKIN. A tinted control in this app is a
+   SOLID flat with dark ink on it (`bg-torch`/`text-on-torch`,
+   `bg-alert`/`text-night`); the translucent `/15` flat with the accent as ink
+   belongs to messages and to nothing else.
+
    BADGES AND TEXT PILLS — `<RoomStatusChip>`, `<ShellPhaseChip>`, and the
    « Régie » pill written by hand on `/admin`: NO frame at all, a bottom border
    instead. The tint moves from the outline to an underline, so the meaning
@@ -296,28 +307,43 @@
    surface that floats over the page has to say where it ends, whatever the
    vocabulary says about blocks you cannot press.
 
-   OBJECTS APART — the podium and the dashboard gauge: a SQUARE border. They
-   would then be the only right angles in a skin that methodically removed
-   every one of them (vikunja-74), and that IS the intent — a monument reads as
-   a monument because it is not shaped like everything around it. Written down
-   so the next reader does not "fix" it in good faith. Whether the reveal
-   standings join them is the one case still open, and it is carried on the
-   card rather than guessed at here. vikunja-105.
+   OBJECTS APART — the podium and the dashboard gauge, and only those two: a
+   SQUARE border of three pixels, one cell of the raster, since vikunja-105.
+   They are the only right angles in a skin that methodically removed every one
+   of them (vikunja-74), and that IS the intent — a monument reads as a monument
+   because it is not shaped like everything around it. Written down so the next
+   reader does not "fix" it in good faith.
+
+   Two things a square border takes with it, both wanted here. The winner's step
+   and the gauge stop being cut, so their flats have corners: on the gauge that
+   is an opaque `night` block sitting as a dark, un-grained square against a
+   ground made of grain and glow, which is what `frame-fill`'s comment warns
+   about and what a monument's corner is supposed to do. And the podium's
+   gradient no longer needs the `background-origin: border-box` that `@utility
+   frame` carries for it — a solid opaque border paints over the strip the
+   browser would otherwise tile the ramp into.
 
    THE PHONE NAV BAR — `frame-xs`, since vikunja-106. Still a surface laid over
    the page, saying so in three pixels instead of nine.
 
-   LISTS OF ROWS — the participant list on `/admin`, and the two on
-   « Résultats »: a grey bottom border, same three-pixel note as the pills. A
-   list should read as a list rather than as twenty-five framed blocks stacked
-   on one another. All three since vikunja-106. The standings row used to tint
-   itself `torch` for « c'est moi » — looked at on the screen and dropped there
-   and then: an underline is a weaker mark than an outline, and the row already
-   says « vous » after the name. A colour that repeats a word wordlessly earns
-   nothing, so every underline in that list is grey and `aria-current` carries
-   the rest. The two lists on « Résultats » keep a horizontal padding the
-   participant list does not: their rows hold a thumbnail and an avatar rather
-   than text starting at the margin.
+   LISTS OF ROWS — the participant list on `/admin`, the two on « Résultats »
+   and the show's standings: a grey bottom border, same three-pixel note as the
+   pills. A list should read as a list rather than as twenty-five framed blocks
+   stacked on one another. The first three since vikunja-106, the standings
+   since vikunja-105 — which is where it landed after being the vocabulary's
+   last open case: it wears the podium's torch/edge pattern and could have gone
+   with the monuments, but twenty-five names read one after another are a list
+   you read, and the podium two slides earlier is the thing you look at. The two
+   leaderboards in this game therefore have one shape.
+
+   None of these four tints a row to point at somebody. « Résultats » used to
+   outline your own row in `torch` and dropped it: the row already says « vous »
+   after the name, and a colour that repeats a word wordlessly earns nothing —
+   `aria-current` carries what the word cannot. The show's leader keeps a torch
+   WASH, which says something else (who won) to a room rather than to a reader.
+   The three lists whose rows open with a thumbnail or an avatar keep a
+   horizontal padding; the participant list, whose rows open with text, lines up
+   with the heading above it instead.
 
    AN ACTION UNDER WAY — `<RoomUploadTile>`, and so far only it: a `torch` frame
    on a block nobody can press, standing in the photo grid while a file goes up.
@@ -355,13 +381,15 @@
    which already carries the grain and the glow. Check what holds the block in
    place before, every time.
 
-   Applied so far: the sections, the messages, the dialogs, the interactive
-   family as it already stood, the badges and the avatars (vikunja-104), all
-   four screens of photographs (vikunja-101, vikunja-97, vikunja-106), and the
-   nav bar and the three lists (vikunja-106). What is left is the monuments —
-   vikunja-105, which also decides whether the reveal standings are one of them.
-   The count at the top of this comment is what tells you whether anything has
-   been left out. */
+   ALL OF IT IS APPLIED, as of vikunja-105. Sections, messages, dialogs and the
+   interactive family were already in agreement; the badges and avatars came in
+   vikunja-104, the photographs across their four screens in vikunja-101,
+   vikunja-97 and vikunja-106, the nav bar and three of the lists in
+   vikunja-106, and the monuments and the last list here. Nothing is pending,
+   which makes the count at the top of this comment the thing to watch: recount
+   it when something new gets a frame, and if the new one belongs to no
+   paragraph above, that is a decision to take rather than a line to copy from
+   its neighbour. */
 
 /* The pixel frame: `frame` draws the outline, `frame-<tint>` colours it, and
    `frame-fill` cuts the flat underneath to the same steps.
