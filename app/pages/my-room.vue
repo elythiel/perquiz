@@ -48,7 +48,7 @@ const summary = computed(() => {
 const uploads = useRoomUploads(refresh)
 
 const picker = useTemplateRef<HTMLInputElement>('picker')
-const preview = useTemplateRef<{ open: () => void }>('preview')
+const zoom = useTemplateRef<{ open: (index: number) => void }>('zoom')
 const deleteDialog = useTemplateRef<{ open: () => void }>('deleteDialog')
 const nameField = useTemplateRef<{ fail: (reason: string) => void, succeed: () => void }>('nameField')
 
@@ -159,6 +159,7 @@ async function rename(displayName: string) {
           @pick="pick"
           @remove="askToRemove"
           @move="move"
+          @zoom="index => zoom?.open(index)"
         />
 
         <RoomDisplayNameField
@@ -167,30 +168,6 @@ async function rename(displayName: string) {
           :read-only="readOnly"
           @save="rename"
         />
-
-        <!--
-          The only action left on this page, and it is a way of looking rather
-          than of changing — which is why it stays `Secondary` even now that
-          it is alone. Adding photographs lives on the grid's own tile: the
-          button that used to sit here fired the exact same `pick`, and having
-          it twice is what made the action look far from its subject
-          (vikunja-94).
-        -->
-        <ButtonSecondary
-          class="sm:self-start"
-          size="lg"
-          :disabled="!inPlay"
-          @click="preview?.open()"
-        >
-          <template #icon>
-            <Icon
-              name="pixelarticons:eye"
-              class="block size-5 shrink-0"
-              aria-hidden="true"
-            />
-          </template>
-          {{ t('myRoom.playerPreview') }}
-        </ButtonSecondary>
       </div>
     </BaseCard>
 
@@ -222,9 +199,19 @@ async function rename(displayName: string) {
       @change="onPicked"
     >
 
-    <RoomPlayerPreview
-      ref="preview"
-      :photos="photos"
+    <!--
+      The same zoom the guess sheet and the results use, on the same photos.
+      That is the whole point of the change: what you check here is what the
+      others will be shown, in the shape they will be shown it — where the
+      preview dialog it replaces paged through them one at a time, which the
+      guess sheet has never done (vikunja-99).
+
+      It takes names, the grid takes objects; the map is here rather than in a
+      computed, since this is its only reader.
+    -->
+    <PhotoZoom
+      ref="zoom"
+      :photos="photos.map(photo => photo.name)"
     />
     <RoomDeletePhotoDialog
       ref="deleteDialog"

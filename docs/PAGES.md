@@ -65,7 +65,7 @@ Features (`preparation` and `open` phases — the room is editable in both):
 - Upload feedback: per-file progress/processing state, per-file errors (too big, unsupported, failed) without blocking the other files.
 - List my photos; reorder them; delete any (with confirmation).
 - "In play" status: visible ("your room appears on others' sheets") vs 0 photos ("not in play").
-- Preview my room as others see it: photos only, nothing identifying.
+- See any photo full size, in the same zoom the guess sheet uses — which is how to check that nothing in a shot names its owner (SPEC §3). Until vikunja-99 this was a separate preview dialog that paged through the photos one at a time; the guess sheet never did, so the preview showed something nobody would ever see.
 - Edit my display name (same rules as registration; uniqueness re-checked).
 
 States:
