@@ -39,12 +39,12 @@ function confirm() {
       {{ t('myRoom.confirmDelete') }}
     </h2>
 
-    <p
+    <BaseMessage
       v-if="consequence"
-      class="bg-alert/15 px-4 py-3 text-base leading-relaxed text-alert-ink"
+      tone="alert"
     >
-      {{ consequence }}
-    </p>
+      <p>{{ consequence }}</p>
+    </BaseMessage>
 
     <div class="flex justify-end gap-3">
       <ButtonSecondary @click="dialog?.close()">

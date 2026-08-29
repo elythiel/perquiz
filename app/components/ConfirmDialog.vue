@@ -43,13 +43,17 @@ function confirm() {
       {{ title }}
     </h2>
 
-    <p
+    <!-- A message, not a dialog-only block: it says the same thing here as on
+         a page, so it wears the same form. The frame it gains inside the shell
+         is a second line, but it is a tinted one 14px inside an `edge` one and
+         two tints apart — which reads as a block on a panel, not as two
+         borders on one box. -->
+    <BaseMessage
       v-if="body"
-      class="px-4 py-3 text-base leading-relaxed"
-      :class="tone === 'clue' ? 'bg-clue/15 text-clue-ink' : 'bg-alert/15 text-alert-ink'"
+      :tone="tone ?? 'alert'"
     >
-      {{ body }}
-    </p>
+      <p>{{ body }}</p>
+    </BaseMessage>
 
     <p
       v-if="note"

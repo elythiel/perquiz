@@ -42,11 +42,12 @@ const zoom = useTemplateRef<{ open: (index: number) => void }>('zoom')
       </li>
     </ul>
 
-    <BaseCard v-else>
-      <p class="text-base text-text-muted">
-        {{ t('guess.noPhotos') }}
-      </p>
-    </BaseCard>
+    <BaseMessage
+      v-else
+      tone="clue"
+    >
+      <p>{{ t('guess.noPhotos') }}</p>
+    </BaseMessage>
 
     <PhotoZoom
       ref="zoom"

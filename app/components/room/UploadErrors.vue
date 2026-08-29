@@ -23,15 +23,17 @@ const lines = computed(() => props.failures.map(failure => ({
 </script>
 
 <template>
-  <section
-    class="frame frame-alert frame-fill flex flex-col gap-2 bg-alert/15 px-3.5 py-2.5"
-    :aria-label="t('myRoom.errorHeading')"
+  <!-- The heading is the region's name and nothing else: it was an `aria-label`
+       before this component existed, and it stays out of sight. -->
+  <BaseMessage
+    tone="alert"
+    :title="t('myRoom.errorHeading')"
+    hide-title
   >
     <ul class="flex flex-col gap-1.5">
       <li
         v-for="line in lines"
         :key="line.id"
-        class="text-base leading-relaxed text-alert-ink"
       >
         {{ line.text }}
       </li>
@@ -51,5 +53,5 @@ const lines = computed(() => props.failures.map(failure => ({
     >
       {{ t('myRoom.cancel') }}
     </button>
-  </section>
+  </BaseMessage>
 </template>

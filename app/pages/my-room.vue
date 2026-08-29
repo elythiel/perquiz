@@ -129,11 +129,12 @@ async function rename(displayName: string) {
       {{ inPlay ? summary : t('myRoom.summaryEmpty') }}
     </p>
 
-    <BaseCard v-if="readOnly">
-      <p class="text-base leading-relaxed text-text-soft">
-        {{ t('myRoom.readOnly') }}
-      </p>
-    </BaseCard>
+    <BaseMessage
+      v-if="readOnly"
+      tone="clue"
+    >
+      <p>{{ t('myRoom.readOnly') }}</p>
+    </BaseMessage>
 
     <!--
       One region for the room: the photographs, the name they are found under,

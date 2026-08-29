@@ -126,11 +126,12 @@ async function pick(participantId: number) {
       :total="sheet.rooms.value.length"
     />
 
-    <BaseCard v-if="sheet.readOnly.value">
-      <p class="text-base leading-relaxed text-text-soft">
-        {{ t('guess.readOnly') }}
-      </p>
-    </BaseCard>
+    <BaseMessage
+      v-if="sheet.readOnly.value"
+      tone="clue"
+    >
+      <p>{{ t('guess.readOnly') }}</p>
+    </BaseMessage>
 
     <div
       v-else
@@ -174,12 +175,12 @@ async function pick(participantId: number) {
          very unlikely to be right. With six names on a sheet of twenty-nine
          rooms this will come up often, which is expected and not a reason to
          harden it. -->
-    <p
+    <BaseMessage
       v-if="sheet.nameOf(room.guess) && sheet.timesNamed(room.guess) > 1"
-      class="frame frame-amber bg-amber/15 px-2.5 py-1 text-sm leading-relaxed text-amber-ink"
+      tone="amber"
     >
-      {{ t('guess.duplicate', { name: sheet.nameOf(room.guess) }) }}
-    </p>
+      <p>{{ t('guess.duplicate', { name: sheet.nameOf(room.guess) }) }}</p>
+    </BaseMessage>
 
     <div class="flex items-center gap-3">
       <button
