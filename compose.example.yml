@@ -14,7 +14,7 @@ services:
     # never moves, so this line says exactly what is running, and rolling back
     # is the previous version of this file. A bot that watches semver — Renovate
     # and friends — bumps it for you.
-    image: ghcr.io/elythiel/perquiz:v0.3.0
+    image: ghcr.io/elythiel/perquiz:v0.3.1
     restart: unless-stopped
     env_file: .env
     ports:
