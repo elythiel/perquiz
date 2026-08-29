@@ -6,8 +6,12 @@
  * `size-12 shrink-0 text-sm`, which is the duplication `<AvatarBadge>` exists
  * to end.
  *
- * 48px and not the 40px it was: the pixel frame costs 18px of the box, and two
- * initials at `text-sm` in the 22px that left were wearing the walls.
+ * The size is the badge's own now. It used to carry `frame-xs px-1 py-1` to
+ * claw back some of what a full band cost it — two initials at `text-sm` in the
+ * 22px a 9px band left were wearing the walls. `<AvatarBadge>` is `frame-xs`
+ * for every caller since the frame vocabulary landed, and it pads itself, so
+ * this is down to the one thing that is genuinely this component's: the type
+ * size the four screens drawing a suspect agreed on.
  */
 defineProps<{ displayName: string }>()
 </script>
@@ -15,6 +19,6 @@ defineProps<{ displayName: string }>()
 <template>
   <AvatarBadge
     :name="displayName"
-    class="text-sm frame-xs px-1 py-1"
+    class="text-sm"
   />
 </template>

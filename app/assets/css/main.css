@@ -278,13 +278,16 @@
    instead. The tint moves from the outline to an underline, so the meaning
    survives while the pill stops claiming to be something you can press. Three
    pixels — `border-b-[3px]`, one cell of the grid — and never `border-b-2`,
-   which would be the first line in this interface off the 3px raster. They
-   get a component of their own too, the way the messages did. vikunja-104.
+   which would be the first line in this interface off the 3px raster. All
+   three live in `<BaseChip>` since vikunja-104, the way the messages live in
+   `<BaseMessage>`: one component, so this paragraph applies once.
 
    AVATARS AND SUSPECTS — `<AvatarBadge>`, what wraps it, and
    `<GuessSuspectCard>`: `frame-xs`. A face is neither a section nor a control,
    and the finest band the grid allows is a texture on it rather than a claim
-   about it. vikunja-104.
+   about it. Done in vikunja-104, and the thing to keep in mind if a third one
+   is ever added: the badge pads itself by exactly the band it gave up, which
+   is why moving it cost no caller a single pixel of size.
 
    DIALOGS AND POPOVERS — `<BaseDialog>`, `<ShellUserMenu>`: they keep
    `frame-edge`, and this is the assumed exception to all of the above. A
@@ -342,11 +345,13 @@
    which already carries the grain and the glow. Check what holds the block in
    place before, every time.
 
-   Applied as of this comment: the sections, the messages, the dialogs, the
-   interactive family as it already stood, and the moderation grid's
-   photographs. The three cards named above carry the rest — and the count at
-   the top of this comment is what tells you whether anything has been left out
-   of them. */
+   Applied so far: the sections, the messages, the dialogs, the interactive
+   family as it already stood, the moderation grid's photographs, and — since
+   vikunja-104 — the badges and the avatars. What is left is the monuments
+   (vikunja-105, which also decides whether the reveal standings are one) and
+   the nav bar, the three lists and the show's photograph (vikunja-106). The
+   count at the top of this comment is what tells you whether anything has been
+   left out of them. */
 
 /* The pixel frame: `frame` draws the outline, `frame-<tint>` colours it, and
    `frame-fill` cuts the flat underneath to the same steps.

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { GamePhase } from '#shared/types/game'
+import type { ChipTone } from '../chip'
 
 interface Props {
   phase: GamePhase
@@ -16,42 +17,44 @@ const { t } = useI18n()
  * something is expected of you, and reading it as a duller `locked` would say
  * the opposite. The pulse stays exclusive to `open` — it means "live".
  *
- * Hollow, in the HD-2D skin: the colour moved from a tinted flat to the frame
- * and the ink, so the glow passes through the chip. Deliberately different
- * from the nav's current tab, which is a FILLED torch block — « where I am »
- * and « what the game is doing » must not read as the same kind of thing.
+ * Hollow, and since the frame vocabulary landed it is hollow twice over: the
+ * colour left the flat for the ink at the HD-2D restyle, and then left the
+ * outline for an underline, because a framed block reads as something you can
+ * press and this one states a fact. `<BaseChip>` owns that shape now; what
+ * stays here is which phase wears which tint, and the dot.
+ *
+ * Deliberately unlike the nav's current tab, which is a FILLED torch block —
+ * « where I am » and « what the game is doing » must not read as the same kind
+ * of thing, and the gap between them just widened.
  */
 const PRESENTATION = {
   preparation: {
     labelKey: 'phase.preparation',
-    chip: 'frame-amber text-amber-ink',
+    tone: 'amber',
     pulse: false,
   },
   open: {
     labelKey: 'phase.open',
-    chip: 'frame-torch text-torch-ink',
+    tone: 'torch',
     pulse: true,
   },
   locked: {
     labelKey: 'phase.locked',
-    chip: 'frame-edge text-text-muted',
+    tone: 'edge',
     pulse: false,
   },
   revealed: {
     labelKey: 'phase.revealed',
-    chip: 'frame-clue text-clue-ink',
+    tone: 'clue',
     pulse: false,
   },
-} as const satisfies Record<GamePhase, { labelKey: string, chip: string, pulse: boolean }>
+} as const satisfies Record<GamePhase, { labelKey: string, tone: ChipTone, pulse: boolean }>
 
 const current = computed(() => PRESENTATION[props.phase])
 </script>
 
 <template>
-  <p
-    class="frame frame-sm inline-flex items-center gap-2 px-1.5 font-mono text-label tracking-label uppercase"
-    :class="current.chip"
-  >
+  <BaseChip :tone="current.tone">
     <!-- A square dot, not a disc: nothing in this skin is round. -->
     <span
       v-if="current.pulse"
@@ -59,5 +62,5 @@ const current = computed(() => PRESENTATION[props.phase])
       aria-hidden="true"
     />
     {{ t(current.labelKey) }}
-  </p>
+  </BaseChip>
 </template>

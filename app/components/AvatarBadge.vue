@@ -14,6 +14,17 @@ import { accentOf, initialsOf } from '#shared/utils/identity'
  * `accentOf` with the rest of the accent, so the line and the letters cannot
  * drift apart.
  *
+ * `frame-xs` and not the full band: a face is neither a section nor a control,
+ * and the vocabulary gives this family the finest line the grid can draw — a
+ * texture on the badge rather than a claim about it.
+ *
+ * `p-1.5` IS THE BAND IT GAVE UP, and that is why not one caller had to be
+ * resized. A full band is 9px on each side, three of line and six of gap; the
+ * fine one is 3px, one of line and two of gap. Six pixels of padding put back
+ * exactly what the six lost pixels of band were doing, so a `size-16` badge
+ * still holds the same letters at the same size and an unsized one still comes
+ * out the same width. What changes is the line, from three pixels to one.
+ *
  * No `size` prop. The five badges are 8, 9, 10, 16→20 and 20→28, and two of
  * them also carry a position or an animation — the podium overlaps its
  * neighbour, the reveal grows into place. A prop would have to enumerate all
@@ -30,7 +41,7 @@ const accent = computed(() => accentOf(name))
 
 <template>
   <span
-    class="frame frame-fill grid place-items-center font-bold"
+    class="frame frame-xs frame-fill grid place-items-center p-1.5 font-bold"
     :class="accent"
     aria-hidden="true"
   >{{ initials }}</span>
