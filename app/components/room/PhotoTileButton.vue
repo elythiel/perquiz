@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { IconName } from '#shared/utils/icons'
+
 /**
  * The chrome every control laid over a photograph shares: the dark plate, the
  * 44px hit area, and the `relative` that makes it safe.
@@ -17,7 +19,7 @@
  * the cursor. `:enabled` matches form controls, which every caller here is.
  */
 defineProps<{
-  icon: string
+  icon: IconName
   label: string
 }>()
 </script>
@@ -28,7 +30,7 @@ defineProps<{
     class="relative tap-target grid place-items-center bg-night/70 px-1 py-1 transition-opacity duration-100 ease-micro enabled:hover:bg-night"
     :aria-label="label"
   >
-    <Icon
+    <BaseIcon
       :name="icon"
       class="block size-6"
       aria-hidden="true"

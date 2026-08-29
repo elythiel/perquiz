@@ -101,8 +101,8 @@ function when(seconds: number | null): string {
           :aria-label="t('admin.removeParticipant', { name: person.displayName })"
           @click="emit('remove', person.id)"
         >
-          <Icon
-            name="pixelarticons:trash"
+          <BaseIcon
+            name="trash"
             class="block size-6"
             aria-hidden="true"
           />

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { IconName } from '#shared/utils/icons'
 import { isBeforeLock } from '#shared/utils/game'
 
 /**
@@ -48,16 +49,16 @@ const tally = computed(() => {
  * road to `/guess` is a road to a read-only screen — the button has to stop
  * at the room, whether that room is empty or already three photos deep.
  */
-const action = computed(() => {
+const action = computed<{ to: string, label: string, icon: IconName } | undefined>(() => {
   if (phase.value === 'revealed') {
-    return { to: '/results', label: t('home.seeResults'), icon: 'pixelarticons:trophy' }
+    return { to: '/results', label: t('home.seeResults'), icon: 'trophy' }
   }
   if (phase.value === 'locked') return undefined
   if (photos.value.length === 0) {
-    return { to: '/my-room', label: t('home.addPhotos'), icon: 'pixelarticons:image' }
+    return { to: '/my-room', label: t('home.addPhotos'), icon: 'image' }
   }
   if (phase.value === 'preparation') {
-    return { to: '/my-room', label: t('home.fillRoom'), icon: 'pixelarticons:archive' }
+    return { to: '/my-room', label: t('home.fillRoom'), icon: 'archive' }
   }
   if (remaining.value > 0) {
     return {
@@ -65,10 +66,10 @@ const action = computed(() => {
       label: answered.value === 0 ? t('home.startGuessing') : t('home.keepGuessing'),
       // A person with a question mark, which is the game's whole question —
       // not "what is this?" but "who is this?".
-      icon: 'pixelarticons:circle-question',
+      icon: 'circle-question',
     }
   }
-  return { to: '/guess', label: t('home.reviewAnswers'), icon: 'pixelarticons:checklist' }
+  return { to: '/guess', label: t('home.reviewAnswers'), icon: 'checklist' }
 })
 
 const headline = computed(() => {
@@ -127,7 +128,7 @@ const note = computed(() => {
       size="xl"
     >
       <template #icon>
-        <Icon
+        <BaseIcon
           :name="action.icon"
           class="block size-5 shrink-0"
           aria-hidden="true"

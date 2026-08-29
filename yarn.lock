@@ -1277,6 +1277,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@iconify-json/lucide@npm:^1.2.126":
+  version: 1.2.126
+  resolution: "@iconify-json/lucide@npm:1.2.126"
+  dependencies:
+    "@iconify/types": "npm:*"
+  checksum: 10c0/564eb1de809a8e995e8151b5e8b6dea67a3a36abe0a02d6d49e0d43b5d49dafd60e8be2b36b41ac2fafdacb674cd29c758c64485f7178c067a0de9686dbfe7f6
+  languageName: node
+  linkType: hard
+
 "@iconify-json/pixelarticons@npm:^1.2.9":
   version: 1.2.9
   resolution: "@iconify-json/pixelarticons@npm:1.2.9"
@@ -8622,6 +8631,7 @@ __metadata:
   resolution: "perquiz@workspace:."
   dependencies:
     "@fontsource/ibm-plex-mono": "npm:^5.3.0"
+    "@iconify-json/lucide": "npm:^1.2.126"
     "@iconify-json/pixelarticons": "npm:^1.2.9"
     "@nuxt/eslint": "npm:^1.17.0"
     "@nuxt/icon": "npm:^2.5.1"

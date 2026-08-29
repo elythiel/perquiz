@@ -25,6 +25,38 @@ const MAX_AGE = 60 * 60 * 24 * 365
  * The cookie is written by `FontPicker`, which sits next to `ThemePicker` in
  * « Ma pièce ».
  */
+/**
+ * The setting, read-only and SHARED — what every reader should call.
+ *
+ * `useCookie` returns a NEW ref on each call. Instances stay in step through a
+ * `BroadcastChannel` per ref, which works and is fine for two readers; since
+ * vikunja-96 every `<BaseIcon>` on the page is a reader, and a page carries
+ * about thirty of them. Thirty refs, thirty channels and thirty parses of
+ * `document.cookie` to answer one question is not a reactivity bug, it is a
+ * design that invites one.
+ *
+ * `useState` is the project's answer to "many readers, one truth" (see
+ * `STATE_KEYS`): the initialiser runs ONCE per request, so the cookie is read
+ * once, and the value is serialised into the payload so the client hydrates
+ * with what the server rendered. A hand-edited cookie is guarded here, exactly
+ * as it was before — anything unreadable reads as `pixel` rather than showing
+ * up as a third, nameless option in the control.
+ */
+export function useFontChoice() {
+  return useState<FontChoice>(STATE_KEYS.fontChoice, () => {
+    const cookie = useCookie<string | null>(COOKIE)
+    return isFontChoice(cookie.value) ? cookie.value : 'pixel'
+  })
+}
+
+/**
+ * The setting, readable and WRITABLE — for the picker and for `app.vue`.
+ *
+ * This is the only place that touches the cookie ref, and therefore the only
+ * place that pays for one. Setting writes both: the cookie, so the next request
+ * is server-rendered correctly, and the shared state, so every reader on the
+ * page follows in the same tick rather than whenever a broadcast lands.
+ */
 export function useFont() {
   const cookie = useCookie<string | null>(COOKIE, {
     sameSite: 'lax',
@@ -32,21 +64,17 @@ export function useFont() {
     maxAge: MAX_AGE,
   })
 
-  /**
-   * The setting, readable and writable.
-   *
-   * A cookie can be hand-edited, so reading it goes through the same guard as
-   * the class does: anything unreadable reads as `pixel` rather than appearing
-   * in the control as a third, nameless option.
-   */
+  const shared = useFontChoice()
+
   const choice = computed<FontChoice>({
-    get: () => isFontChoice(cookie.value) ? cookie.value : 'pixel',
+    get: () => shared.value,
     set: (value) => {
+      shared.value = value
       cookie.value = value
     },
   })
 
-  const fontClass = computed(() => resolveFontClass(cookie.value))
+  const fontClass = computed(() => resolveFontClass(shared.value))
 
   return { choice, fontClass }
 }

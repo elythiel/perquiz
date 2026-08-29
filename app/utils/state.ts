@@ -17,6 +17,15 @@ import type { GamePhase } from '#shared/types/game'
 export const STATE_KEYS = {
   gamePhase: 'game:phase',
   sessionUser: 'session:user',
+  /**
+   * The typeface setting, mirrored out of its cookie.
+   *
+   * Unlike the two above it is not filled by the server plugin — it reads
+   * itself, once, from the cookie `useFont` owns. It is here because it has the
+   * same problem: many readers, one truth, and a mistyped key would silently
+   * be a second empty one. See `useFontChoice`.
+   */
+  fontChoice: 'font:choice',
 } as const
 
 /**

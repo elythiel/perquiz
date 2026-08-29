@@ -93,8 +93,8 @@ onBeforeUnmount(() => {
       class="flex cursor-pointer list-none items-center gap-1.5 transition-opacity duration-100 ease-micro hover:opacity-80 [&::-webkit-details-marker]:hidden"
     >
       <ShellUserChip :display-name="displayName" />
-      <Icon
-        name="pixelarticons:chevron-down"
+      <BaseIcon
+        name="chevron-down"
         class="block size-4 shrink-0 text-text-muted transition-transform duration-100 ease-micro group-open:rotate-180"
         aria-hidden="true"
       />
@@ -125,8 +125,8 @@ onBeforeUnmount(() => {
           type="submit"
           class="flex w-full items-center gap-3 px-3 py-2.5 text-left text-base text-text-soft transition-colors duration-100 ease-micro hover:bg-sunken hover:text-text focus-ring-inset"
         >
-          <Icon
-            name="pixelarticons:logout"
+          <BaseIcon
+            name="logout"
             class="block size-5 shrink-0"
             aria-hidden="true"
           />

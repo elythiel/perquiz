@@ -1,4 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
+import { iconBundle } from './shared/utils/icons'
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -256,16 +257,20 @@ export default defineNuxtConfig({
     detectBrowserLanguage: false,
   },
 
-  // Icons ship in the bundle, never fetched. `scan` walks the source for the
-  // `pixelarticons:*` names actually used and embeds only those, so the page
-  // makes no request to the Iconify API — the same rule as the self-hosted
-  // fonts.
+  // Icons ship in the bundle, never fetched — the same rule as the self-hosted
+  // fonts. Which icons, exactly, is `shared/utils/icons.ts`: since vikunja-96
+  // there are TWO collections, and every name in either of them comes from that
+  // table.
   //
   // pixelarticons and no longer MingCute: the HD-2D skin crenellates every
   // corner it draws, and a smoothly rounded line icon in the middle of it was
   // the one thing on the page still speaking the old language. The glyphs are
   // vector and blocky by construction, so they stay crisp at any size without
   // `image-rendering` — unlike the frames, which need it.
+  //
+  // lucide sits beside it for the readable typeface, and only for it: somebody
+  // who turns the pixel face off was keeping pixel pictograms, so the setting
+  // kept half of its promise (vikunja-93, then vikunja-96).
   icon: {
     /*
      * A real `<svg>` element, not the default CSS mask.
@@ -277,8 +282,25 @@ export default defineNuxtConfig({
      * dimensions from CSS like anything else.
      */
     mode: 'svg',
-    // Scan the source and embed the handful of `pixelarticons:*` actually used.
-    clientBundle: { scan: true },
+    /*
+     * Scan the source, AND name every icon the two sets can draw.
+     *
+     * The scan alone stopped being enough in vikunja-96. It collects names
+     * written LITERALLY in the source, and `<BaseIcon>` builds its name at
+     * render time from `shared/utils/icons.ts` — so there is nothing for the
+     * scan to find, in either collection.
+     *
+     * What normally catches that mistake is turned off two lines below on
+     * purpose: with `provider: 'none'` and `fallbackToApi: false`, a name that
+     * missed the bundle is not a request to a third party, it is A HOLE. No
+     * glyph, no build error, no runtime warning — just an icon that is not
+     * there, found only by looking at every screen.
+     *
+     * So the list is DERIVED from the table rather than typed out here. A
+     * hand-copied one would drift on the first icon anybody adds, and drift
+     * silently. `scan` stays on for whatever still writes a name literally.
+     */
+    clientBundle: { scan: true, icons: iconBundle() },
     // Off: measured, the server bundle changes nothing in the HTML the browser
     // first receives — the glyphs come from the client bundle either way — and
     // it costs ~570 kB of Lucide-sized collection inside .output.

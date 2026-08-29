@@ -136,8 +136,8 @@ function openRoom(photos: readonly string[]) {
             v-if="room.correct"
             class="text-base text-torch-ink"
           >
-            <Icon
-              name="pixelarticons:check"
+            <BaseIcon
+              name="check"
               class="block size-4"
               aria-hidden="true"
             />
@@ -147,8 +147,8 @@ function openRoom(photos: readonly string[]) {
             v-else-if="room.guessName"
             class="text-base text-alert-ink"
           >
-            <Icon
-              name="pixelarticons:close"
+            <BaseIcon
+              name="close"
               class="block size-4"
               aria-hidden="true"
             />

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { IconName } from '#shared/utils/icons'
 import type { FontChoice } from '#shared/types/font'
 
 /**
@@ -19,9 +20,9 @@ const { t } = useI18n()
  * and doubly so here: someone who came to this control because the pixel face
  * is hard to read is exactly the person a pictogram-only option fails.
  */
-const OPTIONS: readonly { value: FontChoice, icon: string }[] = [
-  { value: 'pixel', icon: 'pixelarticons:gamepad' },
-  { value: 'readable', icon: 'pixelarticons:article' },
+const OPTIONS: readonly { value: FontChoice, icon: IconName }[] = [
+  { value: 'pixel', icon: 'gamepad' },
+  { value: 'readable', icon: 'article' },
 ]
 
 /** The labels are translated here: `<RadioGroup>` takes words, not keys. */
