@@ -16,10 +16,32 @@ const label = computed(() => props.position + 1)
 </script>
 
 <template>
-  <!-- An inventory slot: a framed block, the photograph cut to the frame's own
-       steps. One tint for every tile — a colour that rotated would look like it
-       meant something about the room. -->
-  <figure class="frame-flush frame-azure frame-fill group relative aspect-4/3 overflow-hidden bg-sunken">
+  <!-- A photograph is CUT, not framed, and this tile is where that rule was
+       first needed. It used to draw an azure line (`frame-flush frame-azure`),
+       which was fine while it stood on the page and stopped being fine when
+       vikunja-94 moved the grid inside a titled region — `<BaseCard>` is azure
+       too, so the same colour was saying "this is a photograph" inside
+       something saying "this is a section of the page", and neither read as
+       anything. The answer is not a sixth tint, it is no line at all: what
+       tells a photograph from the region holding it is that it has no outline.
+
+       `frame-fill` stays and does all of the remaining work — it is
+       self-contained, writing its own `mask-border` and its own width, so the
+       corners are cut to exactly the same steps as before. Only the line is
+       gone. Note that the band those steps follow is 6px and not the 9 the
+       utility defaults to: `--frame-band` is a custom property and therefore
+       INHERITED, and `<BaseCard>` sets it to `frame-sm` two levels up. That was
+       already true before this change and is unaffected by it — which is
+       precisely why the shape does not move.
+
+       `frame-none` would have been the wrong way to say it: it blanks the tint
+       but leaves `frame-flush`'s `::after` in the box drawing nothing. A
+       utility you never write costs less than one you cancel.
+
+       Not the two tiles that are not photographs — the add slot in
+       `<RoomPhotoGrid>` and `<RoomUploadTile>` keep their torch line, and that
+       is now what tells an action and a state apart from a picture. -->
+  <figure class="frame-fill group relative aspect-4/3 overflow-hidden bg-sunken">
     <!-- The first tile is the largest thing painted on this page, so it is
          fetched eagerly and early; the rest of the grid stays lazy. Lighthouse
          called this one out by name (`lcp-lazy-loaded`), 2026-08-28. -->
