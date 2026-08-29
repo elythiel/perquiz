@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildSeedPlan, PEOPLE } from '../../scripts/seed-plan'
+import { buildSeedPlan, PEOPLE, PHOTO_IDS } from '../../scripts/seed-plan'
 
 /**
  * The seed's acceptance criterion is "enough to exercise every later screen
@@ -91,5 +91,26 @@ describe('the rules the database will not let us break', () => {
 describe('reproducibility', () => {
   it('builds the same game twice', () => {
     expect(buildSeedPlan()).toEqual(buildSeedPlan())
+  })
+})
+
+describe('the photographs the rooms are made of', () => {
+  const wanted = PEOPLE.reduce((total, person) => total + person.photos, 0)
+
+  it('has an id for every photograph the plan asks for', () => {
+    /*
+     * `seed.ts` refuses to run when this is false, but the failure would land
+     * on whoever seeds next rather than on whoever edited the plan. The plan is
+     * the thing people change; this list is the thing they forget.
+     */
+    expect(PHOTO_IDS.length).toBeGreaterThanOrEqual(wanted)
+  })
+
+  it('never uses the same photograph for two rooms', () => {
+    // Rooms have to be told apart at a glance — that is what the five accents
+    // of the old generated placeholders were for. Two identical photographs on
+    // two rooms would put that back.
+    const used = PHOTO_IDS.slice(0, wanted)
+    expect(new Set(used).size).toBe(used.length)
   })
 })
