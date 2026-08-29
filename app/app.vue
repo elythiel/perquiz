@@ -4,12 +4,21 @@
 // theme, so there is no flash on mount.
 const { themeClass, chrome } = useTheme()
 
+// The typeface setting, server-rendered for the same reason and joined to the
+// theme class rather than set beside it: `htmlAttrs.class` is one attribute,
+// and two `useHead` calls writing it would race. Empty values are dropped so
+// the default state leaves `<html>` with no class at all.
+const { fontClass } = useFont()
+
+const htmlClass = computed(() =>
+  [themeClass.value, fontClass.value].filter(Boolean).join(' '))
+
 // `html lang`, the title and the description follow the locale instead of
 // being frozen in nuxt.config.
 const { t, locale } = useI18n()
 
 useHead({
-  htmlAttrs: { class: themeClass, lang: locale },
+  htmlAttrs: { class: htmlClass, lang: locale },
   title: computed(() => t('app.name')),
   meta: computed(() => [
     { name: 'description', content: t('app.description') },

@@ -160,10 +160,10 @@ async function rename(displayName: string) {
 
     <!--
       Next to the display name, as M0 intended. Deliberately NOT tied to
-      `readOnly`: the theme is how you see the app, not something the game
-      freezes when the admin locks it.
+      `readOnly`: how you see the app is not something the game freezes when
+      the admin locks it.
     -->
-    <ThemePicker />
+    <DisplaySettings />
 
     <div class="flex flex-wrap gap-3">
       <!-- Icon beside the label, never instead of it: these two buttons sit

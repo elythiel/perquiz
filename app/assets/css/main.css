@@ -118,10 +118,18 @@
      the way it reads the glow's. Marked in the dark, fainter on paper. */
   --grain-alpha: 2%;
 
-  /* Type: Space Grotesk (headings, body) + IBM Plex Mono (counters, states,
-     phases). Both self-hosted through @fontsource. */
-  --font-sans: "Space Grotesk Variable", "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  /* Type: Pixel Operator, in its proportional cut for text and its monospaced
+     one for counters. Both self-hosted from `public/` — it is not on Fontsource
+     — and declared at the bottom of this file.
+     `--font-mono` takes the MONOSPACED cut and not the proportional one: this
+     token carries the counters, the phases and the uppercase micro-labels, and
+     they are mono because their digits have to line up under each other. The
+     proportional cut sets `1` at 700 units where `M` is 900, which is exactly
+     what that would lose.
+     Someone who turns the pixel face off gets Luciole instead, under
+     `.readable` further down — the whole point of the setting. */
+  --font-sans: "Pixel Operator", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Pixel Operator Mono", "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* Mono labels (counters, states, phases): 11px expressed in rem, so they
      follow the root font size. In mono caps with 0.12em of tracking, 10px sat
@@ -790,6 +798,51 @@
     color: var(--color-text);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /*
+     * Every size in this file was chosen against Space Grotesk, whose x-height
+     * is 0.486 em. The two faces that replaced it do not share it — MEASURED
+     * with fontTools: Pixel Operator sits at 0.438 and Luciole at 0.545. At the
+     * same `font-size`, the pixel face therefore reads 10% SMALLER than what
+     * the type scale was drawn for, and the readable one 12% larger: a 25% gap
+     * between the two states of the same setting.
+     *
+     * `font-size-adjust` closes it at the only place it can be closed once,
+     * rather than by rewriting ten `--text-*` tokens twice. The browser scales
+     * each face so its x-height lands on this ratio, so BOTH states now read at
+     * the size the scale was designed for, and the escape hatch stops changing
+     * the apparent size of the app.
+     *
+     * It adjusts glyphs, not lengths: no box, gap or frame moves. And it makes
+     * the widths converge too — the pixel face goes from 0.76x the old one to
+     * 0.84x, Luciole from 1.10x to 0.98x — which is the layout invariant this
+     * setting depends on, tightened rather than traded away.
+     *
+     * Unsupported (before Safari 16.4 / Chrome 127) it is simply ignored, and
+     * the app looks like it did an hour ago: smaller pixel text, no breakage.
+     */
+    font-size-adjust: 0.486;
+  }
+
+  /*
+   * The way out of the pixel face, set from the cookie by app.vue.
+   *
+   * Luciole (Laurent Bourcellier & Jonathan Perez, CC BY 4.0) rather than a
+   * return to the previous face: the setting exists because nothing in this
+   * repository can measure whether a letterform is legible for the person
+   * reading it, so the alternative it offers should be a face DESIGNED for that
+   * — Luciole was drawn with the CTRDV for readers with low vision, and it
+   * distinguishes the shapes a pixel face flattens (1 / I / l, 0 / O).
+   *
+   * `--font-mono` falls back to IBM Plex Mono, which is already in the build:
+   * Luciole has no monospaced cut, and the counters still have to line up.
+   *
+   * Only the two tokens move. Every size, weight and spacing is shared by both
+   * states, which is the invariant this setting has to keep: a layout that held
+   * together in one face and broke in the other would make the way out a trap.
+   */
+  .readable {
+    --font-sans: "Luciole", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
   }
 
   /* The design system's headings are tight (-0.02 to -0.03em) */
@@ -825,4 +878,69 @@
     animation: none !important;
     transition-duration: 120ms !important;
   }
+}
+
+/*
+ * The faces, served from `public/` and subset to latin + the characters French
+ * needs. Neither is on Fontsource, so neither arrives as a package import the
+ * way Space Grotesk and IBM Plex Mono did.
+ *
+ * Pixel Operator (Jayvee Enaguas, CC0) — 2.8 kB a weight, and it is the reason
+ * the pixel direction could go past a mock-up: MEASURED against every other
+ * pixel face on Fontsource (vikunja-91), it is the only one with digits of
+ * equal width, a regular grid, AND a real bold. That last one is why nothing
+ * here needs `font-synthesis`: the app writes `font-bold` on every heading and
+ * score, and this family has a drawn weight to answer with.
+ *
+ * Luciole (Laurent Bourcellier & Jonathan Perez, CC BY 4.0) — the readable
+ * alternative. ATTRIBUTION IS PART OF ITS LICENCE, not a courtesy: it is
+ * credited in the README, and removing that line is a licence breach rather
+ * than a tidy-up.
+ */
+@font-face {
+  font-family: "Pixel Operator";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/pixel-operator-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pixel Operator";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/pixel-operator-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pixel Operator Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/pixel-operator-mono-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pixel Operator Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/pixel-operator-mono-700.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Luciole";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/luciole-400.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Luciole";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/luciole-700.woff2") format("woff2");
 }

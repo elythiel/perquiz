@@ -21,12 +21,21 @@
     "locked": "Partie verrouillée",
     "revealed": "Résultats révélés"
   },
+  "display": {
+    "label": "Affichage"
+  },
   "theme": {
     "label": "Thème",
     "auto": "Auto",
     "light": "Clair",
     "dark": "Sombre",
     "hint": "« Auto » suit le réglage de votre appareil."
+  },
+  "font": {
+    "label": "Typographie",
+    "pixel": "Pixel",
+    "readable": "Lecture",
+    "hint": "« Lecture » remplace la police pixel par Luciole, dessinée pour la lecture en basse vision."
   },
   "login": {
     "pitch": "Chacun photographie une pièce de chez lui. À vous de deviner qui habite où. Réponses dévoilées le soir de la révélation.",
