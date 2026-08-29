@@ -134,16 +134,68 @@ async function rename(displayName: string) {
       </p>
     </BaseCard>
 
-    <RoomPhotoGrid
-      :photos="photos"
-      :uploads="uploads.inFlight.value"
-      :read-only="readOnly"
-      :full="full"
-      @pick="pick"
-      @remove="askToRemove"
-      @move="move"
-    />
+    <!--
+      One region for the room: the photographs, the name they are found under,
+      and the way to see both as everyone else does. Three blocks that describe
+      the same thing — what the others will see — where the page used to stack
+      them at the same level as a setting that has nothing to do with the game.
 
+      Its title is not « Ma pièce », which the page heading already says two
+      lines above. It names what the region is FOR, which is also what tells it
+      apart from the display settings below.
+    -->
+    <BaseCard :title="t('myRoom.visibleLabel')">
+      <!-- `gap-6` on an inner wrapper rather than on the card: `<BaseCard>`
+           writes `gap-3`, and two gap utilities on one element are a race
+           arbitrated by the order Tailwind emits them in, not by the order they
+           are written. The 24px here is the rhythm the page itself used before
+           these blocks moved inside — they are big enough to want it. -->
+      <div class="flex flex-col gap-6">
+        <RoomPhotoGrid
+          :photos="photos"
+          :uploads="uploads.inFlight.value"
+          :read-only="readOnly"
+          :full="full"
+          @pick="pick"
+          @remove="askToRemove"
+          @move="move"
+        />
+
+        <RoomDisplayNameField
+          ref="nameField"
+          :name="room?.displayName ?? ''"
+          :read-only="readOnly"
+          @save="rename"
+        />
+
+        <!--
+          The only action left on this page, and it is a way of looking rather
+          than of changing — which is why it stays `Secondary` even now that
+          it is alone. Adding photographs lives on the grid's own tile: the
+          button that used to sit here fired the exact same `pick`, and having
+          it twice is what made the action look far from its subject
+          (vikunja-94).
+        -->
+        <ButtonSecondary
+          class="sm:self-start"
+          size="lg"
+          :disabled="!inPlay"
+          @click="preview?.open()"
+        >
+          <template #icon>
+            <Icon
+              name="pixelarticons:eye"
+              class="block size-5 shrink-0"
+              aria-hidden="true"
+            />
+          </template>
+          {{ t('myRoom.playerPreview') }}
+        </ButtonSecondary>
+      </div>
+    </BaseCard>
+
+    <!-- Outside the region on purpose: upload failures come and go, and a
+         titled section that empties itself leaves a heading over nothing. -->
     <RoomUploadErrors
       v-if="uploads.failures.value.length"
       :failures="uploads.failures.value"
@@ -151,54 +203,12 @@ async function rename(displayName: string) {
       @dismiss="uploads.dismissFailures"
     />
 
-    <RoomDisplayNameField
-      ref="nameField"
-      :name="room?.displayName ?? ''"
-      :read-only="readOnly"
-      @save="rename"
-    />
-
     <!--
-      Next to the display name, as M0 intended. Deliberately NOT tied to
-      `readOnly`: how you see the app is not something the game freezes when
-      the admin locks it.
+      Next to the room, as M0 intended, but no longer mixed into it: how you
+      see the app is not part of what the others see. Deliberately NOT tied to
+      `readOnly` either — the game freezes the room, never the reading.
     -->
     <DisplaySettings />
-
-    <div class="flex flex-wrap gap-3">
-      <!-- Icon beside the label, never instead of it: these two buttons sit
-           side by side and do very different things. -->
-      <ButtonSecondary
-        class="flex-1"
-        size="lg"
-        :disabled="!inPlay"
-        @click="preview?.open()"
-      >
-        <template #icon>
-          <Icon
-            name="pixelarticons:eye"
-            class="block size-5 shrink-0"
-            aria-hidden="true"
-          />
-        </template>
-        {{ t('myRoom.playerPreview') }}
-      </ButtonSecondary>
-      <ButtonPrimary
-        v-if="!readOnly"
-        class="flex-1"
-        :disabled="full"
-        @click="pick"
-      >
-        <template #icon>
-          <Icon
-            name="pixelarticons:image"
-            class="block size-5 shrink-0"
-            aria-hidden="true"
-          />
-        </template>
-        {{ t('myRoom.addPhotos') }}
-      </ButtonPrimary>
-    </div>
 
     <!-- HEIC is absent on purpose: sharp cannot decode it (server/utils/photos.ts). -->
     <input
