@@ -18,7 +18,11 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <div class="frame frame-edge flex items-center gap-3 px-2.5 py-1.5">
+  <!-- `frame-xs` with the vocabulary's badge family, and the padding grown to
+       cover what the band stopped providing: 9px of band held 6px of gap, the
+       fine one holds 2, so `px-2.5 py-1.5` becomes the project's own
+       `px-3.5 py-2.5` and the card keeps the air it had. -->
+  <div class="frame frame-xs frame-edge flex items-center gap-3 px-3.5 py-2.5">
     <template v-if="name">
       <GuessSuspectAvatar :display-name="name" />
       <span class="min-w-0 flex-1 truncate text-lg font-bold text-text">{{ name }}</span>

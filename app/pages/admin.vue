@@ -101,9 +101,9 @@ async function removePerson() {
       <ShellPageTitle>
         {{ t('admin.title') }}
       </ShellPageTitle>
-      <p class="frame frame-xs frame-clue px-1.5 font-mono text-label tracking-label text-clue-ink uppercase">
+      <BaseChip tone="clue">
         {{ t('admin.badge') }}
-      </p>
+      </BaseChip>
     </header>
 
     <AdminPhaseControl
