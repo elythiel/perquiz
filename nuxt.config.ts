@@ -211,6 +211,23 @@ export default defineNuxtConfig({
         // the native picker and not the camera API, so denying them changes
         // nothing today and makes the day one is wanted visible here.
         'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+        /*
+         * A year of HTTPS, declared by the app that does not terminate it.
+         *
+         * TLS is the host's reverse proxy's job (SPEC §10), so the tidy place
+         * for this header is the proxy — and the tidy place is the one that
+         * gets forgotten. A line in `compose.example.yml` is read once, when
+         * somebody copies the file; a header in the build ships with the image
+         * and cannot be left out of a deployment. The proxy passes it through,
+         * and a browser ignores it over plain HTTP, so nothing changes in
+         * development.
+         *
+         * No `preload`: that is a submission to a browser-vendor list, it is
+         * effectively irreversible, and it commits every subdomain of whatever
+         * host this lands on — not a promise an example config gets to make on
+         * an operator's behalf.
+         */
+        'strict-transport-security': 'max-age=31536000; includeSubDomains',
       },
     },
   },

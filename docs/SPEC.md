@@ -105,6 +105,7 @@ No realtime sync needed: the projected page is simply a page the admin controls 
 - Participation dashboard: who has uploaded photos (count), who has started/completed their guess sheet — **without showing the guesses' content**.
 - Photo moderation: browse and delete photos, shown without owner names.
 - Design constraint: **admins play too**, so no admin screen may display the room → owner answer key. The only place answers appear is the reveal show (which the admin runs live, at which point the game is over anyway).
+- **Known limit, accepted rather than fixed.** The panel moderates photographs anonymously *and* reports per-person counts, and those two are not fully separable: an admin who deletes a photograph from the anonymous grid can compare the participation counts before and after, and the one that dropped names its owner. Every fix costs the panel the thing it exists for — dropping the counts blinds the organizer to who still has a room to fill, delaying the deletion until the game ends removes the point of moderating during it, and batching deletions only raises the number of photographs an admin must be willing to destroy to learn one owner. It is written here so that a reader finds it stated rather than deduces it: an admin who wants to cheat can, at the price of destroying somebody's photograph, which is a social cost this game already relies on everywhere else.
 
 ## 8. Pages
 

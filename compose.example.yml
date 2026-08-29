@@ -4,6 +4,15 @@
 # why none of it is here. HTTPS termination is assumed to be the host's job
 # (SPEC.md §10).
 #
+# The app already sends `Strict-Transport-Security: max-age=31536000;
+# includeSubDomains` on every response, so a proxy that passes headers through
+# needs nothing added. Two things worth knowing: serve this over HTTPS only —
+# a browser ignores the header in the clear, so plain HTTP is not "the header
+# not working", it is the header never arriving — and if you want the
+# `preload` list, add it at your proxy rather than here. That submission is
+# effectively irreversible and commits every subdomain of your host, which is
+# not a promise an example file gets to make for you.
+#
 #   cp compose.example.yml compose.yml   # then edit
 #   cp .env.example .env                 # then fill it in
 #   docker compose up -d

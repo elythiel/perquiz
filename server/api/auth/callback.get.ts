@@ -48,7 +48,18 @@ export default defineEventHandler(async (event) => {
     return sendRedirect(event, '/')
   }
   catch (error) {
-    console.error('[auth] the callback failed:', error)
+    /*
+     * The name and the message, never the object.
+     *
+     * `openid-client` attaches what it was working on to its errors, and what
+     * it was working on here is the callback URL — which carries `code` and
+     * `state` in its query. Both are single-use and this exchange has already
+     * failed, so the exposure is close to nothing; the reason to trim it is
+     * that logs get shipped, kept and read by more people than a database is,
+     * and a credential in one is a credential in all of them.
+     */
+    const failure = error instanceof Error ? `${error.name}: ${error.message}` : String(error)
+    console.error('[auth] the callback failed:', failure)
     return sendRedirect(event, '/login?error=provider')
   }
 })

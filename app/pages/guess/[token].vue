@@ -51,6 +51,22 @@ watch(stranded, async (lost) => {
 })
 
 /** The filter rides in the URL, so it survives moving from room to room. */
+/**
+ * The deck as the progress bar wants it: one dot per room, answered or not.
+ *
+ * Up here rather than inline in the template, and not only for the length —
+ * `.map()` in a binding builds a new array on every render, so the bar's props
+ * change identity whenever anything else on the page does.
+ */
+const deck = computed(() => sheet.rooms.value.map(room => ({
+  token: room.token,
+  answered: room.guess !== null,
+})))
+
+/** Where the room in the URL sits in that deck. */
+const deckPosition = computed(() =>
+  sheet.rooms.value.findIndex(room => room.token === token.value))
+
 const onlyUnanswered = computed({
   get: () => route.query.unanswered === '1',
   set: (only) => {
@@ -120,8 +136,8 @@ async function pick(participantId: number) {
     </h1>
 
     <GuessDeckProgress
-      :rooms="sheet.rooms.value.map(candidate => ({ token: candidate.token, answered: candidate.guess !== null }))"
-      :current="sheet.rooms.value.findIndex(candidate => candidate.token === token)"
+      :rooms="deck"
+      :current="deckPosition"
       :done="sheet.answered.value"
       :total="sheet.total.value"
     />

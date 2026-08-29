@@ -46,8 +46,26 @@ const ICO_SIZES = [16, 32, 48] as const
 /** Holds on a light tab strip and on a dark one. See the note above. */
 const ICO_INK = '#17a37f'
 
-/** `--color-night`, the app's darkest surface (app/assets/css/main.css). */
-const NIGHT = '#0a0b12'
+/**
+ * `--color-night`, the app's darkest surface, read out of the stylesheet.
+ *
+ * It used to be typed here as a second copy of a value that lives in
+ * `main.css`, which is a copy that drifts in silence: the apple-touch icon
+ * would keep a ground the app had stopped using, on the one surface iOS
+ * refuses to let be transparent. The token is the source; this reads it.
+ */
+function nightFromStylesheet(): string {
+  const css = readFileSync(new URL('../app/assets/css/main.css', import.meta.url), 'utf8')
+  const declared = /--color-night:\s*(#[0-9a-f]{6})/i.exec(css)?.[1]
+
+  if (!declared) {
+    throw new Error('favicons: --color-night is not declared in app/assets/css/main.css')
+  }
+
+  return declared.toLowerCase()
+}
+
+const NIGHT = nightFromStylesheet()
 
 const APPLE_SIZE = 180
 const APPLE_SCALE = 10

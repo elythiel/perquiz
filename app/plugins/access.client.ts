@@ -18,11 +18,14 @@ import { accessVerdict } from '#shared/utils/access'
  * it. No `immediate` either — the middleware has already ruled on the page
  * being loaded, and re-ruling here would only race it.
  *
- * A caveat worth knowing, and not a defect of this file: today nothing writes
- * `game:phase` after the server has, so in practice the verdict only moves
- * when the whole app reloads (which is what the admin panel does after a phase
- * change). The day a tab learns about a phase change on its own — a poll, a
- * stream — this is already in place and already correct.
+ * Live since vikunja-109: the admin panel now writes `game:phase` directly
+ * after flipping it, where it used to reload the whole app — so this watcher
+ * fires for real in the tab that made the change, instead of being a net
+ * waiting for a poll or a stream to exist. Nothing follows from it today, and
+ * that is by design: `/admin` is gated on the ADMIN ROLE and not on a phase,
+ * so no phase an admin can reach refuses them the page they are standing on.
+ * The day one does, this sends them home rather than leaving them on a screen
+ * they no longer have the right to.
  */
 export default defineNuxtPlugin(() => {
   const route = useRoute()
