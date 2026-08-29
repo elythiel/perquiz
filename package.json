@@ -12,6 +12,7 @@
     "postinstall": "nuxt prepare",
     "db:generate": "drizzle-kit generate",
     "seed": "node scripts/seed.ts",
+    "favicons": "node scripts/favicons.ts",
     "release": "node scripts/release.ts",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
