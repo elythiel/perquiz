@@ -1,6 +1,6 @@
 # What keeps the pinned action digests from becoming a freeze.
 #
-# `release.yml` pins every `uses:` to a commit digest, because a tag is mutable:
+# Both workflows pin every `uses:` to a commit digest, because a tag is mutable:
 # whoever owns an action can move `v4` onto other code, and this repository runs
 # a workflow that may push a tag and an image. A digest cannot move.
 #
@@ -28,10 +28,13 @@ updates:
     # But majors do NOT ride along, and that was learned from the first pull
     # request this file produced: grouping everything turned "keep the digests
     # fresh" into six major bumps at once — checkout jumped three majors — with
-    # no CI on the branch to exercise any of them, since the workflow triggers
-    # on pushes to `main` and not on pull requests. A group like that is one
-    # nobody can bisect. Each major now arrives alone, with its own release
-    # notes, and gets judged for itself.
+    # no CI on the branch to exercise any of them, since the workflow of the
+    # time triggered on pushes to `main` and not on pull requests. A group like
+    # that is one nobody can bisect. Each major now arrives alone, with its own
+    # release notes, and gets judged for itself.
+    #
+    # That gap is closed on the other side since vikunja-89: `ci.yml` triggers
+    # on pull requests, and on nothing else since the split.
     groups:
       actions:
         patterns: ['*']
