@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { IconName } from '#shared/utils/icons'
 import type { ThemeChoice } from '#shared/types/theme'
 
 /**
@@ -23,10 +24,10 @@ const { t } = useI18n()
  * guess. `auto` gets a screen rather than a half-sun: it is not a brightness
  * between the other two, it is "whatever this device says".
  */
-const OPTIONS: readonly { value: ThemeChoice, icon: string }[] = [
-  { value: 'auto', icon: 'pixelarticons:laptop' },
-  { value: 'light', icon: 'pixelarticons:sun' },
-  { value: 'dark', icon: 'pixelarticons:moon' },
+const OPTIONS: readonly { value: ThemeChoice, icon: IconName }[] = [
+  { value: 'auto', icon: 'laptop' },
+  { value: 'light', icon: 'sun' },
+  { value: 'dark', icon: 'moon' },
 ]
 
 /** The labels are translated here: `<RadioGroup>` takes words, not keys. */

@@ -190,8 +190,8 @@ async function pick(participantId: number) {
         :aria-label="t('guess.previous')"
         @click="step(-1)"
       >
-        <Icon
-          name="pixelarticons:arrow-left"
+        <BaseIcon
+          name="arrow-left"
           class="block size-6"
           aria-hidden="true"
         />

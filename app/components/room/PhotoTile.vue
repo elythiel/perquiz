@@ -62,7 +62,7 @@ const label = computed(() => props.position + 1)
 
       <RoomPhotoTileButton
         v-if="!readOnly"
-        icon="pixelarticons:trash"
+        icon="trash"
         :label="t('myRoom.deletePhoto', { position: label })"
         class="text-alert-ink focus-ring-alert"
         @click="$emit('remove')"
@@ -80,7 +80,7 @@ const label = computed(() => props.position + 1)
         they are not — one rule for both states, so the control never moves.
       -->
       <RoomPhotoTileButton
-        icon="pixelarticons:search"
+        icon="search"
         :label="t('myRoom.zoomPhoto', { position: label })"
         class="mx-auto text-text-soft"
         @click="$emit('zoom')"
@@ -96,14 +96,14 @@ const label = computed(() => props.position + 1)
            `<RoomPhotoTileButton>`, which explains it. -->
       <template v-if="!readOnly">
         <RoomPhotoTileButton
-          icon="pixelarticons:chevron-left"
+          icon="chevron-left"
           :label="t('myRoom.moveEarlier', { position: label })"
           class="order-first text-text-soft disabled:opacity-0"
           :disabled="position === 0"
           @click="$emit('move', -1)"
         />
         <RoomPhotoTileButton
-          icon="pixelarticons:chevron-right"
+          icon="chevron-right"
           :label="t('myRoom.moveLater', { position: label })"
           class="order-last text-text-soft disabled:opacity-0"
           :disabled="position === count - 1"

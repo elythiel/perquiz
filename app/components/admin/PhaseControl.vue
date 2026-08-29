@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { IconName } from '#shared/utils/icons'
 import type { GamePhase } from '#shared/types/game'
 import { GAME_PHASES } from '#shared/utils/game'
 
@@ -26,11 +27,11 @@ const LABELS: Record<GamePhase, string> = {
  * pick would be a picture, and a picture already means "add a photo". A box is
  * what the phase is for — filling something before it goes out.
  */
-const ICONS: Record<GamePhase, string> = {
-  preparation: 'pixelarticons:archive',
-  open: 'pixelarticons:play',
-  locked: 'pixelarticons:lock',
-  revealed: 'pixelarticons:trophy',
+const PHASE_ICONS: Record<GamePhase, IconName> = {
+  preparation: 'archive',
+  open: 'play',
+  locked: 'lock',
+  revealed: 'trophy',
 }
 
 /** What the button under the cursor would actually do, in one sentence. */
@@ -86,8 +87,8 @@ const nextAlong = computed<GamePhase>(() =>
         :aria-pressed="option === phase"
         @click="ask(option)"
       >
-        <Icon
-          :name="ICONS[option]"
+        <BaseIcon
+          :name="PHASE_ICONS[option]"
           class="block size-4 shrink-0"
           aria-hidden="true"
         />

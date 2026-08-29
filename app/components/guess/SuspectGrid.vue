@@ -105,9 +105,9 @@ function usedIn(id: number): string | undefined {
       }"
       role="status"
     >
-      <Icon
+      <BaseIcon
         v-if="state === 'saved'"
-        name="pixelarticons:check"
+        name="check"
         class="block size-3.5"
         aria-hidden="true"
       />

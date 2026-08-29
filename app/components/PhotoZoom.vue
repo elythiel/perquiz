@@ -61,8 +61,8 @@ defineExpose({
         :aria-label="t('photoZoom.close')"
         @click="dialog?.close()"
       >
-        <Icon
-          name="pixelarticons:close"
+        <BaseIcon
+          name="close"
           class="block size-5"
           aria-hidden="true"
         />
@@ -107,8 +107,8 @@ defineExpose({
           :aria-label="t('photoZoom.previous')"
           @click="step(-1)"
         >
-          <Icon
-            name="pixelarticons:chevron-left"
+          <BaseIcon
+            name="chevron-left"
             class="block size-6"
             aria-hidden="true"
           />
@@ -120,8 +120,8 @@ defineExpose({
           :aria-label="t('photoZoom.next')"
           @click="step(1)"
         >
-          <Icon
-            name="pixelarticons:chevron-right"
+          <BaseIcon
+            name="chevron-right"
             class="block size-6"
             aria-hidden="true"
           />

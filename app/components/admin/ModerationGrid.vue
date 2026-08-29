@@ -38,8 +38,8 @@ const { t } = useI18n()
           :aria-label="t('admin.deletePhoto')"
           @click="emit('remove', photo)"
         >
-          <Icon
-            name="pixelarticons:trash"
+          <BaseIcon
+            name="trash"
             class="block size-4"
             aria-hidden="true"
           />

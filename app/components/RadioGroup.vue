@@ -1,9 +1,11 @@
 <script setup lang="ts" generic="T extends string">
+import type { IconName } from '#shared/utils/icons'
+
 interface Option {
   value: T
   label: string
   /** Beside the label, never instead of it — the project's rule. */
-  icon?: string
+  icon?: IconName
 }
 
 /**
@@ -87,7 +89,7 @@ const choice = defineModel<T>({ required: true })
           :value="option.value"
           class="sr-only"
         >
-        <Icon
+        <BaseIcon
           v-if="option.icon"
           :name="option.icon"
           class="block size-6 shrink-0"

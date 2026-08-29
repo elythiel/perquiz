@@ -49,8 +49,8 @@ const { t } = useI18n()
         class="frame frame-torch press flex aspect-4/3 w-full flex-col items-center justify-center gap-2 text-text-soft transition-colors duration-100 ease-micro hover:text-text"
         @click="$emit('pick')"
       >
-        <Icon
-          name="pixelarticons:plus"
+        <BaseIcon
+          name="plus"
           class="block size-6 text-torch-ink"
           aria-hidden="true"
         />

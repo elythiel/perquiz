@@ -135,8 +135,8 @@ async function removePerson() {
            to a room off a wall, which is the same word the reveal stage uses
            about itself. A play arrow would promise a video. -->
       <template #icon>
-        <Icon
-          name="pixelarticons:projector"
+        <BaseIcon
+          name="projector"
           class="block size-5 shrink-0"
           aria-hidden="true"
         />
