@@ -1,85 +1,40 @@
-# Verifies everything, and publishes a container image once per version.
+# Verifies every pull request, and does nothing else.
 #
-# Two halves, and only the second is deliberate. Verification runs on every push
-# to `main` and on every pull request — which is why the workflow is called `ci`
-# rather than `release`: a pull request that reported "release / check" would be
-# announcing something it never does. Publication produces an immutable,
-# addressable artefact and stops there. Nothing here knows where Perquiz runs —
-# no host, no domain, no reverse-proxy config, no secret beyond the token GitHub
-# hands the job itself. The deployment pulls; see the "Publishing" section of the
-# README.
+# The name of this file and the name of the job below are BOTH load-bearing, in
+# a way nothing here can check: branch protection on `main` matches its required
+# check by name, so renaming either would make the requirement unsatisfiable and
+# block every merge, permanently and silently. That setting lives on GitHub and
+# is invisible from the repository — if this ever has to be renamed, the
+# protection rule has to be edited in the same breath.
 #
-# No `tags: ['v*']` trigger: this workflow CREATES the tags. Listening for them
-# too would be dead configuration, and a tag pushed by hand would walk straight
-# past the "already published" guard below with code nobody checked.
+# `pull_request` and nothing else, where this file once also ran on pushes to
+# `main`. A pull request's checks run on the merge ref — exactly the content
+# that lands — and `main` cannot be reached any other way, so a second run after
+# the merge would verify a commit that was already verified. Publication moved
+# out with the push trigger, to `release.yml`; the split is what let it go.
+#
+# Unfiltered on purpose: a pull request stacked on another branch is exactly the
+# case that had no CI at all (vikunja-89, measured on Dependabot's first pull
+# request — six major action bumps, zero check runs), and narrowing this to
+# `branches: [main]` would leave it there.
 name: ci
 
 on:
-  push:
-    branches: [main]
-  # Every pull request too, so `check` runs BEFORE a merge rather than after it.
-  #
-  # Measured rather than assumed: Dependabot's first pull request carried six
-  # major action bumps and reported zero check runs, so its first exercise would
-  # have been a release. The branch that carried the three audits went ten
-  # commits the same way.
-  #
-  # Unfiltered on purpose, where `push` above is restricted to `main`: a pull
-  # request stacked on another branch is exactly the case that had no CI, and
-  # narrowing this to `branches: [main]` would leave it there. Nothing is run
-  # twice either — `push` never fires for a branch, so a pull request only ever
-  # triggers this event.
-  #
-  # `publish` is held off it by its own condition below.
   pull_request:
-  workflow_dispatch:
 
-# Least privilege at the root, so a job that says nothing gets nothing.
-#
-# Without this the two read-only jobs inherit whatever the repository's default
-# happens to be — and on a public repository that default is a setting somebody
-# else can change, in a place nobody looks. `publish` keeps its own block, which
-# REPLACES this one rather than adding to it: it needs `contents: write` to push
-# the tag and `packages: write` to push the image.
+# Least privilege at the root, so a job that says nothing gets nothing. Nothing
+# in this file needs more: `check` reads the code and runs the test suite.
 permissions:
   contents: read
 
-# Two pushes in a row must not race to publish the same version.
+# A branch that gets a second push supersedes its own run: the older answer is
+# about code nobody is proposing any more.
 concurrency:
-  group: release-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  # The gate is the version, and moving it is a deliberate line in a commit.
-  # Everything on `main` is checked; only a new version is published, so what a
-  # deployment pulls is what somebody decided to release rather than whatever
-  # landed last.
-  version:
-    runs-on: ubuntu-latest
-    outputs:
-      value: ${{ steps.read.outputs.value }}
-      unpublished: ${{ steps.read.outputs.unpublished }}
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # The tags ARE the question being asked, and a shallow clone has
-          # none: without this the guard always answers "never published" and
-          # every push republishes — the exact opposite of the point.
-          fetch-depth: 0
-
-      - id: read
-        run: |
-          value="$(node -p "require('./package.json').version")"
-          echo "value=$value" >> "$GITHUB_OUTPUT"
-          if git rev-parse -q --verify "refs/tags/v$value" > /dev/null; then
-            echo "unpublished=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::v$value is already published; nothing to do."
-          else
-            echo "unpublished=true" >> "$GITHUB_OUTPUT"
-          fi
-
-  # Runs on every push, version or no version: it is the publication that is
-  # deliberate, never the verification.
+  # Do not rename. See the note at the top of this file.
   check:
     runs-on: ubuntu-latest
     steps:
@@ -94,75 +49,3 @@ jobs:
       - run: yarn lint
       - run: yarn typecheck
       - run: yarn test
-
-  publish:
-    needs: [version, check]
-    # Two conditions, and the ORDER is load-bearing: `release.spec.ts` pins the
-    # first half as a literal string, so appending is the only shape that keeps
-    # it green.
-    #
-    # A pull request must never reach the registry. Not because it would fail —
-    # from this repository it would have the permissions — but because it would
-    # publish an image and push a tag for code that has not landed, and a tag
-    # is this project's promise that an image exists at a reviewed commit.
-    if: needs.version.outputs.unpublished == 'true' && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      # `write`, unlike before: this job pushes the tag it just published.
-      contents: write
-      packages: write
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
-
-      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # `github.repository` rather than a literal: renaming the repo or forking
-      # it needs no edit here.
-      - id: meta
-        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
-        with:
-          images: ghcr.io/${{ github.repository }}
-          # One tag, and it is the version. A moving tag has nothing left to
-          # do here: the deployment pins a version and Renovate bumps it, which
-          # is something it can only do with semver. `sha-<short>` is gone too
-          # — the commit is already in the image, as
-          # `org.opencontainers.image.revision` (the `labels:` below), so
-          # `docker inspect` answers "what is running" without a tag for it.
-          tags: type=raw,value=v${{ needs.version.outputs.value }}
-
-      - uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          # amd64 only. Adding linux/arm64 here works, but sharp and
-          # better-sqlite3 compile under QEMU and the build goes from minutes
-          # to tens of minutes — worth it only once something actually runs on
-          # arm.
-          platforms: linux/amd64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # Last, and only on success: a tag is a promise that an image exists. A
-      # failed build leaves none, and the next push tries the same version
-      # again rather than skipping it as already released.
-      #
-      # Annotated, and told who it is by: an annotated tag carries a date and
-      # an author, which is what a release marker is for, and stating the
-      # identity keeps this independent of whatever git config a runner
-      # happens to ship with.
-      - name: Tag the commit this version was built from
-        env:
-          VERSION: v${{ needs.version.outputs.value }}
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git tag -a "$VERSION" -m "$VERSION"
-          git push origin "$VERSION"

@@ -245,10 +245,13 @@ have waited on.
 
 ## Publishing
 
-Every push to `main` and every pull request run lint, typecheck and the test
-suite. An image is pushed to `ghcr.io/elythiel/perquiz` only when the `version`
-in `package.json` names one that does not exist yet
-([.github/workflows/ci.yml](.github/workflows/ci.yml)) — so bumping
+Every pull request runs lint, typecheck and the test suite
+([.github/workflows/ci.yml](.github/workflows/ci.yml)), on the merge ref — so
+what is checked is what would land. `main` is protected and takes nothing any
+other way, which is why the release side verifies nothing again. An image is
+pushed to `ghcr.io/elythiel/perquiz` only when the `version` in `package.json`
+names one that does not exist yet
+([.github/workflows/release.yml](.github/workflows/release.yml)) — so bumping
 that line *is* the decision to release, and it is the only one.
 
 One tag comes out of it, `vX.Y.Z`, and it never moves: it is what a deployment
@@ -259,13 +262,13 @@ There is no `sha-<short>` either: the commit is in the image, as
 `org.opencontainers.image.revision`, so `docker inspect` answers "what exactly
 is running" without a tag spent on it.
 
-The workflow also creates the matching git tag, and only after the push
+The release workflow also creates the matching git tag, and only after the push
 succeeded: a tag is a promise that an image exists.
 
 That is where this repository's responsibility ends. **Deployment is a pull**,
 and it is deliberately not described here: no host, no domain, no proxy config
-and no deploy credential lives in this repo, which is why the workflow needs no
-secret beyond the token GitHub gives the job. Whatever pulls the image — a
+and no deploy credential lives in this repo, which is why the release workflow
+needs no secret beyond the token GitHub gives the job. Whatever pulls the image — a
 version bumped by hand, a cron `docker compose pull && up -d`, or a bot like
 Renovate opening the bump as a pull request — is configured on the machine that
 runs it. [compose.example.yml](compose.example.yml) is a portable

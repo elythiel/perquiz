@@ -2,22 +2,37 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 /**
- * The version, and the tags that are no longer published.
+ * The version, the tags that are no longer published, and the two workflow
+ * files that split the job between them.
  *
- * Nothing here runs the workflow — that only happens on GitHub. What it can do
- * is guard the things that would break it silently from this side: a version
+ * Nothing here runs a workflow — that only happens on GitHub. What it can do is
+ * guard the things that would break it silently from this side: a version
  * string the tag and the image name are derived from, the moving tags whose
  * removal is the whole point of publishing per version, and the pinning and
  * permissions that a later edit would undo without anybody noticing.
  *
  * A `latest` or a `main` coming back would not fail anything. It would just
  * quietly give a deployment something else to point at.
+ *
+ * SINCE THE SPLIT (vikunja-90), read the two files apart from each other:
+ * `ci.yml` verifies pull requests, `release.yml` publishes from `main`, and an
+ * assertion aimed at the wrong one passes for the wrong reason. The groups
+ * below say which file each invariant belongs to — except the last two, which
+ * hold of the CI as a whole and therefore sweep BOTH. That distinction is the
+ * trap: a rule left reading one file would still be green while a new workflow
+ * arrived with actions pinned to tags and permissions inherited from a
+ * repository setting.
  */
 
 const ROOT = new URL('../..', import.meta.url)
 const read = (path: string) => readFileSync(new URL(path, ROOT), 'utf8')
 
-const workflow = read('.github/workflows/ci.yml')
+const ci = read('.github/workflows/ci.yml')
+const release = read('.github/workflows/release.yml')
+
+/** Every workflow, for the invariants that are about the CI rather than a file. */
+const WORKFLOWS = [['ci.yml', ci], ['release.yml', release]] as const satisfies readonly (readonly [string, string])[]
+
 const version = JSON.parse(read('package.json')).version as string
 
 describe('the version everything is derived from', () => {
@@ -27,8 +42,8 @@ describe('the version everything is derived from', () => {
     expect(version).toMatch(/^\d+\.\d+\.\d+(?:-[\w.]+)?$/)
   })
 
-  it('is what the workflow reads, and from one place', () => {
-    expect(workflow).toContain('node -p "require(\'./package.json\').version"')
+  it('is what the release workflow reads, and from one place', () => {
+    expect(release).toContain('node -p "require(\'./package.json\').version"')
   })
 })
 
@@ -51,7 +66,7 @@ describe('the example nobody would notice going stale', () => {
 
 describe('what the registry receives', () => {
   it('is one tag, and it is the version', () => {
-    expect(workflow).toContain('tags: type=raw,value=v${{ needs.version.outputs.value }}')
+    expect(release).toContain('tags: type=raw,value=v${{ needs.version.outputs.value }}')
   })
 
   it('is no longer a moving tag, nor the commit', () => {
@@ -59,33 +74,52 @@ describe('what the registry receives', () => {
     // travels — as `org.opencontainers.image.revision`, from `labels:` — which
     // is what made the `sha-` tag redundant rather than merely unfashionable.
     for (const gone of ['type=sha', 'type=ref,event=branch', 'value=latest']) {
-      expect(workflow, gone).not.toContain(gone)
+      expect(release, gone).not.toContain(gone)
     }
-    expect(workflow).toContain('labels: ${{ steps.meta.outputs.labels }}')
+    expect(release).toContain('labels: ${{ steps.meta.outputs.labels }}')
   })
 })
 
 describe('the guard that makes it once per version', () => {
   it('holds the publish back until the version is new', () => {
-    expect(workflow).toContain('if: needs.version.outputs.unpublished == \'true\'')
+    expect(release).toContain('if: needs.version.outputs.unpublished == \'true\'')
   })
 
   it('can see the tags it asks about', () => {
     // A shallow clone has none, and the guard would answer "never published"
     // on every push — republishing exactly what this stops.
-    expect(workflow).toContain('fetch-depth: 0')
+    expect(release).toContain('fetch-depth: 0')
   })
 
   it('may write the tag it publishes', () => {
-    expect(workflow).toContain('contents: write')
+    expect(release).toContain('contents: write')
+  })
+})
+
+describe('what a pull request is checked with', () => {
+  it('runs the three scripts a merge is gated on', () => {
+    /*
+     * The verification lives in `ci.yml` alone since the split, and this is the
+     * file branch protection names as a required check. The scripts are pinned
+     * here because dropping one would leave the gate green while checking less
+     * — `yarn typecheck` quietly gone is a merge that compiles nowhere.
+     */
+    for (const script of ['yarn lint', 'yarn typecheck', 'yarn test']) {
+      expect(ci, script).toContain(script)
+    }
   })
 
-  it('checks every push, and publishes only some', () => {
-    // The gate is the release, never the verification.
-    expect(workflow).toMatch(/needs: \[version, check\]/)
-    for (const script of ['yarn lint', 'yarn typecheck', 'yarn test']) {
-      expect(workflow, script).toContain(script)
-    }
+  it('is triggered by the pull request itself, before a merge and not after', () => {
+    /*
+     * Half of the reason that file is worth anything: `check` has to run BEFORE
+     * a merge. Without this trigger nothing verified a pull request at all —
+     * measured on Dependabot's first, which reported zero check runs while
+     * carrying six major action bumps (vikunja-89).
+     *
+     * Its removal would be silent, and now more so than before: `ci.yml` has no
+     * other trigger left, so it would simply never run again.
+     */
+    expect(ci).toMatch(/^ {2}pull_request:$/m)
   })
 })
 
@@ -93,27 +127,31 @@ describe('the guard that makes it once per version', () => {
  * The pinning, and the two halves that only work together.
  *
  * A tag is mutable: whoever owns an action can move `v4` onto other code, and
- * this workflow may push a tag and an image. A digest cannot move. But a digest
- * nobody updates is a version that will never receive a fix either — so pinning
- * alone trades one risk for another, and what makes it a hardening is the bot
- * that keeps the digests fresh.
+ * this repository runs a workflow that pushes a tag and an image. A digest
+ * cannot move. But a digest nobody updates is a version that will never receive
+ * a fix either — so pinning alone trades one risk for another, and what makes
+ * it a hardening is the bot that keeps the digests fresh.
  *
  * Neither half is taste, which is why both are pinned here while the durations
  * and the easings elsewhere are not.
+ *
+ * Every rule in this group sweeps BOTH workflows: the eight pinned `uses:` were
+ * split between them, and a rule reading one file would guard half a CI.
  */
-describe('the actions the workflow runs', () => {
+describe.each(WORKFLOWS)('the actions %s runs', (name, workflow) => {
   const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map(match => match[1]!)
 
   it('has some to sweep', () => {
     // Cheap guard against the regex quietly finding nothing and every
-    // assertion below passing over an empty list.
-    expect(uses.length).toBeGreaterThan(5)
+    // assertion below passing over an empty list. Two is the floor a workflow
+    // that does anything meets — `ci.yml` checks out and sets up node.
+    expect(uses.length).toBeGreaterThan(1)
   })
 
   it('pins every one to a digest, never to a tag', () => {
-    // The failure this catches is not a rewrite: it is the seventh action,
-    // added months from now, arriving as `@v1` because that is what the
-    // documentation shows.
+    // The failure this catches is not a rewrite: it is the next action, added
+    // months from now, arriving as `@v1` because that is what the
+    // documentation shows — or a whole new workflow file arriving that way.
     expect(uses.filter(ref => !/@[0-9a-f]{40}$/.test(ref))).toEqual([])
   })
 
@@ -124,59 +162,38 @@ describe('the actions the workflow runs', () => {
     const commented = [...workflow.matchAll(/uses:\s*\S+@[0-9a-f]{40}\s*#\s*v\S+/g)]
     expect(commented).toHaveLength(uses.length)
   })
+})
 
-  it('has something keeping those digests fresh', () => {
+describe('what keeps those digests fresh', () => {
+  it('is configured, so the pins are not a freeze', () => {
     // Without this the pins are a freeze, and the trade stops being worth it.
-    const dependabot = read('.github/dependabot.yml')
-    expect(dependabot).toContain('package-ecosystem: github-actions')
+    // Dependabot sweeps the whole directory, so it followed the split without
+    // a line of configuration.
+    expect(read('.github/dependabot.yml')).toContain('package-ecosystem: github-actions')
   })
 })
 
-describe('what the workflow is allowed to do', () => {
+describe.each(WORKFLOWS)('what %s is allowed to do', (name, workflow) => {
   it('grants nothing at the root beyond reading', () => {
     /*
      * Least privilege where a job that says nothing lands. Without this block
      * the read-only jobs inherit the repository default, which is a setting in
      * a place nobody looks — and on a public repository, one that can be
-     * widened without touching this file.
+     * widened without touching these files.
+     *
+     * Swept over both, because the file that arrives without this block is the
+     * one nobody thought to give it.
      */
     expect(workflow).toMatch(/^permissions:\n {2}contents: read$/m)
   })
+})
 
-  it('leaves the publish job its own, wider block', () => {
+describe('what the publish job alone is allowed to do', () => {
+  it('has its own, wider block', () => {
     // Job permissions REPLACE the root ones rather than adding to them, so the
     // one job that pushes a tag and an image has to name both itself. If this
-    // and the assertion above ever disagree, the release stops at a 403.
-    expect(workflow).toContain('contents: write')
-    expect(workflow).toContain('packages: write')
-  })
-
-  it('checks pull requests as well as pushes', () => {
-    /*
-     * Half of the reason this file is worth anything: `check` has to run before
-     * a merge, not after one. Without this trigger nothing verified a pull
-     * request at all — measured on Dependabot's first, which reported zero
-     * check runs while carrying six major action bumps (vikunja-89).
-     *
-     * Its removal would be silent: the workflow would still be green on `main`,
-     * and every branch would go back to being trusted on nothing.
-     */
-    expect(workflow).toMatch(/^ {2}pull_request:$/m)
-  })
-
-  it('never publishes from a pull request', () => {
-    /*
-     * The other half, and the worst failure in the file if it goes: a pull
-     * request that reached the registry would push an image and a tag for code
-     * that has not landed, and here a tag is the promise that an image exists
-     * at a reviewed commit. Nothing else would turn red.
-     *
-     * Pinned as one string because the ORDER is the invariant too: the first
-     * half is what the once-per-version guard above asserts on its own, so the
-     * event check has to be appended rather than woven in.
-     */
-    expect(workflow).toContain(
-      'if: needs.version.outputs.unpublished == \'true\' && github.event_name != \'pull_request\'',
-    )
+    // and the root assertion above ever disagree, the release stops at a 403.
+    expect(release).toContain('contents: write')
+    expect(release).toContain('packages: write')
   })
 })

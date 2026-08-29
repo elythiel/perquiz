@@ -14,7 +14,8 @@ import process from 'node:process'
  * it says; it just refuses to invent one.
  *
  * The version in `package.json` IS the release — the workflow reads it, and
- * publishes when that version has no tag yet (.github/workflows/ci.yml).
+ * publishes when that version has no tag yet (.github/workflows/release.yml;
+ * `ci.yml` is the other half of the split, and only checks pull requests).
  * Which is why nothing here tags or pushes: this script prepares the decision
  * and leaves the moment of it to `git push`.
  *
