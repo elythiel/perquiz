@@ -8,7 +8,7 @@ defineProps<Props>()
 
 <template>
   <span class="flex shrink-0 items-center gap-2.5">
-    <span class="sr-only text-sm font-medium text-text-soft sm:not-sr-only">{{ displayName }}</span>
+    <span class="sr-only text-sm text-text-soft sm:not-sr-only">{{ displayName }}</span>
     <AvatarBadge
       :name="displayName"
       class="frame-none text-xs"

@@ -135,7 +135,6 @@ Detailed per-page functional specs (features, states, edge cases) live in [PAGES
 ```
 users       id, display_name (unique, ci), is_admin, created_at
 identities  id, user_id → users, provider (NUXT_OIDC_PROVIDER_ID), subject,
-            secret_hash (nullable — reserved for a future local provider),
             created_at, UNIQUE (provider, subject)
 photos      id, user_id → users, filename, position, created_at
 guesses     guesser_id → users, room_user_id → users, guessed_user_id → users,

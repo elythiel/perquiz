@@ -15,10 +15,13 @@ import { accessVerdict } from '#shared/utils/access'
  * `revealed`); all this prevents is an empty shell rendering to somebody who
  * typed a URL. Nothing here may ever be a reason to relax one of those.
  *
- * Both augmentations are needed, for different reasons — the same pair, for
- * the same reasons, as `theme` in useTheme.ts: `PageMeta` constrains the write
- * side (`definePageMeta`), which would otherwise accept anything through its
- * index signature; `RouteMeta` types the read side (`to.meta.access`).
+ * Both augmentations are needed, for different reasons: `PageMeta` constrains
+ * the write side (`definePageMeta`), which would otherwise accept anything
+ * through its index signature; `RouteMeta` types the read side
+ * (`to.meta.access`). Nuxt augments `PageMeta` from `nuxt/app` itself — see
+ * `.nuxt/types/middleware.d.ts`. The theme had the same pair until
+ * vikunja-107 removed it unused, so this is now the one worked example of the
+ * pattern in the app.
  */
 declare module 'nuxt/app' {
   interface PageMeta {

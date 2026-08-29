@@ -29,6 +29,13 @@
       "when": 1787911638123,
       "tag": "0003_preparation_phase",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1788021032065,
+      "tag": "0004_drop_secret_hash",
+      "breakpoints": true
     }
   ]
 }

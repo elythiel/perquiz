@@ -104,6 +104,30 @@ describe('the faces themselves', () => {
     expect(css).not.toContain('font-synthesis')
   })
 
+  it('keeps that promise for the readable face too, where the mono headings land', () => {
+    /*
+     * The rule above buys nothing on its own: `h1, h2, h3` sets 700 and the
+     * eyebrow headings are `font-mono`, so the readable state renders IBM Plex
+     * Mono at 700 on every card, every admin list and the radio-group legend.
+     * Fontsource ships one file per weight AND per subset, and a weight that
+     * is not imported is not an error — it is a synthetic bold, the very thing
+     * the assertion above refuses for the pixel face. It went unnoticed until
+     * vikunja-107 because nothing in TypeScript or CSS can see it.
+     *
+     * Pinned as an exact set, in both directions: 400 and 700 are the weights
+     * the app writes, and anything else is payload nobody reads — 500 and 600
+     * rode along unread for as long as 700 was missing.
+     */
+    const imports = [...read('nuxt.config.ts').matchAll(/@fontsource\/ibm-plex-mono\/([\w-]+)\.css/g)]
+
+    expect(imports.map(match => match[1]).sort()).toEqual([
+      'latin-400',
+      'latin-700',
+      'latin-ext-400',
+      'latin-ext-700',
+    ])
+  })
+
   it('normalises the two x-heights, so the setting does not resize the app', () => {
     /*
      * The type scale was drawn against Space Grotesk (x-height 0.486 em).

@@ -1,26 +1,27 @@
 import { describe, expect, it } from 'vitest'
-import { resolveThemeClass, themeOverride } from '../../shared/utils/theme'
+import { resolveThemeClass } from '../../shared/utils/theme'
 
 /**
  * Theme resolution: which class ends up on `<html>`.
  *
- * Three inputs (the cookie, the `theme` a page declares, the path) for three
- * possible outputs. It is very little code, but it is where the "/reveal stays
- * dark whatever the setting" invariant lives — and a regression there would be
- * invisible to the eye, the theme staying broadly correct.
+ * One input, the cookie, for three possible outputs. It is very little code,
+ * but it is still worth pinning for the reason `font.spec.ts` gives about its
+ * own: the failure mode is silent. A cookie that stopped resolving would leave
+ * everyone on `auto` with a control that appears to do nothing.
+ *
+ * It took two more inputs until vikunja-107 — the theme a page forced on
+ * itself, and the path — and two thirds of this file exercised a branch no
+ * page ever reached. What is left is what the app actually runs.
  */
 
-const NO_META = undefined
-const HOME = '/'
-
-describe('the person\'s choice, with no page forcing anything', () => {
+describe('the setting a person chose', () => {
   it.each([
     ['no cookie', null, ''],
     ['auto', 'auto', ''],
     ['light', 'light', 'light'],
     ['dark', 'dark', 'dark'],
   ] as const)('%s -> class="%s"', (_label, cookie, expected) => {
-    expect(resolveThemeClass({ cookie, meta: NO_META, path: HOME })).toBe(expected)
+    expect(resolveThemeClass(cookie)).toBe(expected)
   })
 
   // A cookie can be edited from the console: its value must never end up in
@@ -28,44 +29,7 @@ describe('the person\'s choice, with no page forcing anything', () => {
   it.each(['nonsense', '', 'clair', 'sombre', '<script>x</script>', 42, null, undefined, {}])(
     'an unreadable cookie (%o) falls back to auto silently',
     (cookie) => {
-      expect(resolveThemeClass({ cookie, meta: NO_META, path: HOME })).toBe('')
+      expect(resolveThemeClass(cookie)).toBe('')
     },
   )
-})
-
-describe('a page forcing its theme wins over the setting', () => {
-  it.each([
-    ['dark', 'light', 'dark'],
-    ['dark', 'auto', 'dark'],
-    ['dark', null, 'dark'],
-    ['light', 'dark', 'light'],
-    ['light', 'auto', 'light'],
-  ] as const)('page=%s, cookie=%s -> class="%s"', (meta, cookie, expected) => {
-    expect(resolveThemeClass({ cookie, meta, path: HOME })).toBe(expected)
-  })
-
-  it.each(['auto', 'nonsense', '', 'sombre', 42, {}])(
-    'an unreadable page `theme` (%o) is ignored, the setting takes over again',
-    (meta) => {
-      expect(resolveThemeClass({ cookie: 'light', meta, path: HOME })).toBe('light')
-    },
-  )
-})
-
-describe('no path is pinned to a theme any more', () => {
-  // M0 pinned `/reveal`, on the assumption that a projected page must be dark.
-  // M7 built that show and decided otherwise: it follows the setting like
-  // everything else. The mechanism stays, the list is empty.
-  it.each(['/reveal', '/reveal/3', '/reveal/12/podium', '/', '/results'])(
-    '%s follows the setting',
-    (path) => {
-      expect(themeOverride(undefined, path)).toBeUndefined()
-      expect(resolveThemeClass({ cookie: 'light', meta: undefined, path })).toBe('light')
-    },
-  )
-
-  it('still lets a page pin itself', () => {
-    expect(themeOverride('dark', '/reveal')).toBe('dark')
-    expect(resolveThemeClass({ cookie: 'light', meta: 'dark', path: '/reveal' })).toBe('dark')
-  })
 })
