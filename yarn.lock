@@ -1229,13 +1229,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@fontsource-variable/space-grotesk@npm:^5.3.0":
-  version: 5.3.0
-  resolution: "@fontsource-variable/space-grotesk@npm:5.3.0"
-  checksum: 10c0/5b92b6c2878be04996caf1785bb7b0920e33c097da1d0c3568355a33a63797c809c1f3b14d19711561129cb2273f1c81adadadd8e6af6165b8f70310a0923189
-  languageName: node
-  linkType: hard
-
 "@fontsource/ibm-plex-mono@npm:^5.3.0":
   version: 5.3.0
   resolution: "@fontsource/ibm-plex-mono@npm:5.3.0"
@@ -8628,7 +8621,6 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "perquiz@workspace:."
   dependencies:
-    "@fontsource-variable/space-grotesk": "npm:^5.3.0"
     "@fontsource/ibm-plex-mono": "npm:^5.3.0"
     "@iconify-json/pixelarticons": "npm:^1.2.9"
     "@nuxt/eslint": "npm:^1.17.0"

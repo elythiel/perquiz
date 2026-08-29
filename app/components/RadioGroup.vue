@@ -42,7 +42,12 @@ const choice = defineModel<T>({ required: true })
 
 <template>
   <fieldset class="flex flex-col gap-3">
-    <legend class="font-mono text-label tracking-eyebrow text-text-muted uppercase">
+    <!-- The margin is not a duplicate of the `gap` above: a `<legend>` does not
+         participate in its fieldset's flex layout — the browser lays it out on
+         the border box itself — so the gap applies between the options and the
+         hint below them, and never between the legend and the options. Hence a
+         margin, matched to the gap so the three rows sit evenly. -->
+    <legend class="mb-3 font-mono text-label tracking-eyebrow text-text-muted uppercase">
       {{ legend }}
     </legend>
 

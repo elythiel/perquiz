@@ -35,17 +35,14 @@ const options = computed(() =>
 </script>
 
 <template>
-  <BaseCard>
-    <RadioGroup
-      v-model="choice"
-      class="py-2.5"
-      name="theme"
-      :legend="t('theme.label')"
-      :options="options"
-    >
-      <p class="text-sm leading-relaxed text-text-muted">
-        {{ t('theme.hint') }}
-      </p>
-    </RadioGroup>
-  </BaseCard>
+  <RadioGroup
+    v-model="choice"
+    name="theme"
+    :legend="t('theme.label')"
+    :options="options"
+  >
+    <p class="text-sm leading-relaxed text-text-muted">
+      {{ t('theme.hint') }}
+    </p>
+  </RadioGroup>
 </template>

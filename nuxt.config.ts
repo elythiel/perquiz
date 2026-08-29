@@ -76,7 +76,16 @@ export default defineNuxtConfig({
   css: [
     // Self-hosted fonts (no CDN): the woff2 files are served by the build.
     // Only the subsets French needs are loaded (latin, latin-ext).
-    '@fontsource-variable/space-grotesk/index.css',
+    //
+    // Space Grotesk is gone with vikunja-93: Pixel Operator carries the text
+    // now and Luciole is what the readable setting switches to, both declared
+    // as `@font-face` in main.css because neither is on Fontsource. IBM Plex
+    // Mono stays — it is the monospaced face of that readable state, where
+    // Luciole has no cut of its own.
+    //
+    // Its `index.css` also carried a lesson worth keeping: it pulled the
+    // vietnamese subset in on top of latin and latin-ext, against what the
+    // line above claims. Per-subset imports, always.
     '@fontsource/ibm-plex-mono/latin-400.css',
     '@fontsource/ibm-plex-mono/latin-ext-400.css',
     '@fontsource/ibm-plex-mono/latin-500.css',

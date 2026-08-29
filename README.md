@@ -14,6 +14,21 @@ Nuxt 4 (SSR, TypeScript strict) · Tailwind v4 with the design-system tokens ·
 OIDC provider for identity (code + PKCE) · sharp for photo processing.
 Self-hosted fonts, no CDN.
 
+### Typefaces
+
+Three faces ship with the app, all served from `public/` or the build — nothing
+is fetched from a CDN at runtime.
+
+- **Pixel Operator** © Jayvee Enaguas — [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+  The interface face, in its proportional and monospaced cuts.
+- **Luciole** © Laurent Bourcellier & Jonathan Perez —
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). What the
+  *Typographie → Lecture* setting switches to: a face drawn with the CTRDV for
+  readers with low vision. **Its licence requires this credit**; the line is not
+  decoration.
+- **IBM Plex Mono** © IBM — [OFL 1.1](https://openfontlicense.org/). The
+  monospaced face of that readable state, where Luciole has no cut of its own.
+
 ## Requirements
 
 - **Node 24**
