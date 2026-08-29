@@ -222,8 +222,14 @@ file. That folder is a runtime input: the Dockerfile copies it next to
 
 **Seeding** — `yarn seed` wipes the game tables and rewrites them from
 [scripts/seed-plan.ts](scripts/seed-plan.ts): ten players, nine rooms, 29
-generated placeholder photos and 51 guesses. It refuses to run with
-`NODE_ENV=production`.
+photographs and 51 guesses. It refuses to run with `NODE_ENV=production`.
+
+The photographs come from [Lorem Picsum](https://picsum.photos) by fixed ids, so
+two seeds produce the same game. **The first run needs the network**; the
+downloads are kept in `data/photos/.source/` and every run after that works
+offline. The images are Unsplash's, whose
+[licence](https://unsplash.com/license) covers downloading and storing them —
+they are development data, never committed.
 
 The plan is deliberate rather than random, and deterministic — two runs give
 the same game, down to the ids. It holds one room with no photos, one player

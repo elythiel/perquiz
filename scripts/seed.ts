@@ -1,12 +1,12 @@
 import { createHash } from 'node:crypto'
-import { mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import process from 'node:process'
 import { sql } from 'drizzle-orm'
 import sharp from 'sharp'
 import { dataDirectories, migrateDatabase, openDatabase } from '../server/database/client.ts'
 import { appState, guesses, identities, photos, users } from '../server/database/schema.ts'
-import { buildSeedPlan } from './seed-plan.ts'
+import { buildSeedPlan, PHOTO_IDS } from './seed-plan.ts'
 
 /**
  * Fills a development database with a game nobody had to play.
@@ -16,6 +16,13 @@ import { buildSeedPlan } from './seed-plan.ts'
  * byte-identical output, so two developers comparing a screen are looking at
  * the same game.
  *
+ * The rooms are real photographs now, fetched once from Lorem Picsum by the
+ * fixed ids in `seed-plan.ts` and kept in a local cache. The FIRST run needs
+ * the network; every run after it does not, because the cache survives the
+ * wipe. Rectangles with a number in them were enough to prove the data had the
+ * right shape, and useless for what this seed is actually for — looking at the
+ * podium, the standings, the show and the thumbnails, and judging them.
+ *
  *   yarn seed
  */
 
@@ -24,43 +31,72 @@ if (process.env.NODE_ENV === 'production') {
   process.exit(1)
 }
 
-const WIDTH = 1600
-const HEIGHT = 1200
+/** What Picsum is asked for: the widest variant the pipeline produces. */
+const SOURCE_WIDTH = 1600
+const SOURCE_HEIGHT = 1200
+
 /** Matches the pipeline in server/utils/photos.ts: web ~1600px, thumb ~400px. */
 const VARIANTS = [{ suffix: 'web', edge: 1600 }, { suffix: 'thumb', edge: 400 }]
-
-/** The design system's five accents: one per room, so rooms read apart. */
-const ACCENTS = ['#4fe3c1', '#8b7bff', '#ff6b8a', '#ffc45a', '#78b4ff']
 
 const dataDir = process.env.NUXT_DATA_DIR ?? './data'
 const { root, photos: photoDir } = dataDirectories(dataDir)
 
 /**
- * A placeholder that never names its owner.
+ * Downloaded originals, kept between runs.
  *
- * The room number is fine — the room → owner mapping is the secret (SPEC §3),
- * and a dev who needs it can read the database. The stripes shift with the
- * photo index so a carousel visibly moves even where no font is installed.
+ * Inside `photos/` and starting with a dot, which is not a detail: `clearPhotos()`
+ * below wipes that directory on every seed and spares dotfiles — so the cache
+ * lives through the wipe without that function needing to know it exists, and
+ * the existing `.gitignore` rule for `data/` already covers it.
  */
-function placeholderSvg(room: number, index: number): string {
-  const accent = ACCENTS[room % ACCENTS.length]!
-  const stripes = Array.from({ length: 5 }, (_, i) => {
-    const y = ((index * 90) + (i * 240)) % HEIGHT
-    return `<rect x="0" y="${y}" width="${WIDTH}" height="46" fill="${accent}" opacity="0.16"/>`
-  }).join('')
+const cacheDir = join(photoDir, '.source')
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}">
-    <rect width="${WIDTH}" height="${HEIGHT}" fill="#12141f"/>
-    ${stripes}
-    <circle cx="${260 + (index * 130) % 1100}" cy="820" r="150" fill="${accent}" opacity="0.28"/>
-    <text x="50%" y="46%" text-anchor="middle" font-family="sans-serif"
-          font-size="360" font-weight="700" fill="${accent}">${room + 1}</text>
-    <text x="50%" y="58%" text-anchor="middle" font-family="sans-serif"
-          font-size="64" fill="#f1f3f8" opacity="0.7">pièce ${room + 1} · photo ${index + 1}</text>
-  </svg>`
+/**
+ * One photograph, from the cache or from Picsum.
+ *
+ * The cache is what makes this bearable to the free service on the other end:
+ * 29 requests once, then none. It is also what keeps the seed working on a
+ * train — everything below only runs on a cold cache.
+ *
+ * FAILS RATHER THAN FALLS BACK, which is the same decision as everywhere else
+ * in this file. A placeholder quietly standing in for a photograph would make
+ * one developer's seed differ from another's for good, since the cache would
+ * then hold the stand-in: the promise of a shared game, broken silently, which
+ * is worse than a script that stops and says what happened.
+ */
+async function photograph(id: number): Promise<Buffer> {
+  const cached = join(cacheDir, `${id}.jpg`)
+  if (existsSync(cached)) return readFileSync(cached)
+
+  const url = `https://picsum.photos/id/${id}/${SOURCE_WIDTH}/${SOURCE_HEIGHT}`
+  let response: Response
+  try {
+    response = await fetch(url)
+  }
+  catch (cause) {
+    throw new Error(
+      `seed: cannot reach picsum.photos for photo ${id}.\n`
+      + '       The first seed needs the network; later ones do not, because the\n'
+      + `       downloads are kept in ${cacheDir}.`,
+      { cause },
+    )
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `seed: picsum.photos answered ${response.status} for photo ${id}.\n`
+      + '       If that id is gone, replace it in PHOTO_IDS (scripts/seed-plan.ts)\n'
+      + '       rather than letting the seed pick something else — two developers\n'
+      + '       would stop looking at the same game without noticing.',
+    )
+  }
+
+  const bytes = Buffer.from(await response.arrayBuffer())
+  mkdirSync(cacheDir, { recursive: true })
+  writeFileSync(cached, bytes)
+  return bytes
 }
 
-/** Deterministic, and shaped exactly like the random names uploads get. */
 function photoName(room: number, index: number): string {
   return createHash('sha256').update(`perquiz-seed:${room}:${index}`).digest('hex').slice(0, 32)
 }
@@ -125,11 +161,29 @@ const ids = plan.people.map((person) => {
   return row.id
 })
 
+/*
+ * The list has to cover the plan, and saying so here costs three lines.
+ *
+ * Without it, adding a person to `seed-plan.ts` without extending `PHOTO_IDS`
+ * hands sharp an `undefined` and fails somewhere far from the cause. The plan
+ * is the thing people edit; the list is the thing they forget.
+ */
+const wanted = plan.people.reduce((total, person) => total + person.photos, 0)
+if (PHOTO_IDS.length < wanted) {
+  console.error(`seed: the plan wants ${wanted} photographs and PHOTO_IDS holds ${PHOTO_IDS.length}.`)
+  console.error('       Add ids to PHOTO_IDS in scripts/seed-plan.ts — picsum.photos/images lists them.')
+  process.exit(1)
+}
+
 let written = 0
+let taken = 0
 for (const [room, person] of plan.people.entries()) {
   for (let index = 0; index < person.photos; index++) {
     const name = photoName(room, index)
-    const source = sharp(Buffer.from(placeholderSvg(room, index)))
+    // One id per photograph, in plan order: room 0 takes the first ones, and a
+    // person with no photos consumes none, so the mapping is stable as long as
+    // the plan is.
+    const source = sharp(await photograph(PHOTO_IDS[taken++]!))
     for (const { suffix, edge } of VARIANTS) {
       await source.clone()
         .resize({ width: edge, height: edge, fit: 'inside', withoutEnlargement: true })

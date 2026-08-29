@@ -49,6 +49,35 @@ export interface SeedPlan {
  * with three distinct steps, and the ties sit just below it (4 / 4 and 1 / 1)
  * so shared ranks are exercised without hiding the nominal case.
  */
+/**
+ * The photographs the rooms are made of, as Lorem Picsum identifiers.
+ *
+ * `picsum.photos/id/{id}/{w}/{h}` is a stable URL: the same id gives the same
+ * photograph, today and next year, which is what lets `yarn seed` keep its
+ * promise of producing the same game twice. The images come from Unsplash,
+ * whose licence covers downloading, copying and storing them locally, with
+ * attribution appreciated rather than required (unsplash.com/license, read
+ * 2026-08-29).
+ *
+ * WRITTEN OUT, never computed. The catalogue has holes — 394 does not exist —
+ * so an id derived by arithmetic would eventually land on nothing, at somebody
+ * else's first seed rather than here.
+ *
+ * They are ordinary photographs and not interiors, which the game would have
+ * preferred. MEASURED before giving up on it: the 993-photo catalogue was
+ * inventoried and a quarter of it looked at, for three usable interiors — a
+ * fonds of landscapes, cities and objects. Nine coherent sets, one of them six
+ * views of a single home, are not in there, and an API key would not put them
+ * there. What the seed needs is photographs that tell rooms apart, and that it
+ * gets: one id every 33 across the whole catalogue, starting past the first
+ * ten, which are ten desk shots by the same photographer.
+ */
+export const PHOTO_IDS: readonly number[] = [
+  33, 66, 101, 135, 171, 204, 241, 277, 314, 350,
+  384, 419, 454, 491, 524, 558, 598, 634, 670, 705,
+  764, 799, 834, 870, 906, 942, 978, 1012, 1049,
+]
+
 export const PEOPLE: readonly SeedPerson[] = [
   { name: 'Sofia', isAdmin: true, photos: 4, score: 4, answered: 8 },
   { name: 'Camille', isAdmin: false, photos: 3, score: 3, answered: 6 },
