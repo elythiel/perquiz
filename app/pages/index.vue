@@ -117,10 +117,7 @@ const note = computed(() => {
       :new-rooms="phase === 'open' ? (data?.newRooms ?? 0) : 0"
     />
 
-    <HomeRoomPanel
-      :photos="photos"
-      :read-only="!isBeforeLock(phase)"
-    />
+    <HomeRoomPanel :photos="photos" />
 
     <!-- One button, one icon slot: both follow the same decision, so the icon
          cannot go missing when the label changes. -->
