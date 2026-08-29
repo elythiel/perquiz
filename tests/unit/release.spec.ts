@@ -17,7 +17,7 @@ import { describe, expect, it } from 'vitest'
 const ROOT = new URL('../..', import.meta.url)
 const read = (path: string) => readFileSync(new URL(path, ROOT), 'utf8')
 
-const workflow = read('.github/workflows/release.yml')
+const workflow = read('.github/workflows/ci.yml')
 const version = JSON.parse(read('package.json')).version as string
 
 describe('the version everything is derived from', () => {
@@ -149,5 +149,34 @@ describe('what the workflow is allowed to do', () => {
     // and the assertion above ever disagree, the release stops at a 403.
     expect(workflow).toContain('contents: write')
     expect(workflow).toContain('packages: write')
+  })
+
+  it('checks pull requests as well as pushes', () => {
+    /*
+     * Half of the reason this file is worth anything: `check` has to run before
+     * a merge, not after one. Without this trigger nothing verified a pull
+     * request at all — measured on Dependabot's first, which reported zero
+     * check runs while carrying six major action bumps (vikunja-89).
+     *
+     * Its removal would be silent: the workflow would still be green on `main`,
+     * and every branch would go back to being trusted on nothing.
+     */
+    expect(workflow).toMatch(/^ {2}pull_request:$/m)
+  })
+
+  it('never publishes from a pull request', () => {
+    /*
+     * The other half, and the worst failure in the file if it goes: a pull
+     * request that reached the registry would push an image and a tag for code
+     * that has not landed, and here a tag is the promise that an image exists
+     * at a reviewed commit. Nothing else would turn red.
+     *
+     * Pinned as one string because the ORDER is the invariant too: the first
+     * half is what the once-per-version guard above asserts on its own, so the
+     * event check has to be appended rather than woven in.
+     */
+    expect(workflow).toContain(
+      'if: needs.version.outputs.unpublished == \'true\' && github.event_name != \'pull_request\'',
+    )
   })
 })

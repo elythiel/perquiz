@@ -245,10 +245,10 @@ have waited on.
 
 ## Publishing
 
-Every push to `main` runs lint, typecheck and the test suite. An image is
-pushed to `ghcr.io/elythiel/perquiz` only when the `version` in `package.json`
-names one that does not exist yet
-([.github/workflows/release.yml](.github/workflows/release.yml)) — so bumping
+Every push to `main` and every pull request run lint, typecheck and the test
+suite. An image is pushed to `ghcr.io/elythiel/perquiz` only when the `version`
+in `package.json` names one that does not exist yet
+([.github/workflows/ci.yml](.github/workflows/ci.yml)) — so bumping
 that line *is* the decision to release, and it is the only one.
 
 One tag comes out of it, `vX.Y.Z`, and it never moves: it is what a deployment
