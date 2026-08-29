@@ -65,8 +65,8 @@ const items = computed<NavItem[]>(() => [
              between tabs never moves the row. -->
         <NuxtLink
           :to="item.to"
-          class="frame frame-sm press tap-target relative block font-mono text-label tracking-widest whitespace-nowrap uppercase transition-colors duration-100 ease-micro sm:px-0.5"
-          :class="isCurrent(item.to) ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch' : 'frame-none text-text-muted hover:text-text-soft'"
+          class="frame frame-sm frame-fill press tap-target relative block font-mono text-label tracking-widest whitespace-nowrap uppercase transition-colors duration-100 ease-micro sm:px-0.5"
+          :class="isCurrent(item.to) ? 'frame-on-torch bg-torch font-bold text-on-torch' : 'frame-none text-text-muted hover:text-text-soft'"
           :aria-current="isCurrent(item.to) ? 'page' : undefined"
         >
           {{ item.label }}
