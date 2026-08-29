@@ -125,7 +125,7 @@ jobs:
       # `github.repository` rather than a literal: renaming the repo or forking
       # it needs no edit here.
       - id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}
           # One tag, and it is the version. A moving tag has nothing left to
