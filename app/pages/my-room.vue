@@ -25,7 +25,11 @@ const inPlay = computed(() => photos.value.length > 0)
 const full = computed(() => photos.value.length >= MAX_PHOTOS_PER_ROOM)
 
 /**
- * "Vos 3 photos apparaissent sur la grille des 9 autres joueurs."
+ * "Vos photos apparaissent sur la grille des 9 autres joueurs."
+ *
+ * No photo count here since vikunja-100: the region's heading counts them, and
+ * a sentence that repeats the number beside it only makes the reader check
+ * whether the two agree.
  *
  * Two numbers, and vue-i18n only agrees with one — so the audience half is its
  * own message, carrying its own preposition and article. That is what makes
@@ -37,10 +41,7 @@ const summary = computed(() => {
 
   return t(
     'myRoom.summary',
-    {
-      count: photos.value.length,
-      others: t('myRoom.summaryOthers', { count: others }, others),
-    },
+    { others: t('myRoom.summaryOthers', { count: others }, others) },
     photos.value.length,
   )
 })
@@ -145,6 +146,30 @@ async function rename(displayName: string) {
       apart from the display settings below.
     -->
     <BaseCard :title="t('myRoom.visibleLabel')">
+      <!--
+        The counter that used to be a tile in the grid, and it moved for two
+        reasons rather than one. It stopped looking like a photograph that
+        failed to load — and it now says its piece BEFORE the cap is reached:
+        at 9 / 10 it announces, at 10 / 10 it explains why the add tile went.
+        A message that only appears once the slot has vanished arrives too
+        late to be the explanation it was meant to be (vikunja-100).
+
+        `tabular-nums` for the same reason `ProgressPanel` has it: a counter
+        that changes width between 9 and 10 makes the whole heading jump.
+
+        Nothing here in read-only. A cap you can no longer reach asks a
+        question with no answer, and the summary above still says how many
+        photographs there are.
+      -->
+      <template
+        v-if="!readOnly"
+        #aside
+      >
+        <p class="text-xl font-bold tabular-nums">
+          {{ t('myRoom.photoCount', { count: photos.length, max: MAX_PHOTOS_PER_ROOM }) }}
+        </p>
+      </template>
+
       <!-- `gap-6` on an inner wrapper rather than on the card: `<BaseCard>`
            writes `gap-3`, and two gap utilities on one element are a race
            arbitrated by the order Tailwind emits them in, not by the order they
