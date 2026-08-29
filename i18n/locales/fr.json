@@ -74,12 +74,10 @@
     "preparationTitle": "La partie se prépare.",
     "preparationBody": "Les devinettes ne sont pas encore ouvertes. C’est le moment de garnir votre pièce : l’organisateur ouvrira le jeu quand tout le monde aura déposé ses photos.",
     "fillRoom": "Garnir ma pièce",
-    "seeResults": "Voir les résultats",
-    "photosCount": "{count} photo | {count} photo | {count} photos"
+    "seeResults": "Voir les résultats"
   },
   "myRoom": {
     "title": "Ma pièce",
-    "description": "Déposez les photos de votre pièce, réorganisez-les, et choisissez le nom sous lequel les autres vous chercheront.",
     "visibleLabel": "Ce que les autres voient",
     "summary": "Votre photo apparaît sur la grille {others}. Aucun nom n’est attaché. | Votre photo apparaît sur la grille {others}. Aucun nom n’est attaché. | Vos photos apparaissent sur la grille {others}. Aucun nom n’est attaché.",
     "summaryOthers": "des autres joueurs | de l’autre joueur | des {count} autres joueurs",
@@ -127,7 +125,6 @@
     "counter": "{done} / {total}"
   },
   "guess": {
-    "progress": "{done} / {total} pièce devinée | {done} / {total} pièce devinée | {done} / {total} pièces devinées",
     "counter": "{done} / {total}",
     "question": "Chez qui sommes-nous ?",
     "previous": "Pièce précédente",
@@ -155,7 +152,6 @@
   },
   "results": {
     "title": "Résultats",
-    "tie": "{count} joueur ex æquo | {count} joueur ex æquo | {count} joueurs ex æquo",
     "found": "/ {total} trouvée | / {total} trouvée | / {total} trouvées",
     "place": "{place} place",
     "tiedWith": "Ex æquo avec {names}",
@@ -179,7 +175,6 @@
     "toLocked": "Verrouiller fige photos et réponses. Réversible.",
     "toRevealed": "Révéler montre à chacun son score et le classement. Réversible.",
     "toPreparation": "Revenir à la préparation retire la feuille de devinettes : les réponses déjà écrites sont conservées, mais plus personne ne peut deviner. Les pièces restent modifiables.",
-    "currentPhase": "C’est la phase en cours.",
     "confirmPhase": "Changer de phase ?",
     "confirm": "Confirmer",
     "cancel": "Annuler",
@@ -190,7 +185,6 @@
     "photosShort": "{count} ph",
     "neverSeen": "Aucune visite",
     "lastActivity": "Dernière visite {when}",
-    "noRoomYet": "Pas de pièce",
     "removeParticipant": "Supprimer les données de {name}",
     "confirmRemoveTitle": "Supprimer les données de {name} ?",
     "confirmRemoveBody": "{photos}, sa pièce et {made} seront supprimées.",
@@ -227,7 +221,6 @@
     "notLockedTitle": "Verrouillez la partie avant le show",
     "notLockedBody": "Tant que la partie est en cours, les réponses peuvent encore changer : le classement projeté ne serait pas le bon.",
     "toAdmin": "Aller à la régie",
-    "emptyTitle": "Rien à révéler",
     "emptyBody": "Aucune pièce n’est en jeu.",
     "open": "Lancer le show"
   }

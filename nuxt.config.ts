@@ -87,12 +87,17 @@ export default defineNuxtConfig({
     // Its `index.css` also carried a lesson worth keeping: it pulled the
     // vietnamese subset in on top of latin and latin-ext, against what the
     // line above claims. Per-subset imports, always.
+    //
+    // 400 and 700, and those two only — the weights the app actually writes.
+    // It carried 500 and 600 until vikunja-107, which nothing asked for, while
+    // 700 was missing and every mono `<h2>` fell back to a synthetic bold in
+    // the readable state (`h1, h2, h3` in main.css sets 700, and the eyebrow
+    // headings are mono). Pixel Operator ships a drawn 700 for the same
+    // reason; this is the readable face keeping that promise.
     '@fontsource/ibm-plex-mono/latin-400.css',
     '@fontsource/ibm-plex-mono/latin-ext-400.css',
-    '@fontsource/ibm-plex-mono/latin-500.css',
-    '@fontsource/ibm-plex-mono/latin-ext-500.css',
-    '@fontsource/ibm-plex-mono/latin-600.css',
-    '@fontsource/ibm-plex-mono/latin-ext-600.css',
+    '@fontsource/ibm-plex-mono/latin-700.css',
+    '@fontsource/ibm-plex-mono/latin-ext-700.css',
     '~/assets/css/main.css',
   ],
 

@@ -1,28 +1,5 @@
-import type { ThemeChoice, ThemeOverride } from '#shared/types/theme'
+import type { ThemeChoice } from '#shared/types/theme'
 import { isThemeChoice, resolveThemeClass } from '#shared/utils/theme'
-
-/**
- * The theme a page forces, whatever the person's setting. `/reveal` is
- * video-projected in a dark room, so it will declare
- * `definePageMeta({ theme: 'dark' })`.
- *
- * Both augmentations are needed, for different reasons: `PageMeta` constrains
- * the write side (`definePageMeta`), which would otherwise accept anything
- * thanks to its `[key: string]: unknown` index signature; `RouteMeta` types the
- * read side (`route.meta.theme`). Nuxt augments `PageMeta` from `nuxt/app`
- * itself — see `.nuxt/types/middleware.d.ts`.
- */
-declare module 'nuxt/app' {
-  interface PageMeta {
-    theme?: ThemeOverride
-  }
-}
-
-declare module 'vue-router' {
-  interface RouteMeta {
-    theme?: ThemeOverride
-  }
-}
 
 /**
  * A cookie and not `localStorage`: Perquiz renders on the server, and the
@@ -62,8 +39,6 @@ export interface ChromeColor {
  * the same computed values.
  */
 export function useTheme() {
-  const route = useRoute()
-
   const cookie = useCookie<string | null>(COOKIE, {
     sameSite: 'lax',
     path: '/',
@@ -84,11 +59,7 @@ export function useTheme() {
     },
   })
 
-  const themeClass = computed(() => resolveThemeClass({
-    cookie: cookie.value,
-    meta: route.meta.theme,
-    path: route.path,
-  }))
+  const themeClass = computed(() => resolveThemeClass(cookie.value))
 
   /**
    * `theme-color` has to swap with no JS and no flash. On `auto` we emit both

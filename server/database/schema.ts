@@ -52,8 +52,6 @@ export const identities = sqliteTable('identities', {
   provider: text('provider').notNull(),
   /** The OIDC `sub` claim. */
   subject: text('subject').notNull(),
-  /** Reserved for a future local provider; always null while v1 is OIDC-only. */
-  secretHash: text('secret_hash'),
   createdAt: createdAt(),
 }, table => [
   uniqueIndex('identities_provider_subject_unique').on(table.provider, table.subject),

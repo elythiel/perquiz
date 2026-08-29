@@ -20,26 +20,29 @@ const messages: Messages = JSON.parse(readFileSync(join(ROOT, 'i18n/locales/fr.j
 const i18n = createI18n({ legacy: false, locale: 'fr', messages: { fr: messages } })
 const { t, te } = i18n.global
 
-/** Every key the app asks for, harvested from `t('…')` and `$t('…')` calls. */
-function usedKeys(): string[] {
-  const found = new Set<string>()
+/** Every `.vue` and `.ts` file under `app/`, concatenated. */
+function appSource(): string {
+  const parts: string[] = []
   const walk = (dir: string) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const path = join(dir, entry.name)
-      if (entry.isDirectory()) {
-        walk(path)
-      }
-      else if (/\.(vue|ts)$/.test(entry.name)) {
-        // `\bt(` alone would also match `split(` or `.at(`: the lookbehind
-        // rejects anything word-ish (or a `$`) right before the `t`.
-        for (const [, key] of readFileSync(path, 'utf8').matchAll(/(?<![\w$])\$?t\(\s*'([^']+)'/g)) {
-          found.add(key!)
-        }
-      }
+      if (entry.isDirectory()) walk(path)
+      else if (/\.(vue|ts)$/.test(entry.name)) parts.push(readFileSync(path, 'utf8'))
     }
   }
   walk(join(ROOT, 'app'))
-  return [...found].sort()
+  return parts.join('\n')
+}
+
+const source = appSource()
+
+/** Every key the app asks for, harvested from `t('…')` and `$t('…')` calls. */
+function usedKeys(): string[] {
+  // `\bt(` alone would also match `split(` or `.at(`: the lookbehind rejects
+  // anything word-ish (or a `$`) right before the `t`.
+  const found = [...source.matchAll(/(?<![\w$])\$?t\(\s*'([^']+)'/g)].map(([, key]) => key!)
+
+  return [...new Set(found)].sort()
 }
 
 describe('the French locale', () => {
@@ -66,6 +69,40 @@ describe('the French locale', () => {
       })
 
     expect(milestoneLabels(messages)).toEqual([])
+  })
+
+  /**
+   * The other direction, and the general case.
+   *
+   * The harvest above proves the file answers what the app asks; it cannot see
+   * a key the app stopped asking for. Six had outlived their screens by
+   * vikunja-107 — a photo counter, a room description, two empty states — and
+   * nothing ever turned red. `names no milestone` looks this way already, but
+   * only for one particular smell; this looks for the smell itself.
+   */
+  it('carries no key the app never asks for', () => {
+    /*
+     * Deliberately looser than the harvest above, which only sees a key inside
+     * a `t('…')` call. Plenty are written somewhere else and are perfectly
+     * alive: `PhaseChip` and `PhaseControl` keep theirs in a lookup table,
+     * `login.vue` in a map from an error slug, `DeckProgress` picks between two
+     * in a ternary. Asking whether the name appears in `app/` AT ALL is the
+     * question that has no false positives — a locale key is distinctive
+     * enough that a chance match is not a realistic worry.
+     */
+    const dynamic = ['theme.', 'font.', 'myRoom.errors.']
+
+    const leaves = (node: Messages, path = ''): string[] =>
+      Object.entries(node).flatMap(([key, value]) => {
+        const here = path ? `${path}.${key}` : key
+        return typeof value === 'string' ? [here] : leaves(value, here)
+      })
+
+    const orphans = leaves(messages).filter(key =>
+      !source.includes(key) && !dynamic.some(prefix => key.startsWith(prefix)),
+    )
+
+    expect(orphans).toEqual([])
   })
 
   it('uses typographic apostrophes', () => {
@@ -97,18 +134,25 @@ describe('the message format', () => {
   // Exercised now, before the real screens land: a locale file that cannot
   // pluralise or interpolate is a thing you want to discover on day one.
   it('pluralises and interpolates in one go (docs/SPEC.md §4)', () => {
-    const progress = (done: number, total: number) =>
-      t('guess.progress', { done, total }, done)
+    /*
+     * `guess.progress` carried this until vikunja-107. The deck kept the bare
+     * fraction (`guess.counter`) and the worded version stopped shipping, so
+     * the assertion had outlived its message: a string alive only because a
+     * test named it is the smell the two checks above exist to catch.
+     *
+     * Same section, same shape, on copy the sheet really renders —
+     * `SuspectGrid.vue` naming the rooms a suspect is already down for.
+     */
+    const used = (rooms: readonly string[]) =>
+      t('guess.suspectUsed', { rooms: rooms.join(' et ') }, rooms.length)
 
-    // French keeps the singular at zero, hence the three forms in the file.
-    expect(progress(0, 8)).toBe('0 / 8 pièce devinée')
-    expect(progress(1, 8)).toBe('1 / 8 pièce devinée')
-    expect(progress(3, 8)).toBe('3 / 8 pièces devinées')
-  })
-
-  it('pluralises tied ranks (docs/SPEC.md §5)', () => {
-    expect(t('results.tie', { count: 1 }, 1)).toBe('1 joueur ex æquo')
-    expect(t('results.tie', { count: 3 }, 3)).toBe('3 joueurs ex æquo')
+    /*
+     * The message carries three forms because vue-i18n indexes zero, one and
+     * many separately in French, and the first two agree. Only the two the
+     * sheet can reach are asserted: it never names a suspect used in no room.
+     */
+    expect(used(['2'])).toBe('Déjà désigné pour la pièce 2')
+    expect(used(['2', '5'])).toBe('Déjà désigné pour les pièces 2 et 5')
   })
 })
 
