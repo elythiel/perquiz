@@ -51,18 +51,23 @@ function openRoom(photos: readonly string[]) {
       </template>
     </p>
 
-    <!-- Two signals, kept apart: the leader keeps the torch wash, « you »
-         keeps the highlighted line — the frame now rather than a ring, so a
-         player who is both still reads as both. -->
+    <!-- One visual signal and one word. The leader keeps the torch wash; « vous »
+         is said in the row, after the name, and that is the whole of how you
+         find yourself here. The row used to tint its own frame torch as well —
+         a second, wordless way of saying the same thing, which cost a colour
+         and told nobody anything the word did not. Every underline in the list
+         is therefore grey, and `aria-current` still marks the row for anyone
+         who is not reading it.
+
+         `frame-fill` went with the frame. It cut the wash to the frame's own
+         corners, and there are no corners left to cut — a mask over a row with
+         no outline would notch a shape nothing else describes. -->
     <ol class="flex flex-col gap-2">
       <li
         v-for="player in data.standings"
         :key="player.id"
-        class="frame frame-sm frame-fill flex items-center gap-3 px-2.5 py-1.5"
-        :class="[
-          player.rank === 1 && 'bg-linear-to-r from-torch/20 to-transparent',
-          player.id === me.id ? 'frame-torch' : 'frame-edge',
-        ]"
+        class="flex items-center gap-3 border-b-3 border-edge-strong px-3.5 py-2.5"
+        :class="player.rank === 1 && 'bg-linear-to-r from-torch/20 to-transparent'"
         :aria-current="player.id === me.id ? 'true' : undefined"
       >
         <!-- Shared ranks repeat the number rather than counting rows: that is
@@ -94,14 +99,19 @@ function openRoom(photos: readonly string[]) {
       v-if="rooms.length"
       class="flex flex-col gap-2"
     >
+      <!-- `frame-sm` moves onto the button, and that is not tidying: the row
+           used to declare it and `--frame-band` is a custom property, so the
+           thumbnail's mask was reading 6px off its parent. Drop the row's frame
+           without saying it here and the cut silently grows to the utility's
+           9px default. -->
       <li
         v-for="(room, index) in rooms"
         :key="index"
-        class="frame frame-sm frame-edge flex items-center gap-4 p-1.5"
+        class="flex items-center gap-4 border-b-3 border-edge-strong px-3.5 py-2.5"
       >
         <button
           type="button"
-          class="frame-fill press relative size-20 shrink-0 overflow-hidden bg-sunken"
+          class="frame-sm frame-fill press relative size-20 shrink-0 overflow-hidden bg-sunken"
           :aria-label="t('photoZoom.gallery')"
           @click="openRoom(room.photos)"
         >

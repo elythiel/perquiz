@@ -242,11 +242,13 @@
    applies.
 
    It exists because the obvious version turned out to be false. "A line means
-   you can act on it" would be a good vocabulary, and the interface disagrees:
-   thirty-seven elements under `app/` carry a frame, and NINETEEN of them
-   cannot be pressed. The tints had drifted with it — the same colour saying
-   different things from screen to screen. So the rule is by FAMILY, and each
-   family says what it wears and why.
+   you can act on it" would be a good vocabulary, and the interface disagreed:
+   when this was written, thirty-seven elements under `app/` carried a frame and
+   NINETEEN of them could not be pressed. The tints had drifted with that — the
+   same colour saying different things from screen to screen. So the rule is by
+   FAMILY, and each family says what it wears and why. Applying the families has
+   since brought those two numbers to twenty-seven and eleven, and every one of
+   the eleven belongs to a paragraph below.
 
    Count those two numbers with a regex that respects class boundaries.
    `\bframe\b` matches the `frame` inside `frame-sm`, which is a band width
@@ -302,16 +304,20 @@
    standings join them is the one case still open, and it is carried on the
    card rather than guessed at here. vikunja-105.
 
-   THE PHONE NAV BAR — `frame-xs`. vikunja-106.
+   THE PHONE NAV BAR — `frame-xs`, since vikunja-106. Still a surface laid over
+   the page, saying so in three pixels instead of nine.
 
    LISTS OF ROWS — the participant list on `/admin`, and the two on
    « Résultats »: a grey bottom border, same three-pixel note as the pills. A
    list should read as a list rather than as twenty-five framed blocks stacked
-   on one another. The participant list is decided. The two on « Résultats » are
-   the same shape for the same reason and go the same way — but one of them
-   tints its own row `torch` for « c'est moi », which the participants have no
-   equivalent of, so that one is TO BE LOOKED AT on the screen before it is
-   settled. vikunja-106.
+   on one another. All three since vikunja-106. The standings row used to tint
+   itself `torch` for « c'est moi » — looked at on the screen and dropped there
+   and then: an underline is a weaker mark than an outline, and the row already
+   says « vous » after the name. A colour that repeats a word wordlessly earns
+   nothing, so every underline in that list is grey and `aria-current` carries
+   the rest. The two lists on « Résultats » keep a horizontal padding the
+   participant list does not: their rows hold a thumbnail and an avatar rather
+   than text starting at the margin.
 
    AN ACTION UNDER WAY — `<RoomUploadTile>`, and so far only it: a `torch` frame
    on a block nobody can press, standing in the photo grid while a file goes up.
@@ -327,9 +333,10 @@
    were azure inside an azure region and neither read as anything (vikunja-101),
    and on the dashboard the line was most of what made four preview thumbnails
    look like buttons you could press (vikunja-97). FOUR screens show
-   photographs and three now agree — the moderation grid always did. The reveal
-   stage still draws an azure line around the one photograph this game projects
-   on a wall, and goes to vikunja-106.
+   photographs and all four now agree — the moderation grid always did, and the
+   reveal stage came last (vikunja-106) because it collides with nothing: it is
+   projected on a wall with nothing around it. A rule that stops at the most
+   visible screen in the game is not a rule.
 
    WHAT IT COSTS TO MOVE ONE OF THESE. tests/unit/contrast.spec.ts enumerates
    the six frame inks BY TOKEN NAME and holds each at 3:1 against the three
@@ -349,13 +356,12 @@
    place before, every time.
 
    Applied so far: the sections, the messages, the dialogs, the interactive
-   family as it already stood, the badges and the avatars (vikunja-104), and the
-   photographs on three of their four screens — the moderation grid, which
-   already agreed, « Ma pièce » (vikunja-101) and the dashboard (vikunja-97).
-   What is left is the monuments (vikunja-105, which also decides whether the
-   reveal standings are one), and the nav bar, the three lists and the show's
-   photograph (vikunja-106). The count at the top of this comment is what tells
-   you whether anything has been left out of them. */
+   family as it already stood, the badges and the avatars (vikunja-104), all
+   four screens of photographs (vikunja-101, vikunja-97, vikunja-106), and the
+   nav bar and the three lists (vikunja-106). What is left is the monuments —
+   vikunja-105, which also decides whether the reveal standings are one of them.
+   The count at the top of this comment is what tells you whether anything has
+   been left out. */
 
 /* The pixel frame: `frame` draws the outline, `frame-<tint>` colours it, and
    `frame-fill` cuts the flat underneath to the same steps.

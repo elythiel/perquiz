@@ -47,10 +47,16 @@ function when(seconds: number | null): string {
     </div>
 
     <ul class="flex flex-col gap-2">
+      <!-- A grey underline and not a frame, per the vocabulary: twenty-five
+           framed blocks stacked on one another read as twenty-five objects
+           rather than as one list. `py-3` is what the band was holding (9px of
+           band, 6 of it gap) and the horizontal padding simply goes — with no
+           line down the sides, a row indented from the heading above it would
+           be indented from nothing. -->
       <li
         v-for="person in participants"
         :key="person.id"
-        class="frame frame-edge flex items-center gap-3 px-2.5 py-1.5"
+        class="flex items-center gap-3 border-b-3 border-edge-strong py-3"
       >
         <GuessSuspectAvatar :display-name="person.displayName" />
 

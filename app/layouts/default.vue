@@ -35,11 +35,18 @@ const isAdmin = computed(() => user.value?.isAdmin ?? false)
           page paint edge to edge, and which also puts a fixed bar under the
           home indicator on a notched iPhone. On everything else the inset is
           0 and the bar sits exactly where it did.
+
+          `frame-xs` since the frame vocabulary: the bar is still a surface laid
+          over the page, and three pixels say so. `p-3` and not `p-1.5` is that
+          band handed back — 9px of band held 6 of gap, 3px holds 2 — so the bar
+          keeps the height it had and only its line got finer. The tabs inside
+          are unaffected: each names its own `frame-sm`, so none of them is
+          reading `--frame-band` off this element.
         -->
         <ShellNav
           :phase="phase"
           :is-admin="isAdmin"
-          class="frame frame-edge max-sm:frame-fill fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 bg-panel p-1.5 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:unframed sm:bg-transparent sm:px-0 sm:py-0"
+          class="frame frame-xs frame-edge max-sm:frame-fill fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 bg-panel p-3 sm:static sm:inset-auto sm:mr-auto sm:ml-8 sm:unframed sm:bg-transparent sm:px-0 sm:py-0"
         />
 
         <ShellUserMenu :display-name="displayName" />
