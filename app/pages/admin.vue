@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { RemovalPreview } from '#shared/types/admin'
 import type { GamePhase } from '#shared/types/game'
 import { isBeforeLock } from '#shared/utils/game'
 
@@ -22,14 +23,10 @@ const pendingPhoto = ref<string>()
 /**
  * Nitro types a route that can throw as partially optional, so the shape is
  * declared the way it actually arrives and the template supplies the floors.
+ * The fields themselves come from `RemovalPreview`: retyping them here was a
+ * copy that would have drifted at the first one added (vikunja-109).
  */
-const pendingPerson = ref<{
-  id: number
-  displayName?: string
-  photos?: number
-  guessesMade?: number
-  guessesLost?: number
-}>()
+const pendingPerson = ref<{ id: number } & Partial<RemovalPreview>>()
 
 /**
  * What a removal destroys, in numbers that agree.
@@ -61,9 +58,18 @@ const personDialog = useTemplateRef<{ open: () => void }>('personDialog')
 async function changePhase(phase: GamePhase) {
   await $fetch('/api/admin/phase', { method: 'PATCH', body: { phase } })
   await refresh()
-  // The layout's phase chip reads the payload written at request time, so the
-  // whole shell has to be told, not just this page.
-  await reloadNuxtApp({ persistState: false })
+  /*
+   * The layout's phase chip reads a `useState` the server plugin filled at
+   * request time, so the shell has to be told too: this page refreshing its
+   * own payload never reaches it.
+   *
+   * One assignment, where this used to call `reloadNuxtApp()`. Throwing the
+   * whole application away — and flashing a full remount at the person running
+   * the party — to move one string was a heavy way to do it. The state is
+   * exactly what the server would have written on the next request, so the
+   * shell lands in the same place without the round trip.
+   */
+  useState<GamePhase>(STATE_KEYS.gamePhase).value = phase
 }
 
 function askPhoto(name: string) {

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f80515eb-bd82-4dd6-9242-60c2409f69b4",
+  "id": "b5ddf9fe-f01e-40ea-b848-3439c6dd2a6d",
   "prevId": "85bb95d2-f7e3-4b6c-95b3-8f88148e077f",
   "tables": {
     "app_state": {
@@ -86,6 +86,13 @@
           "name": "guesses_room_idx",
           "columns": [
             "room_user_id"
+          ],
+          "isUnique": false
+        },
+        "guesses_guessed_idx": {
+          "name": "guesses_guessed_idx",
+          "columns": [
+            "guessed_user_id"
           ],
           "isUnique": false
         }

@@ -91,6 +91,12 @@ export const guesses = sqliteTable('guesses', {
   check('guesses_not_own_room', sql`${table.guesserId} <> ${table.roomUserId}`),
   check('guesses_not_self', sql`${table.guessedUserId} <> ${table.guesserId}`),
   index('guesses_room_idx').on(table.roomUserId),
+  // `guessed_user_id` is a cascading foreign key, and SQLite scans the whole
+  // table to honour one without an index — twice over, since `removalPreview`
+  // counts the same rows before the panel asks. Nothing anyone would feel at
+  // twenty-five players; it is here because an unindexed cascade is the kind
+  // of thing that is free to add now and awkward to notice later.
+  index('guesses_guessed_idx').on(table.guessedUserId),
 ])
 
 const PHASES = ['preparation', 'open', 'locked', 'revealed'] as const satisfies readonly GamePhase[]

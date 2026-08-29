@@ -1,5 +1,7 @@
+import type { RemovalPreview } from '#shared/types/admin'
+
 /** What deleting this participant would take with it — for the confirmation. */
-export default defineEventHandler((event) => {
+export default defineEventHandler((event): RemovalPreview => {
   assertAdmin(event)
 
   const id = Number(getRouterParam(event, 'id'))

@@ -85,11 +85,25 @@ describe('the raster fallbacks', () => {
   })
 
   it('keeps the apple-touch icon opaque on night, because iOS demands it', async () => {
-    // iOS blackens transparency and rounds the corners itself, so the ground
-    // is a constraint rather than a choice. It is NOT the tab-strip case.
+    /*
+     * iOS blackens transparency and rounds the corners itself, so the ground
+     * is a constraint rather than a choice. It is NOT the tab-strip case.
+     *
+     * The expected colour is read from the stylesheet rather than typed, which
+     * is the third copy this value used to have (script, test, CSS). Now the
+     * token is the only one: change `--color-night` without re-running
+     * `yarn favicons` and this turns red, which is the message it should have
+     * been sending all along.
+     */
+    const css = readFileSync(new URL('app/assets/css/main.css', ROOT), 'utf8')
+    const night = /--color-night:\s*#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(css)
+    expect(night).not.toBeNull()
+
+    const ground = night!.slice(1, 4).map(channel => Number.parseInt(channel, 16))
     const tile = await sharp(new URL('public/apple-touch-icon.png', ROOT).pathname).raw().toBuffer({ resolveWithObject: true })
+
     expect(tile.info.channels).toBe(4)
-    expect([...tile.data.subarray(0, 4)]).toEqual([0x0A, 0x0B, 0x12, 255])
+    expect([...tile.data.subarray(0, 4)]).toEqual([...ground, 255])
   })
 })
 

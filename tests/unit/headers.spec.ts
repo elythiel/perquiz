@@ -33,8 +33,26 @@ describe('the headers on every response', () => {
     'referrer-policy',
     'permissions-policy',
     'content-security-policy',
+    'strict-transport-security',
   ])('declares %s', (header) => {
     expect(CONFIG).toContain(`'${header}':`)
+  })
+
+  it('claims a year of HTTPS, and promises nothing on anyone else\'s behalf', () => {
+    /*
+     * Declared here rather than left to the reverse proxy that actually
+     * terminates TLS: the proxy is the tidy place and therefore the one a
+     * deployment forgets. `preload` is deliberately absent — it is a
+     * submission to a browser-vendor list, effectively irreversible, and it
+     * would commit every subdomain of whatever host this lands on.
+     */
+    const value = /'strict-transport-security': '([^']+)'/.exec(CONFIG)?.[1]
+
+    expect(value).toBe('max-age=31536000; includeSubDomains')
+    // Read off the VALUE and not the file: the word `preload` appears in the
+    // comment above the header, explaining its absence. `font.spec.ts` learned
+    // the same lesson — a property named to say it is not written is the first
+    // thing a regex over the raw source finds.
   })
 
   it.each([

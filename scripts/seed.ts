@@ -31,6 +31,23 @@ if (process.env.NODE_ENV === 'production') {
   process.exit(1)
 }
 
+/**
+ * Every identity this script writes starts with it, and the guard below reads
+ * it back to tell a seeded database from somebody's real game.
+ */
+const SEED_SUBJECT_PREFIX = 'seed:'
+
+/**
+ * The provider a seeded identity is filed under when the environment says
+ * nothing.
+ *
+ * It has to be SOME value, and Zitadel is the reference configuration — but a
+ * deployment pointed at another provider files its real identities under
+ * another id, and a seeded row under this one would never resolve a login.
+ * Harmless in development, and the reason the run announces it out loud.
+ */
+const DEFAULT_PROVIDER = 'zitadel'
+
 /** What Picsum is asked for: the widest variant the pipeline produces. */
 const SOURCE_WIDTH = 1600
 const SOURCE_HEIGHT = 1200
@@ -117,6 +134,44 @@ function clearPhotos() {
 const plan = buildSeedPlan()
 const db = migrateDatabase(openDatabase(dataDir))
 
+/*
+ * The second guard, because the first one is `NODE_ENV` and `NODE_ENV` is
+ * unset far more often than it is `production`.
+ *
+ * What this script destroys is a whole game, and the accident worth catching
+ * is a `yarn seed` aimed at a real `NUXT_DATA_DIR` — a shell in the wrong
+ * window, a pasted command. So it asks the database what it holds rather than
+ * asking the environment what it is.
+ *
+ * The test is "has this database ever been seeded", not "does it contain
+ * anything but seeded rows". The second reading is the tempting one and it is
+ * wrong: a development database picks up a real identity the moment its owner
+ * signs in through the actual provider to look at the thing, which is most of
+ * what a development database is FOR. Refusing there would fire on the normal
+ * loop and be turned off within the day.
+ *
+ * An empty database is fine — that is a fresh clone. A populated one with no
+ * seeded identity in it has never been near this script, and that is the shape
+ * of somebody's real party.
+ *
+ * `PERQUIZ_SEED_FORCE=1` is the way past, and having to type it is the point:
+ * a sentence about intent that no misdirected paste contains.
+ */
+const subjects = db.select({ subject: identities.subject }).from(identities).all()
+const seeded = subjects.filter(row => row.subject.startsWith(SEED_SUBJECT_PREFIX)).length
+
+if (subjects.length > 0 && seeded === 0 && process.env.PERQUIZ_SEED_FORCE !== '1') {
+  console.error(`seed: ${root} holds ${subjects.length} identity(ies) and none of them were seeded.`)
+  console.error('seed: that is a real game, not a development database. Refusing to wipe it.')
+  console.error('seed: re-run with PERQUIZ_SEED_FORCE=1 if you meant it.')
+  process.exit(1)
+}
+
+if (!process.env.NUXT_OIDC_PROVIDER_ID) {
+  console.warn(`seed: NUXT_OIDC_PROVIDER_ID is unset — filing seeded identities under "${DEFAULT_PROVIDER}".`)
+  console.warn('seed: a login through another provider will not resolve them.')
+}
+
 const before = db.select().from(users).all().length
 console.log(`seed: ${root}`)
 console.log(`seed: wiping ${before} user(s), their photos, identities and guesses`)
@@ -146,7 +201,7 @@ clearPhotos()
  */
 db.run(sql`delete from sqlite_sequence where name in ('users', 'identities', 'photos')`)
 
-const provider = process.env.NUXT_OIDC_PROVIDER_ID ?? 'zitadel'
+const provider = process.env.NUXT_OIDC_PROVIDER_ID ?? DEFAULT_PROVIDER
 
 const ids = plan.people.map((person) => {
   const row = db.insert(users)
@@ -155,7 +210,7 @@ const ids = plan.people.map((person) => {
     .get()
 
   db.insert(identities)
-    .values({ userId: row.id, provider, subject: `seed:${person.name.toLowerCase()}` })
+    .values({ userId: row.id, provider, subject: `${SEED_SUBJECT_PREFIX}${person.name.toLowerCase()}` })
     .run()
 
   return row.id

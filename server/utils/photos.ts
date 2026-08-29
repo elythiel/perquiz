@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto'
 import { unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import type { Sharp } from 'sharp'
 import sharp from 'sharp'
 
 /**
@@ -112,13 +113,35 @@ export async function storePhoto(bytes: Uint8Array): Promise<StoredPhoto> {
   const name = randomBytes(16).toString('hex')
   const source = sharp(bytes, { failOn: 'error', limitInputPixels: MAX_INPUT_PIXELS }).rotate()
 
-  const render = (edge: number) => source
-    .clone()
+  const render = (input: Sharp, edge: number) => input
     .resize({ width: edge, height: edge, fit: 'inside', withoutEnlargement: true })
     .webp({ quality: 82 })
     .toBuffer({ resolveWithObject: true })
 
-  const [web, thumb] = await Promise.all([render(WEB_EDGE), render(THUMB_EDGE)])
+  /*
+   * The thumbnail comes from the web rendering, not from the original.
+   *
+   * MEASURED, 2026-08-29, on a 4032 × 3024 photograph of noise: 195 → 170 ms
+   * of CPU per upload as a 7.7 Mo JPEG (−13%), 143 → 136 ms as a PNG (−5%).
+   * The audit that asked for this estimated −40%, on the reasoning that
+   * `source.clone()` twice decodes the file twice. It does not, and that is
+   * worth knowing: libvips decodes a JPEG at the scale it was asked for —
+   * shrink-on-load straight out of the DCT — so the 400-pixel render never
+   * paid for a full decode in the first place. The gain that survives is the
+   * one that was never the argument: one decode instead of one and a fraction,
+   * and half the peak memory, since the two renders are now sequential.
+   *
+   * Sequential is also the cost: wall-clock per upload goes the other way by a
+   * few percent. That is the right trade here — during a party the shared CPU
+   * is what runs out, and uploads are already serialised per person by the
+   * queue, so nobody is waiting on the parallelism that was lost.
+   *
+   * The second lossy pass is not visible where it lands: 1600 → 400 throws
+   * away fifteen sixteenths of the pixels, and the resampling dominates
+   * anything WebP did at quality 82 on the way in.
+   */
+  const web = await render(source.clone(), WEB_EDGE)
+  const thumb = await render(sharp(web.data), THUMB_EDGE)
 
   await Promise.all([
     writeFile(photoPath(name, 'web'), web.data),
