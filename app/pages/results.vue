@@ -152,11 +152,12 @@ function openRoom(photos: readonly string[]) {
       </li>
     </ul>
 
-    <BaseCard v-else>
-      <p class="text-base text-text-muted">
-        {{ t('results.noRooms') }}
-      </p>
-    </BaseCard>
+    <BaseMessage
+      v-else
+      tone="clue"
+    >
+      <p>{{ t('results.noRooms') }}</p>
+    </BaseMessage>
 
     <PhotoZoom
       ref="zoom"

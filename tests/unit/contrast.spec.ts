@@ -47,6 +47,10 @@ const CHIPS = [
   { flat: 'clue', alpha: 0.15, ink: 'clue-ink' },
   // 15% amber: the `preparation` phase chip.
   { flat: 'amber', alpha: 0.15, ink: 'amber-ink' },
+  // 15% alert: the third of the three tints `<BaseMessage>` fills with, and
+  // the one this table was missing. The other two were already here by way of
+  // the chips; a message wears the same pair on the same two grounds.
+  { flat: 'alert', alpha: 0.15, ink: 'alert-ink' },
   { flat: 'torch', alpha: 0.20, ink: 'torch-ink' },
   { flat: 'clue', alpha: 0.20, ink: 'clue-ink' },
   { flat: 'alert', alpha: 0.20, ink: 'alert-ink' },

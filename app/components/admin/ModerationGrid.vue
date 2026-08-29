@@ -47,10 +47,11 @@ const { t } = useI18n()
       </li>
     </ul>
 
-    <BaseCard v-else>
-      <p class="text-base text-text-muted">
-        {{ t('admin.moderationEmpty') }}
-      </p>
-    </BaseCard>
+    <BaseMessage
+      v-else
+      tone="clue"
+    >
+      <p>{{ t('admin.moderationEmpty') }}</p>
+    </BaseMessage>
   </section>
 </template>

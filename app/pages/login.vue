@@ -52,30 +52,22 @@ const signedOut = computed(() => route.query.bye !== undefined)
         {{ $t('login.pitch') }}
       </p>
 
-      <section
+      <BaseMessage
         v-if="problem"
-        class="frame frame-alert frame-fill flex flex-col gap-2 bg-alert/15 px-3.5 py-2.5"
+        tone="alert"
+        :title="$t(problem.title)"
       >
-        <h2 class="font-mono text-label tracking-label text-alert-ink uppercase">
-          {{ $t(problem.title) }}
-        </h2>
-        <p class="text-base leading-relaxed text-text-soft">
-          {{ $t(problem.body) }}
-        </p>
-      </section>
+        <p>{{ $t(problem.body) }}</p>
+      </BaseMessage>
 
       <!-- `clue` and not `alert`: nothing went wrong here, a state changed. -->
-      <section
+      <BaseMessage
         v-else-if="signedOut"
-        class="frame frame-clue frame-fill flex flex-col gap-2 bg-clue/15 px-3.5 py-2.5"
+        tone="clue"
+        :title="$t('login.signedOutTitle')"
       >
-        <h2 class="font-mono text-label tracking-label text-clue-ink uppercase">
-          {{ $t('login.signedOutTitle') }}
-        </h2>
-        <p class="text-base leading-relaxed text-text-soft">
-          {{ $t('login.signedOut') }}
-        </p>
-      </section>
+        <p>{{ $t('login.signedOut') }}</p>
+      </BaseMessage>
 
       <!-- A full page navigation, not a fetch: the next stop is the provider. -->
       <a
