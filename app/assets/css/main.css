@@ -234,6 +234,120 @@
   );
 }
 
+/* THE VOCABULARY OF THE FRAME — what a line says, and which block wears it.
+
+   Everything below this comment is MECHANISM: how the band is drawn, how the
+   flat is cut, what a tint costs. This is the other half, and it lives here
+   rather than in a ticket because a rule nobody can find is a rule nobody
+   applies.
+
+   It exists because the obvious version turned out to be false. "A line means
+   you can act on it" would be a good vocabulary, and the interface disagrees:
+   thirty-seven elements under `app/` carry a frame, and NINETEEN of them
+   cannot be pressed. The tints had drifted with it — the same colour saying
+   different things from screen to screen. So the rule is by FAMILY, and each
+   family says what it wears and why.
+
+   Count those two numbers with a regex that respects class boundaries.
+   `\bframe\b` matches the `frame` inside `frame-sm`, which is a band width
+   and not a frame at all — it inflated the first count of this very comment by
+   seven. tests/unit/design-primitives.spec.ts sweeps with that same pattern.
+
+   SECTIONS — a titled region of the page, which is every `<BaseCard>` there
+   is: `frame-azure`, at `frame-sm`. Azure means "a part of this page" and
+   means nothing else, and the card is the only block that wears it, so it can
+   be learned in one screen. Since vikunja-103 there is no untitled card left,
+   which is what retired the pair this file used to describe — azure for a
+   titled region, edge for the one-sentence ones — along with the branch that
+   drew it.
+
+   MESSAGES — the block that asks to be noticed: `<BaseMessage>`, a full band,
+   a tinted flat cut with `frame-fill`, and the tint IS the register (alert,
+   clue, amber). Settled in vikunja-103, and the reason this family needs one
+   paragraph rather than ten: it lives in a single component, so the rule
+   applies to it once instead of at every call site.
+
+   INTERACTIVE — button, link, field, tab, option. A tint chosen by the
+   control's ROLE, and the line is what says you may act on it: `on-torch`
+   around the torch call to action, `edge` on the quiet ones, `alert` on the
+   destructive one, `torch` on the option you picked. This is the family the
+   whole technique was built for, and the one that already agreed with itself.
+
+   BADGES AND TEXT PILLS — `<RoomStatusChip>`, `<ShellPhaseChip>`, and the
+   « Régie » pill written by hand on `/admin`: NO frame at all, a bottom border
+   instead. The tint moves from the outline to an underline, so the meaning
+   survives while the pill stops claiming to be something you can press. Three
+   pixels — `border-b-[3px]`, one cell of the grid — and never `border-b-2`,
+   which would be the first line in this interface off the 3px raster. They
+   get a component of their own too, the way the messages did. vikunja-104.
+
+   AVATARS AND SUSPECTS — `<AvatarBadge>`, what wraps it, and
+   `<GuessSuspectCard>`: `frame-xs`. A face is neither a section nor a control,
+   and the finest band the grid allows is a texture on it rather than a claim
+   about it. vikunja-104.
+
+   DIALOGS AND POPOVERS — `<BaseDialog>`, `<ShellUserMenu>`: they keep
+   `frame-edge`, and this is the assumed exception to all of the above. A
+   surface that floats over the page has to say where it ends, whatever the
+   vocabulary says about blocks you cannot press.
+
+   OBJECTS APART — the podium and the dashboard gauge: a SQUARE border. They
+   would then be the only right angles in a skin that methodically removed
+   every one of them (vikunja-74), and that IS the intent — a monument reads as
+   a monument because it is not shaped like everything around it. Written down
+   so the next reader does not "fix" it in good faith. Whether the reveal
+   standings join them is the one case still open, and it is carried on the
+   card rather than guessed at here. vikunja-105.
+
+   THE PHONE NAV BAR — `frame-xs`. vikunja-106.
+
+   LISTS OF ROWS — the participant list on `/admin`, and the two on
+   « Résultats »: a grey bottom border, same three-pixel note as the pills. A
+   list should read as a list rather than as twenty-five framed blocks stacked
+   on one another. The participant list is decided. The two on « Résultats » are
+   the same shape for the same reason and go the same way — but one of them
+   tints its own row `torch` for « c'est moi », which the participants have no
+   equivalent of, so that one is TO BE LOOKED AT on the screen before it is
+   settled. vikunja-106.
+
+   AN ACTION UNDER WAY — `<RoomUploadTile>`, and so far only it: a `torch` frame
+   on a block nobody can press, standing in the photo grid while a file goes up.
+   Torch everywhere else means "act here" or "this is the one you picked", and
+   this is neither — it is the upload reporting on itself. Named rather than
+   folded into `interactive`, so that the day a second one appears the
+   difference already has a word. Nothing to change in the code; it is here
+   because it had no family and a rule with a hole in it is not a rule.
+
+   PHOTOGRAPHS — `frame-fill` alone: the cut, and no line. A picture brings its
+   own edges. FOUR screens show photographs and only two of them are scoped:
+   vikunja-101 for « Ma pièce », vikunja-97 for the dashboard. Of the other two
+   the moderation grid on `/admin` already agrees with the rule, and the reveal
+   stage does not — it still draws an azure line around the one photograph this
+   game projects on a wall. It goes with the rest to vikunja-106.
+
+   WHAT IT COSTS TO MOVE ONE OF THESE. tests/unit/contrast.spec.ts enumerates
+   the six frame inks BY TOKEN NAME and holds each at 3:1 against the three
+   grounds in both themes, because these lines carry meaning (WCAG 1.4.11). A
+   bottom border or a square one that reuses an existing ink — `torch-ink`,
+   `edge-strong` — stays covered with no new measurement. But that test reads
+   the PALETTE and never the components: give one of these borders a colour
+   from outside it and nothing goes red. Which is the second reason this is
+   written here and not somewhere else.
+
+   AND REMEMBER WHAT THE FRAME REPLACED. `<BaseCard>` used to paint the `panel`
+   flat; the HD-2D skin dropped it so the torchlight could pass through the
+   cards it sat under, and the pixel line is what holds those blocks together
+   now (vikunja-74). Taking a line off a block is therefore not removing a
+   decoration — it is removing the only thing that separated it from a ground
+   which already carries the grain and the glow. Check what holds the block in
+   place before, every time.
+
+   Applied as of this comment: the sections, the messages, the dialogs, the
+   interactive family as it already stood, and the moderation grid's
+   photographs. The three cards named above carry the rest — and the count at
+   the top of this comment is what tells you whether anything has been left out
+   of them. */
+
 /* The pixel frame: `frame` draws the outline, `frame-<tint>` colours it, and
    `frame-fill` cuts the flat underneath to the same steps.
 
