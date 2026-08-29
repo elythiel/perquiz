@@ -1,4 +1,5 @@
-import type { Standing } from './scoring'
+import type { Standing } from '#shared/utils/scoring'
+import { standings } from '#shared/utils/scoring'
 import { sessionSecret } from './subkey'
 import { guesses, photos, users } from '../database/schema'
 

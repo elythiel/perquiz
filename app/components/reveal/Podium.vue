@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PodiumStep } from '~~/server/utils/scoring'
+import type { PodiumStep } from '#shared/utils/scoring'
 import { ordinal } from '#shared/utils/show'
 
 const props = defineProps<{

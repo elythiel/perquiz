@@ -1,7 +1,9 @@
-import type { Standing } from './scoring'
+import type { RevealRoom, RevealShow } from '#shared/types/reveal'
+import { standings } from '#shared/utils/scoring'
 import { isBeforeLock } from '#shared/utils/game'
 import { createHmac, randomBytes } from 'node:crypto'
 import { eq } from 'drizzle-orm'
+import { rankBy } from './ranking'
 import { APP_STATE_ID, appState, guesses, photos, users } from '../database/schema'
 
 /**
@@ -12,27 +14,6 @@ import { APP_STATE_ID, appState, guesses, photos, users } from '../database/sche
  * frozen, and only on the projector. Participants' own devices stay blind
  * until the phase is flipped afterwards (SPEC §6).
  */
-
-export interface RevealVote {
-  displayName: string
-  count: number
-  /** The room's owner: the bar the reveal lands on. */
-  isOwner: boolean
-}
-
-export interface RevealRoom {
-  owner: { id: number, displayName: string }
-  photos: string[]
-  /** Every name that got a vote, most voted first. */
-  votes: RevealVote[]
-  /** Players who left this room blank — part of the story (PAGES `/reveal`). */
-  noAnswer: number
-}
-
-export interface RevealShow {
-  rooms: RevealRoom[]
-  standings: Standing[]
-}
 
 /**
  * The order the show deals the rooms in, minted once and kept.
@@ -62,7 +43,7 @@ function showSeed(): string {
 function dealt(roomIds: readonly number[], seed: string): number[] {
   const rank = (id: number) =>
     createHmac('sha256', seed).update(`room:${id}`).digest('hex')
-  return [...roomIds].sort((left, right) => rank(left).localeCompare(rank(right)))
+  return rankBy(roomIds, rank)
 }
 
 /**

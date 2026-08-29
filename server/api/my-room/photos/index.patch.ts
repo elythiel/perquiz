@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<{ order?: unknown }>(event)
   const order = body?.order
   if (!Array.isArray(order) || !order.every(isPhotoName)) {
-    throw createError({ statusCode: 400, statusMessage: 'The order must be a list of photo names' })
+    throw createError({ statusCode: 400, statusMessage: 'invalid-order' })
   }
 
   return { photos: reorderRoomPhotos(requireUser(event), order) }

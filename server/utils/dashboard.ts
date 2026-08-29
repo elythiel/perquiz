@@ -1,4 +1,4 @@
-import type { GamePhase } from '#shared/types/game'
+import type { DashboardState } from '#shared/types/dashboard'
 import { asc, eq, sql } from 'drizzle-orm'
 import { guesses, photos, users } from '../database/schema'
 
@@ -10,25 +10,6 @@ import { guesses, photos, users } from '../database/schema'
  * computes shared ranks is that milestone's deliverable — building a second
  * one here would be the kind of duplicate that quietly disagrees with itself.
  */
-
-export interface DashboardState {
-  phase: GamePhase
-  /** My own photos, in order — the thumbnails on the room panel. */
-  myPhotos: string[]
-  /** Rooms with at least one photo, mine included: the state of the game. */
-  roomsInPlay: number
-  participants: number
-  /** Rooms I can answer, and how many I have. */
-  answered: number
-  total: number
-  /**
-   * Rooms that came into play since I last looked, mine excluded.
-   *
-   * Zero on a first visit, which reads as "nothing new" rather than "all of
-   * it is new" — the second would be true and useless.
-   */
-  newRooms: number
-}
 
 /**
  * Reads the dashboard, then stamps the visit.

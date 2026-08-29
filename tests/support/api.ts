@@ -22,7 +22,6 @@ import * as provisioningUtils from '../../server/utils/provisioning'
 import * as resultsUtils from '../../server/utils/results'
 import * as revealUtils from '../../server/utils/reveal'
 import * as roomUtils from '../../server/utils/room'
-import * as scoringUtils from '../../server/utils/scoring'
 import * as sessionUtils from '../../server/utils/session'
 import * as sheetUtils from '../../server/utils/sheet'
 import * as uploadQueueUtils from '../../server/utils/upload-queue'
@@ -136,7 +135,7 @@ function expose(config: Record<string, unknown>) {
   for (const module of [
     adminUtils, dashboardUtils, databaseUtils, displayNameUtils, guessingUtils,
     oidcUtils, photoUtils, provisioningUtils, resultsUtils, revealUtils, roomUtils,
-    scoringUtils, sessionUtils, sheetUtils, uploadQueueUtils,
+    sessionUtils, sheetUtils, uploadQueueUtils,
   ]) {
     for (const [name, value] of Object.entries(module)) globals[name] = value
   }

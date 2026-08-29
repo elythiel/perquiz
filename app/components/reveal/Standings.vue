@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Standing } from '~~/server/utils/scoring'
+import type { Standing } from '#shared/utils/scoring'
 import { ordinal } from '#shared/utils/show'
 
 defineProps<{ standings: readonly Standing[] }>()

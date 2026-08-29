@@ -1,4 +1,4 @@
-import type { GuessSheet } from '~~/server/utils/sheet'
+import type { GuessSheet } from '#shared/types/sheet'
 import { GUESS_SHEET_KEY } from '~/composables/useGuessSheet'
 
 /**

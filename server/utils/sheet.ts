@@ -1,4 +1,4 @@
-import type { GamePhase } from '#shared/types/game'
+import type { GuessSheet, SheetCounts, SheetRoom } from '#shared/types/sheet'
 import { and, asc, eq, sql } from 'drizzle-orm'
 import { sessionSecret } from './subkey'
 import { guesses, photos, users } from '../database/schema'
@@ -11,33 +11,6 @@ import { guesses, photos, users } from '../database/schema'
  * not a secret — everybody knows who is playing. What never leaves is which
  * name goes with which handle.
  */
-
-export interface SheetRoom {
-  /** Opaque, per-viewer. See server/utils/guessing.ts. */
-  token: string
-  photos: string[]
-  /** The viewer's own answer: a participant id, or null. Their own to know. */
-  guess: number | null
-  /**
-   * The names this room offers, in the same alphabetical order as
-   * `participants` — never in the order they were derived in, which would put
-   * the owner first.
-   */
-  suspects: number[]
-}
-
-export interface SheetParticipant {
-  id: number
-  displayName: string
-}
-
-export interface GuessSheet {
-  phase: GamePhase
-  rooms: SheetRoom[]
-  participants: SheetParticipant[]
-  answered: number
-  total: number
-}
 
 /**
  * Everyone who could plausibly live somewhere: the pool the decoys come from.
@@ -68,6 +41,36 @@ export function answerableRooms(viewerId: number): number[] {
     .where(sql`${photos.userId} <> ${viewerId}`)
     .all()
     .map(row => row.id)
+}
+
+/**
+ * How far along this player is: two counts, and nothing else.
+ *
+ * The pair `recordGuess` hands back after every tap, which is the most
+ * frequent write in the game and happens when everyone is playing at once. It
+ * used to rebuild the whole sheet to produce them — the photo table, a
+ * per-room HMAC sort, the roster — and throw about ninety-nine percent of that
+ * away. Two `count(*)` say the same thing.
+ *
+ * Counted exactly as `dashboardState` counts them, deliberately: the two
+ * numbers are read side by side, on the deck and on the home panel, and a
+ * player who saw 7/9 in one place and 7/8 in the other would be right to
+ * distrust both. Answers about rooms that left the game do not count, which is
+ * why the subquery is there rather than a bare `count(*)`.
+ */
+export function sheetCounts(viewerId: number): SheetCounts {
+  const db = useDatabase()
+
+  return {
+    answered: toCount(db.get<{ count: number }>(sql`
+      select count(*) as count from ${guesses}
+      where guesser_id = ${viewerId}
+        and room_user_id in (select distinct user_id from ${photos})
+    `)),
+    total: toCount(db.get<{ count: number }>(sql`
+      select count(distinct user_id) as count from ${photos} where user_id <> ${viewerId}
+    `)),
+  }
 }
 
 /**
@@ -167,7 +170,7 @@ function assertGuessingIsOpen(): void {
   if (phase !== 'open') {
     throw createError({
       statusCode: 409,
-      statusMessage: 'The guess sheet is not open',
+      statusMessage: 'guessing-closed',
       data: { phase },
     })
   }
@@ -232,6 +235,5 @@ export function recordGuess(viewerId: number, token: unknown, participantId: unk
     })
     .run()
 
-  const sheet = guessSheet(viewerId)
-  return { answered: sheet.answered, total: sheet.total }
+  return sheetCounts(viewerId)
 }
