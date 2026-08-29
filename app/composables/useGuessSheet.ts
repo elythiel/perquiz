@@ -1,3 +1,4 @@
+import type { SheetCounts } from '#shared/types/sheet'
 import type { SaveState } from '~/components/guess/SuspectCard.vue'
 
 /**
@@ -64,27 +65,55 @@ export async function useGuessSheet() {
     return rooms.value.filter(room => room.guess === id).length
   }
 
-  const answered = computed(() => rooms.value.filter(room => room.guess !== null).length)
+  /**
+   * How far along, in the server's words.
+   *
+   * Seeded by the sheet, nudged optimistically on each tap so the counter
+   * moves under the finger, then replaced by what `PATCH /api/guess` answers.
+   * The server has the last word — it counts only rooms still in play, and it
+   * has seen anything another tab wrote — but it never makes the screen wait
+   * for it, which is the same bargain the answer itself strikes above.
+   *
+   * The watcher takes `data` and not its contents on purpose: answering mutates
+   * a room in place, and a deep watch would fire on that and undo the nudge
+   * with the value the sheet was loaded with.
+   */
+  const counts = ref<SheetCounts>({ answered: 0, total: 0 })
+
+  watch(data, (sheet) => {
+    if (sheet) counts.value = { answered: sheet.answered, total: sheet.total }
+  }, { immediate: true })
+
+  const answered = computed(() => counts.value.answered)
+  const total = computed(() => counts.value.total)
 
   async function answer(token: string, participantId: number) {
     const room = rooms.value.find(candidate => candidate.token === token)
     if (!room) return
 
     const previous = room.guess
+    const restore = counts.value
     room.guess = participantId
+    // Only a room that had no answer moves the counter: replacing a name is
+    // not progress, and counting it would let the deck read 10/9.
+    if (previous === null) counts.value = { ...counts.value, answered: counts.value.answered + 1 }
     states.value.set(token, 'saving')
 
     try {
-      await $fetch('/api/guess', { method: 'PATCH', body: { room: token, participant: participantId } })
+      counts.value = await $fetch('/api/guess', {
+        method: 'PATCH',
+        body: { room: token, participant: participantId },
+      })
       states.value.set(token, 'saved')
     }
     catch {
       // Put the sheet back where it was: a name left on screen that the server
       // never accepted is the one thing worse than saying the save failed.
       room.guess = previous
+      counts.value = restore
       states.value.set(token, 'failed')
     }
   }
 
-  return { data, rooms, participants, readOnly, answered, refresh, stateOf, nameOf, timesNamed, answer }
+  return { data, rooms, participants, readOnly, answered, total, refresh, stateOf, nameOf, timesNamed, answer }
 }

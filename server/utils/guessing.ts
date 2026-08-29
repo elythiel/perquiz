@@ -1,5 +1,6 @@
 import { SUSPECTS_PER_ROOM } from '#shared/utils/guessing'
 import { createHmac } from 'node:crypto'
+import { rankBy } from './ranking'
 import { SUBKEYS, subkey } from './subkey'
 
 /**
@@ -58,8 +59,7 @@ export function deckOrder(
   viewerId: number,
   secret: string,
 ): number[] {
-  return [...roomUserIds].sort((left, right) =>
-    roomToken(viewerId, left, secret).localeCompare(roomToken(viewerId, right, secret)))
+  return rankBy(roomUserIds, roomUserId => roomToken(viewerId, roomUserId, secret))
 }
 
 /**
@@ -98,9 +98,7 @@ export function suspectsFor(
   const rank = (candidate: number) =>
     createHmac('sha256', subkey(secret, SUBKEYS.guessSuspects)).update(`${roomUserId}:${candidate}`).digest('hex')
 
-  const decoys = roster
-    .filter(candidate => candidate !== roomUserId)
-    .sort((left, right) => rank(left).localeCompare(rank(right)))
+  const decoys = rankBy(roster.filter(candidate => candidate !== roomUserId), rank)
     .slice(0, SUSPECTS_PER_ROOM - 1)
 
   return new Set([roomUserId, ...decoys])

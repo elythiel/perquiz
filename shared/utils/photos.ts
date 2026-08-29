@@ -27,3 +27,38 @@ export const MAX_UPLOAD_BYTES = 15_000_000
  * never deletes.
  */
 export const MAX_PHOTOS_PER_ROOM = 10
+
+/**
+ * Why an upload was refused, as the locale file knows it.
+ *
+ * The server answers `statusMessage` with one of these slugs and the browser
+ * looks the sentence up under `myRoom.errors.*`. Written here because it is a
+ * contract between the two halves, and a slug thrown on one side with no
+ * sentence on the other reaches the screen as its own key.
+ *
+ * Which is exactly what happened until vikunja-108. The browser used to take
+ * any `statusMessage` under forty characters for a slug — a guess, and a wrong
+ * one the day a route answered « The rooms are no longer editable », thirty-two
+ * characters of English that went straight into the page. A list cannot guess:
+ * anything absent from it is `failed`, which is the honest thing to say about
+ * a refusal the interface has no words for.
+ *
+ * `no-file` is deliberately NOT here. It means the browser sent no file part,
+ * which is a bug in this code rather than something a person did, and there is
+ * no sentence to write for it that would help them.
+ */
+export const UPLOAD_FAILURES = [
+  'too-large',
+  'too-many',
+  'unsupported-type',
+  'heic',
+  'unreadable',
+  'locked',
+] as const
+
+/** A slug above, or the catch-all the browser falls back to. */
+export type UploadFailure = typeof UPLOAD_FAILURES[number] | 'failed'
+
+export function isUploadFailure(value: unknown): value is UploadFailure {
+  return UPLOAD_FAILURES.includes(value as typeof UPLOAD_FAILURES[number])
+}

@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { createI18n } from 'vue-i18n'
+import { UPLOAD_FAILURES } from '../../shared/utils/photos'
 
 // The locale file is the only place a player-facing string may live. These
 // tests read it off disk — no Nuxt runtime, same trick as the contrast audit.
@@ -103,6 +104,25 @@ describe('the French locale', () => {
     )
 
     expect(orphans).toEqual([])
+  })
+
+  /**
+   * The upload contract, from both ends.
+   *
+   * `myRoom.errors.*` is looked up from a slug the server chose, so it is
+   * exempt from the orphan check above and the two halves could drift apart
+   * unnoticed in either direction. A slug with no sentence reaches the screen
+   * as its own key — which is how « The rooms are no longer editable » got
+   * there — and a sentence with no slug is copy nobody will ever read.
+   */
+  it('has a sentence for every upload failure, and no spare ones', () => {
+    // `failed` is the browser's own fallback rather than a slug the server
+    // sends, and the two name errors belong to the rename form, not to an
+    // upload. Both are named here so the list stays a closed set.
+    const expected = [...UPLOAD_FAILURES, 'failed', 'name-taken', 'name-invalid'].sort()
+    const written = Object.keys((messages.myRoom as Messages).errors as Messages).sort()
+
+    expect(written).toEqual(expected)
   })
 
   it('uses typographic apostrophes', () => {

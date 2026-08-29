@@ -5,7 +5,7 @@ export default defineEventHandler(async (event) => {
 
   const name = getRouterParam(event, 'name')
   if (!isPhotoName(name)) {
-    throw createError({ statusCode: 400, statusMessage: 'Not a photo name' })
+    throw createError({ statusCode: 400, statusMessage: 'invalid-photo-name' })
   }
 
   // The row first: it is what makes the photo visible. An orphan file on disk

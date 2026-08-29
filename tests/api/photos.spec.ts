@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { crc32, deflateSync } from 'node:zlib'
 import { sql } from 'drizzle-orm'
 import sharp from 'sharp'
 import { beforeEach, describe, expect, it } from 'vitest'
@@ -52,6 +53,45 @@ function image(format: 'jpeg' | 'png' | 'webp', options: { exif?: boolean } = {}
     : canvas
 
   return tagged[format]().toBuffer()
+}
+
+/**
+ * A decompression bomb: a real, decodable PNG of 8 000 × 8 000 — 64 megapixels,
+ * 64 Mo of raw greyscale — in about sixty kilobytes on the wire.
+ *
+ * Hand-built rather than rendered through sharp, because the point is the gap
+ * between the two sizes: flat colour deflates to almost nothing, so this walks
+ * through a 15 Mo cap with four decimal orders of room to spare. It is a
+ * VALID image, and that is what makes the test worth having — without a pixel
+ * limit sharp decodes it without complaint, so a refusal can only come from
+ * the limit itself.
+ */
+function pixelBomb(width = 8_000, height = 8_000): Buffer {
+  const chunk = (type: string, data: Buffer) => {
+    const length = Buffer.alloc(4)
+    length.writeUInt32BE(data.length)
+    const body = Buffer.concat([Buffer.from(type, 'ascii'), data])
+    const checksum = Buffer.alloc(4)
+    checksum.writeUInt32BE(crc32(body) >>> 0)
+    return Buffer.concat([length, body, checksum])
+  }
+
+  const header = Buffer.alloc(13)
+  header.writeUInt32BE(width, 0)
+  header.writeUInt32BE(height, 4)
+  header[8] = 8 // bit depth
+  header[9] = 0 // greyscale
+
+  // One filter byte then one byte per pixel, per row: what a PNG decoder
+  // expects, and all zeroes, which is why it compresses to nothing.
+  const scanlines = Buffer.alloc(height * (width + 1))
+
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]),
+    chunk('IHDR', header),
+    chunk('IDAT', deflateSync(scanlines)),
+    chunk('IEND', Buffer.alloc(0)),
+  ])
 }
 
 async function upload(
@@ -211,12 +251,67 @@ describe('what an upload is judged on', () => {
     expect((await upload(broken)).status).toBe(422)
   })
 
+  it('refuses an image that would decode to far more than it weighs', async () => {
+    /*
+     * The 15 Mo cap bounds the FILE, and a compressed format lets the decoded
+     * size run away from it: sixty kilobytes here, 64 Mo of pixels once open,
+     * and twice that live since the two variants render in parallel. A handful
+     * of guests uploading one each is an out-of-memory kill in the middle of a
+     * party, which is a poor way to lose a game.
+     */
+    const bomb = pixelBomb()
+    expect(bomb.byteLength).toBeLessThan(MAX_UPLOAD_BYTES)
+
+    const response = await upload(bomb, { filename: 'room.png', type: 'image/png' })
+    expect(response.status).toBe(422)
+    expect((await response.json()).statusMessage).toBe('unreadable')
+  })
+
+  it('refuses it on the pixel count and not because the file is broken', async () => {
+    /*
+     * What makes the test above a guard rather than a coincidence. These same
+     * bytes are a perfectly good image: drop the limit and sharp reads them,
+     * resizes them and hands back a thumbnail. The 422 therefore has exactly
+     * one possible source, and removing `limitInputPixels` turns this file
+     * green and the one above red.
+     */
+    const bomb = pixelBomb()
+
+    const unguarded = await sharp(bomb, { limitInputPixels: false })
+      .resize({ width: 64 }).webp().toBuffer()
+    expect(unguarded.byteLength).toBeGreaterThan(0)
+
+    await expect(sharp(bomb, { limitInputPixels: 50_000_000 }).metadata())
+      .rejects.toThrow(/pixel limit/i)
+  })
+
   it('refuses a request that announces more than the ceiling', async () => {
     const tooBig = new Uint8Array(MAX_UPLOAD_BYTES + 1_000_000)
     tooBig.set([0xFF, 0xD8, 0xFF], 0)
 
     // Refused on the announced length, before the body is buffered.
     expect((await upload(tooBig)).status).toBe(413)
+  })
+
+  it('says « locked » in a slug when the game freezes mid-upload', async () => {
+    /*
+     * The bug vikunja-108 was opened on. The browser used to read any
+     * `statusMessage` shorter than forty characters as an i18n slug, and this
+     * route answered « The rooms are no longer editable » — thirty-two
+     * characters of English that went into the page as
+     * `myRoom.errors.The rooms are no longer editable`. A player whose photo
+     * was in flight when the admin locked the game saw that, and the 409
+     * fallback written for this exact case was never reached.
+     *
+     * Pinned on the wire rather than in the component: the contract is the
+     * slug, and it is the server's half of it that broke.
+     */
+    const api = await useTestApi()
+    api.setPhase('locked')
+
+    const response = await upload(await image('jpeg'))
+    expect(response.status).toBe(409)
+    expect((await response.json()).statusMessage).toBe('locked')
   })
 
   it('refuses a request carrying no file at all', async () => {

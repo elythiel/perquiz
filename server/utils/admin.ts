@@ -2,6 +2,7 @@ import type { H3Event } from 'h3'
 import type { GamePhase } from '#shared/types/game'
 import { isBeforeLock } from '#shared/utils/game'
 import { createHmac } from 'node:crypto'
+import { rankBy } from './ranking'
 import { SUBKEYS, sessionSecret, subkey } from './subkey'
 import { asc, eq, sql } from 'drizzle-orm'
 import { APP_STATE_ID, appState, guesses, photos, users } from '../database/schema'
@@ -84,7 +85,7 @@ export interface AdminPanel {
 function moderationOrder(names: readonly string[], secret: string): string[] {
   const key = subkey(secret, SUBKEYS.moderationOrder)
   const rank = (name: string) => createHmac('sha256', key).update(name).digest('hex')
-  return [...names].sort((left, right) => rank(left).localeCompare(rank(right)))
+  return rankBy(names, rank)
 }
 
 export function adminPanel(viewerId: number): AdminPanel {

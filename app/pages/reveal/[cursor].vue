@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { podium } from '~~/server/utils/scoring'
+import { podium } from '#shared/utils/scoring'
 import { clampCursor, ordinal, sceneAt, totalScenes } from '#shared/utils/show'
 
 /**

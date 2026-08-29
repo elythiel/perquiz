@@ -24,7 +24,7 @@ export function assertRoomsEditable(): void {
   if (!isBeforeLock(phase)) {
     throw createError({
       statusCode: 409,
-      statusMessage: 'The rooms are no longer editable',
+      statusMessage: 'locked',
       data: { phase },
     })
   }
@@ -131,7 +131,7 @@ function deletePhoto(name: string, owner?: number): { remaining: number, discard
       .all()
 
     if (removed.length === 0) {
-      throw createError({ statusCode: 404, statusMessage: 'No such photo' })
+      throw createError({ statusCode: 404, statusMessage: 'no-such-photo' })
     }
 
     const userId = removed[0]!.userId
@@ -171,7 +171,7 @@ export function reorderRoomPhotos(userId: number, order: readonly string[]): Roo
     if (!sameSet) {
       throw createError({
         statusCode: 400,
-        statusMessage: 'The new order must list each of your photos exactly once',
+        statusMessage: 'invalid-order',
       })
     }
 

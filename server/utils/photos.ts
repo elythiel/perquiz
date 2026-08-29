@@ -81,6 +81,26 @@ export interface StoredPhoto {
 }
 
 /**
+ * How many pixels an upload may decode to, whatever it weighs on the wire.
+ *
+ * The 15 Mo cap bounds the FILE, and a compressed format lets those two
+ * numbers diverge as far as the encoder likes: a 16 383 × 16 383 PNG of flat
+ * colour is a couple of megabytes on disk and about a gigabyte once decoded —
+ * twice over here, since the two variants render in parallel. With EXIF
+ * orientation forcing `rotate()`, sharp cannot stream around it either. A
+ * handful of guests uploading one each is an out-of-memory kill in the middle
+ * of a party, which is a poor way to lose a game.
+ *
+ * 50 megapixels is roughly five times the largest sensor anyone will point at
+ * a room — a 48 MP phone shot is 12 MP unless it is asked otherwise — so the
+ * limit is unreachable by accident and the refusal costs nobody a photograph.
+ * sharp throws when the input exceeds it, which the caller already turns into
+ * a 422 `unreadable`: from where the person stands, an image this shape IS
+ * unreadable.
+ */
+const MAX_INPUT_PIXELS = 50_000_000
+
+/**
  * Writes the two variants and returns the name they share.
  *
  * `rotate()` before resizing is not cosmetic: it bakes the EXIF orientation
@@ -90,7 +110,7 @@ export interface StoredPhoto {
  */
 export async function storePhoto(bytes: Uint8Array): Promise<StoredPhoto> {
   const name = randomBytes(16).toString('hex')
-  const source = sharp(bytes, { failOn: 'error' }).rotate()
+  const source = sharp(bytes, { failOn: 'error', limitInputPixels: MAX_INPUT_PIXELS }).rotate()
 
   const render = (edge: number) => source
     .clone()

@@ -1,3 +1,6 @@
+import type { UploadFailure } from '#shared/utils/photos'
+import { isUploadFailure } from '#shared/utils/photos'
+
 /**
  * Sending photos, one request per file.
  *
@@ -16,23 +19,34 @@ export interface Upload {
   /** 0-100 while the bytes are going out; meaningless afterwards. */
   percent: number
   /** An i18n key suffix under `myRoom.errors`, set once `status` is failed. */
-  reason?: string
+  reason?: UploadFailure
   size: number
 }
 
 /** Three at a time: enough to keep a connection busy, few enough to stay fair. */
 const PARALLEL = 3
 
-function reasonFrom(xhr: XMLHttpRequest): string {
+/**
+ * Which sentence to show for a refused upload.
+ *
+ * A list and not a shape test. This used to accept any `statusMessage` shorter
+ * than forty characters as a slug, on the theory that a slug is short and a
+ * sentence is long — and « The rooms are no longer editable » is thirty-two,
+ * so locking the game mid-upload put `myRoom.errors.The rooms are no longer
+ * editable` on the screen, and the 409 fallback written for that exact case
+ * was never reached. The slugs are now the contract (`UPLOAD_FAILURES`), and
+ * anything else is `failed` whatever it looks like.
+ */
+function reasonFrom(xhr: XMLHttpRequest): UploadFailure {
   try {
     const body = JSON.parse(xhr.responseText) as { statusMessage?: string }
-    // The routes answer with a short slug precisely so the copy lives in the
-    // locale file rather than in a server response.
-    if (body.statusMessage && body.statusMessage.length < 40) return body.statusMessage
+    if (isUploadFailure(body.statusMessage)) return body.statusMessage
   }
   catch {
     // An empty or non-JSON body: the network, a proxy, a crash.
   }
+  // Kept below the list rather than folded into it: a 409 the list does not
+  // recognise still means something froze under the upload.
   return xhr.status === 409 ? 'locked' : 'failed'
 }
 

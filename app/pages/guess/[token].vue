@@ -123,7 +123,7 @@ async function pick(participantId: number) {
       :rooms="sheet.rooms.value.map(candidate => ({ token: candidate.token, answered: candidate.guess !== null }))"
       :current="sheet.rooms.value.findIndex(candidate => candidate.token === token)"
       :done="sheet.answered.value"
-      :total="sheet.rooms.value.length"
+      :total="sheet.total.value"
     />
 
     <BaseMessage
@@ -207,7 +207,7 @@ async function pick(participantId: number) {
     </div>
 
     <p
-      v-if="position >= walk.length - 1 && sheet.answered.value === sheet.rooms.value.length"
+      v-if="position >= walk.length - 1 && sheet.answered.value === sheet.total.value"
       class="text-center text-sm leading-relaxed text-text-muted"
     >
       {{ t('guess.allAnswered') }}

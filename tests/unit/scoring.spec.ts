@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { podium, standings } from '../../server/utils/scoring'
+import { podium, standings } from '../../shared/utils/scoring'
 
 /**
  * The leaderboard — the one number in this game people will argue about.
