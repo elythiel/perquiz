@@ -59,7 +59,6 @@
     "answersLabel": "Mes réponses",
     "newRooms": "{count} nouvelle pièce depuis votre dernière visite. | {count} nouvelle pièce depuis votre dernière visite. | {count} nouvelles pièces depuis votre dernière visite.",
     "roomLabel": "Ma pièce",
-    "photoAlt": "Ma pièce, photo {position}",
     "roomEmpty": "Votre pièce n’est pas encore en jeu : sans photo, elle n’apparaît sur la grille de personne.",
     "addPhotos": "Ajouter des photos",
     "startGuessing": "Commencer à deviner",
