@@ -60,10 +60,19 @@ defineExpose({
 </script>
 
 <template>
-  <BaseCard>
-    <template #title>
-      <label for="display-name">{{ t('myRoom.nameLabel') }}</label>
-    </template>
+  <!-- No card of its own since vikunja-94: the page groups this with the photo
+       grid inside one region, and a card nested in a card draws two frames
+       around one subject. What `<BaseCard>` gave that is worth keeping is the
+       eyebrow style on the label and the 12px rhythm, both restated here.
+
+       A `<label>` rather than the `<h2>` the card wrapped it in: the text names
+       a field, and a heading that is really a label announces a section that
+       does not exist. -->
+  <div class="flex flex-col gap-3">
+    <label
+      for="display-name"
+      class="font-mono text-label tracking-eyebrow text-text-muted uppercase"
+    >{{ t('myRoom.nameLabel') }}</label>
 
     <form
       class="flex items-center gap-3"
@@ -113,5 +122,5 @@ defineExpose({
     >
       {{ t('myRoom.nameHint') }}
     </p>
-  </BaseCard>
+  </div>
 </template>
