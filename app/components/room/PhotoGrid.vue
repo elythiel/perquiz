@@ -10,7 +10,7 @@ defineProps<{
   full: boolean
 }>()
 
-defineEmits<{ remove: [name: string], move: [name: string, offset: number], pick: [] }>()
+defineEmits<{ remove: [name: string], move: [name: string, offset: number], pick: [], zoom: [index: number] }>()
 
 const { t } = useI18n()
 </script>
@@ -28,6 +28,7 @@ const { t } = useI18n()
         :read-only="readOnly"
         @remove="$emit('remove', photo.name)"
         @move="offset => $emit('move', photo.name, offset)"
+        @zoom="$emit('zoom', index)"
       />
     </li>
 

@@ -7,7 +7,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-defineEmits<{ remove: [], move: [offset: number] }>()
+defineEmits<{ remove: [], move: [offset: number], zoom: [] }>()
 
 const { t } = useI18n()
 
@@ -32,62 +32,62 @@ const label = computed(() => props.position + 1)
       class="size-full object-cover"
     >
 
-    <span
-      class="absolute top-3 left-3 bg-torch px-1.5 font-mono text-on-torch"
-      aria-hidden="true"
-    >{{ label }}</span>
+    <div class="absolute top-0 w-full p-3 flex items-start justify-between">
+      <span
+        class="bg-torch px-1.5 font-mono text-on-torch"
+        aria-hidden="true"
+      >{{ label }}</span>
 
-    <template v-if="!readOnly">
-      <button
-        type="button"
-        class="absolute top-3 right-3 tap-target px-1 py-1 grid place-items-center bg-night/70 text-alert-ink transition-opacity duration-100 ease-micro hover:bg-night focus-ring-alert"
-        :aria-label="t('myRoom.deletePhoto', { position: label })"
+      <RoomPhotoTileButton
+        v-if="!readOnly"
+        icon="pixelarticons:trash"
+        :label="t('myRoom.deletePhoto', { position: label })"
+        class="text-alert-ink focus-ring-alert"
         @click="$emit('remove')"
-      >
-        <Icon
-          name="pixelarticons:trash"
-          class="block size-5"
-          aria-hidden="true"
-        />
-      </button>
+      />
+    </div>
+
+    <div class="absolute bottom-0 w-full p-3 flex items-center">
+      <!--
+        Outside the `readOnly` block on purpose: the arrows and the bin go when
+        the game locks, and looking at your own photograph is the one gesture
+        that still makes sense then.
+
+        `mx-auto` and not `justify-center`: the auto margins centre it between
+        the two arrows when they are there, and in the middle of the row when
+        they are not — one rule for both states, so the control never moves.
+      -->
+      <RoomPhotoTileButton
+        icon="pixelarticons:search"
+        :label="t('myRoom.zoomPhoto', { position: label })"
+        class="mx-auto text-text-soft"
+        @click="$emit('zoom')"
+      />
 
       <!-- Two buttons rather than dragging: a drag target is hard to hit on a
            phone and impossible to reach with a keyboard.
 
-           `relative` on each, and it is not decoration: `tap-target` grows the
-           hit area with an absolutely positioned pseudo-element sized
-           `max(100%, 44px)`, and without a positioned button that `100%`
-           resolves against the FIGURE. Both arrows then claimed the whole
-           photograph, the later one in the DOM winning every click — so tapping
-           anywhere, the left arrow included, moved the photo right. -->
-      <div class="absolute inset-x-3 bottom-3 flex justify-between gap-2">
-        <button
-          type="button"
-          class="tap-target px-1 py-1 relative grid place-items-center bg-night/70 text-text-soft transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
+           `disabled:opacity-0` rather than a `v-if`: the first photo has no
+           « earlier » and the last no « later », and a control that vanishes
+           from the row would slide the other two sideways at every reorder.
+           The positioning that keeps their hit areas apart now lives in
+           `<RoomPhotoTileButton>`, which explains it. -->
+      <template v-if="!readOnly">
+        <RoomPhotoTileButton
+          icon="pixelarticons:chevron-left"
+          :label="t('myRoom.moveEarlier', { position: label })"
+          class="order-first text-text-soft disabled:opacity-0"
           :disabled="position === 0"
-          :aria-label="t('myRoom.moveEarlier', { position: label })"
           @click="$emit('move', -1)"
-        >
-          <Icon
-            name="pixelarticons:chevron-left"
-            class="size-6"
-            aria-hidden="true"
-          />
-        </button>
-        <button
-          type="button"
-          class="tap-target px-1 py-1 relative grid place-items-center bg-night/70 text-text-soft transition-opacity duration-100 ease-micro enabled:hover:bg-night disabled:opacity-0"
+        />
+        <RoomPhotoTileButton
+          icon="pixelarticons:chevron-right"
+          :label="t('myRoom.moveLater', { position: label })"
+          class="order-last text-text-soft disabled:opacity-0"
           :disabled="position === count - 1"
-          :aria-label="t('myRoom.moveLater', { position: label })"
           @click="$emit('move', 1)"
-        >
-          <Icon
-            name="pixelarticons:chevron-right"
-            class="block size-6"
-            aria-hidden="true"
-          />
-        </button>
-      </div>
-    </template>
+        />
+      </template>
+    </div>
   </figure>
 </template>
