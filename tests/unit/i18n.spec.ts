@@ -138,13 +138,19 @@ describe('two numbers in one sentence', () => {
   })
 
   it('names the audience of one as a person, not as a count', () => {
+    /*
+     * The photo count left this sentence with vikunja-100 — the region's
+     * heading carries it now — but the plural did not: it is what makes the
+     * verb and the possessive agree. So the message still takes a count to
+     * choose its form and no longer interpolates one, which is the shape
+     * `my-room.vue` calls it with.
+     */
     const summary = (photos: number, others: number) => t('myRoom.summary', {
-      count: photos,
       others: fragment('myRoom.summaryOthers', others),
     }, photos)
 
     expect(summary(1, 1)).toBe('Votre photo apparaît sur la grille de l’autre joueur. Aucun nom n’est attaché.')
-    expect(summary(3, 9)).toBe('Vos 3 photos apparaissent sur la grille des 9 autres joueurs. Aucun nom n’est attaché.')
+    expect(summary(3, 9)).toBe('Vos photos apparaissent sur la grille des 9 autres joueurs. Aucun nom n’est attaché.')
   })
 
   it('counts a removal without saying "1 photos"', () => {
