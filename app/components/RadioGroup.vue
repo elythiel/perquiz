@@ -57,15 +57,26 @@ const choice = defineModel<T>({ required: true })
     >
       <!-- Chosen: a filled torch block, framed in `on-torch` and cut to it.
            Not chosen: a bare label — `frame-none` keeps the three pixels and
-           spends them on nothing, so choosing an option never resizes it. -->
+           spends them on nothing, so choosing an option never resizes it.
+
+           `frame-fill` is on the label ALWAYS, and that is a fix rather than a
+           simplification (vikunja-95). MEASURED: the first time an element
+           applies the mask, its corners are painted square for one or two
+           frames — 8 and 16 ms in, cut from 33 ms — because the mask has to be
+           rastered for that element before it can cut anything. Acquired on
+           click, that happens under the eye and reads as a square flash;
+           applied at first paint, it happens with everything else and is never
+           seen. On an unchosen option there is no flat to cut, so a permanent
+           mask shows nothing — the same reasoning that has `frame-none` keep
+           the band and spend it on nothing. -->
       <label
         v-for="option in options"
         :key="option.value"
-        class="segment cursor-pointer focus-ring-within"
+        class="segment frame-fill cursor-pointer focus-ring-within"
         :class="[
           layout === 'row' && 'flex-1',
           choice === option.value
-            ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch'
+            ? 'frame-on-torch bg-torch font-bold text-on-torch'
             : 'frame-none text-text-muted hover:text-text-soft',
         ]"
       >

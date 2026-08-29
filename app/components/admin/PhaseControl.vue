@@ -81,8 +81,8 @@ const nextAlong = computed<GamePhase>(() =>
         v-for="option in GAME_PHASES"
         :key="option"
         type="button"
-        class="segment focus-ring-inset"
-        :class="option === phase ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch' : 'frame-none text-text-muted hover:text-text-soft'"
+        class="segment frame-fill focus-ring-inset"
+        :class="option === phase ? 'frame-on-torch bg-torch font-bold text-on-torch' : 'frame-none text-text-muted hover:text-text-soft'"
         :aria-pressed="option === phase"
         @click="ask(option)"
       >

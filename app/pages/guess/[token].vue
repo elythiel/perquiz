@@ -142,8 +142,8 @@ async function pick(participantId: number) {
         v-for="option in [false, true]"
         :key="String(option)"
         type="button"
-        class="frame tap-target relative px-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro"
-        :class="onlyUnanswered === option ? 'frame-on-torch frame-fill bg-torch font-bold text-on-torch' : 'frame-edge text-text-muted hover:text-text-soft'"
+        class="frame frame-fill tap-target relative px-1.5 font-mono text-label tracking-label uppercase transition-colors duration-100 ease-micro"
+        :class="onlyUnanswered === option ? 'frame-on-torch bg-torch font-bold text-on-torch' : 'frame-edge text-text-muted hover:text-text-soft'"
         :aria-pressed="onlyUnanswered === option"
         @click="onlyUnanswered = option"
       >
